@@ -1,0 +1,6 @@
+#ifndef PHYSICS_CONSTANTS_H
+#define PHYSICS_CONSTANTS_H
+
+#define PHY_MP 2.435e18
+
+#endif //PHYSICS_CONSTANTS_H
