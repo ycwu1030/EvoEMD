@@ -1,7 +1,7 @@
 #ifndef EMD_H
 #define EMD_H
 
-#define REAL double
+#include "RealTypes.h"
 
 class EMD
 {
