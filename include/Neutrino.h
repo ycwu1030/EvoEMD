@@ -11,12 +11,17 @@ public:
     typedef enum {
         NORMAL_ORDER = 0,
         INVERTED_ORDER = 1,
-        NO = 2, // * Alternative for normal order
-        IO = 3 // * Alternative for inverted order
+        NO = 2, // * Alternative name for normal order
+        IO = 3 // * Alternative name for inverted order
     } MassOrdering;
     Nu_TypeI_SeeSaw();
     Nu_TypeI_SeeSaw(MassOrdering od);
     ~Nu_TypeI_SeeSaw() = default;
+
+    /*
+     * @brief set the mass ordering and then setup the PMNS matrix.
+    */
+    void Set_Mass_Ordering(MassOrdering od);
 
     /*
      * @brief set the light neutrino mass
@@ -44,9 +49,19 @@ public:
     void Set_RHN_Angle(double rw12 = 0, double iw12 = 0, double rw13 = 0, double iw13 = 0, double rw23 = 0, double iw23 = 0);
 
 
+    /*
+     * @brief get the (i,j) element of the Yukawa Coupling Matrix
+    */
     std::complex<double> Get_Yij(int i, int j);
 
+    /*
+     * @brief get the (i,j) element of the Yukawa Coupling Matrix
+    */
+    std::complex<double> Get_UPMNSij(int i, int j);
+
 private:
+    // * Flag
+    bool UPDATED;
     // * Angles in PMNS
     double theta12;
     double theta13;
@@ -91,7 +106,17 @@ private:
     // * The Yukawa coupling matrix  Ynu L.H.nuR
     Eigen::Matrix3cd Ynu; // * = i sqrt2/vev UPMNS.Mnu_sqrt.RHN.MNR_sqrt;
 
+    
+    /*
+     * @brief: Set up the PMNS matrix based on current mass ordering
+     *         Will also set the mass square difference
+    */
+    void Set_PMNS_Matrix();
 
+    /*
+     * @brief: Set up the matrix Ynu
+     *         This function will be called based on flag: UPDATED
+    */
     void Set_Mixing_Matrix();
 
 };
