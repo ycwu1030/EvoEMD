@@ -1,4 +1,5 @@
 #include "RungeKutta.h"
+#include "EMD.h"
 #include <iostream>
 
 using namespace std;
@@ -14,6 +15,22 @@ public:
     }
 };
 
+class FO_TEST: public ODE_FUNCS
+{
+public:
+    FO_TEST():ODE_FUNCS(){Set_DOF(1);M=100.0;g=2.0;lambda=1e5;}
+    ~FO_TEST(){};
+
+    VD dYdX(double x, VD y){
+        double yeq = Yield_Eq(M/x,M,g);
+        return {-lambda/x/x*(y[0]*y[0]-yeq*yeq)};
+    }
+private:
+    double M;
+    double g;
+    double lambda;
+};
+
 int main(int argc, char const *argv[])
 {
     VD BOUND = {1,2.7};
@@ -25,5 +42,15 @@ int main(int argc, char const *argv[])
     RungeKutta solver(&funcs);
     solver.Solve(0.01);
     solver.Dump_Solution("RK_test.dat");
+
+    VD FOI = {Yield_Eq(100/1,100,2)};
+    FO_TEST fo;
+    fo.Set_X_BEGIN(1);
+    fo.Set_X_END(100);
+    fo.Set_BOUNDARY_CONDITION(FOI);
+
+    RungeKutta fosolver(&fo);
+    fosolver.Solve(0.01);
+    fosolver.Dump_Solution("FO_test.dat");
     return 0;
 }

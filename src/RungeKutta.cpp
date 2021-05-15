@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
@@ -46,18 +47,23 @@ void RungeKutta::INIT()
 void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next)
 {
     REAL half_step = step_size/2.0;
-
+    // cout<<"====RK4====>"<<endl;
+    // cout<<"BEGIN WITH: x="<<x_cur<<" y=("<<y_cur<<") dydx=("<<dy_cur<<") step_size="<<step_size<<endl;
     // * 1. Using dx*dy/dx
     VD dY_Step1 = step_size*dy_cur;
+    // cout<<"STEP1: dY1=("<<dY_Step1<<")"<<endl;
 
     // * 2. Using dx/2 and dY_Step1/2
     VD dY_Step2 = step_size*(*derivs)(x_cur + half_step, y_cur + dY_Step1/2.0);
+    // cout<<"STEP2: dY2=("<<dY_Step2<<")"<<endl;
 
     // * 3. Using dx/2 and dY_Step2/2
     VD dY_Step3 = step_size*(*derivs)(x_cur + half_step, y_cur + dY_Step2/2.0);
+    // cout<<"STEP3: dY3=("<<dY_Step3<<")"<<endl;
 
     // * 4. Using dx and dY_Step3
     VD dY_Step4 = step_size*(*derivs)(x_cur + step_size, y_cur + dY_Step3);
+    // cout<<"STEP4: dY4=("<<dY_Step4<<")"<<endl;
 
     // * Combine above 4 steps:
     y_next = y_cur + dY_Step1/6.0 + dY_Step2/3.0 + dY_Step3/3.0 + dY_Step4/6.0;
@@ -95,10 +101,12 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         x = x_cache + step_size;
 
         // * Check the difference between above two methods
+        // cout<<"y_2step=("<<y<<") y_1step=("<<y_temp<<")"<<endl;
         Delta_y = y - y_temp;
         error_temp = fabs(Delta_y/Y_Scale);
         error_max = *max_element(error_temp.begin(),error_temp.end());
         error_max /= eps;
+        cout<<"error: "<<error_max<<endl;
         if (error_max <= 1.0)
         {
             // * The error is acceptable, we will proceed, and even try to enlarge the step size
@@ -109,6 +117,9 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
             break;
         }
         // * Otherwise, the error is larger than our tolarance, we need to shrink the step size to improve the error
+        // * But, we need to first check whether the error is tooooo large. If so restrict it to a reasonable value
+        // * Actually 1e10 is already not that reasonable, but at least, it should enough to avoid too small step_size
+        error_max = error_max<1e10?error_max:1e10;
         step_size_temp = SAFETY*step_size*exp(POW_SHRINK*log(error_max));
         if (fabs(step_size_temp) < fabs(min_step_size))
         {
@@ -140,6 +151,7 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps)
 
     for (int nstp = 0; nstp < MAXSTEPS; nstp++)
     {
+        cout<<"STEP: "<<nstp<<"  x: "<<x<<"  y: ("<<y<<")"<<endl;
         Y_Scale = fabs(y) + fabs(dydx*step_size);
         for (int i = 0; i < DOF; i++)
         {

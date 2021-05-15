@@ -4,6 +4,7 @@
 #include "Physics_Constants.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_roots.h"
+#include "gsl/gsl_sf_bessel.h"
 
 EMD::EMD()
 {
@@ -109,4 +110,21 @@ REAL EMD::Get_Hubble_at_T(REAL Temp)
 
     return M_PI*sqrt(geT)/3.0/sqrt(10.0)*Temp*Temp/PHY_MP;
 
+}
+
+REAL Number_Density_Eq(REAL T, REAL M, REAL g)
+{
+    double z = M/T;
+    double z2K2 = z*z*gsl_sf_bessel_Kn(2,z);
+    return g*pow(T,3)/2/M_PI/M_PI*z2K2;
+}
+
+REAL Entropy_Density(REAL T)
+{
+    return 2*M_PI*M_PI/45.0*106.5*pow(T,3);
+}
+
+REAL Yield_Eq(REAL T, REAL M, REAL g)
+{
+    return Number_Density_Eq(T,M,g)/Entropy_Density(T);
 }

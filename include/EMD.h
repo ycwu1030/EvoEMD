@@ -34,6 +34,16 @@ public:
 };
 
 
+/*
+ * @brief: Calculate the number density at equilibrium
+ * @param T, the temperature
+ * @param M, the mass of the species
+ * @param g, the internal dof of the species 
+*/
+REAL Number_Density_Eq(REAL T, REAL M, REAL g);
 
+REAL Entropy_Density(REAL T);
+
+REAL Yield_Eq(REAL T, REAL M, REAL g);
 
 #endif

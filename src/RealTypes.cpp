@@ -122,3 +122,13 @@ VD operator/(const VD &lhs, const VD &rhs)
     }
     return res;
 }
+
+std::ostream &operator<<(std::ostream &os, const VD &rhs)
+{
+    for (int i = 0; i < rhs.size()-1; i++)
+    {
+        os<<rhs[i]<<",";
+    }
+    os<<rhs.back();
+    return os;
+}
