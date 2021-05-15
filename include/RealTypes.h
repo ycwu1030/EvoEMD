@@ -2,6 +2,7 @@
 #define __REALTYPES_H__
 
 #include <vector>
+#include <iostream>
 
 #define REAL double
 #define VD std::vector<REAL>
@@ -29,5 +30,7 @@ REAL operator*(const VD &lhs, const VD &rhs); // Scalar Product
 // * Divide Operator
 VD operator/(const VD &lhs, const VD &rhs); // elementary-wise divide
 VD operator/(const VD &lhs, const REAL &s);
+
+std::ostream &operator<<(std::ostream &os, const VD &rhs);
 
 #endif //__REALTYPES_H__
