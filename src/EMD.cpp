@@ -5,17 +5,21 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_roots.h"
 #include "gsl/gsl_sf_bessel.h"
+#include "spdlog_wrapper.h"
 
 EMD::EMD()
 {
-    Set_Temperature(1e14,1e5);
+    SPDLOG_INFO_FILE("DEFAULT CONSTRUCTOR FOR EMD.");
+    Set_Temperature(1e14, 1e5);
 }
 EMD::EMD(REAL _Ti, REAL _Tr, REAL _Tf, REAL _TInflation)
 {
-    Set_Temperature(_Ti,_Tr,_Tf,_TInflation);
+    SPDLOG_INFO_FILE("CONSTRUCTOR FOR EMD with Ti = {:+9.8e}, Tr = {:+9.8e}, Tf = {:+9.8e}, Tinflation = {:+9.8e}", _Ti, _Tr, _Tf, _TInflation);
+    Set_Temperature(_Ti, _Tr, _Tf, _TInflation);
 }
 void EMD::Set_Temperature(REAL _Ti, REAL _Tr, REAL _Tf, REAL _TInflation)
 {
+    SPDLOG_INFO_FILE("Setting Temperatures for EMD with Ti = {:+9.8e}, Tr = {:+9.8e}, Tf = {:+9.8e}, Tinflation = {:+9.8e}", _Ti, _Tr, _Tf, _TInflation);
     Ti = _Ti;
     Tr = _Tr;
     Tf = _Tf;
@@ -26,44 +30,48 @@ void EMD::Set_Temperature(REAL _Ti, REAL _Tr, REAL _Tf, REAL _TInflation)
     ger = ge(Tr);
     gsr = gs(Tr);
 
-    Delta = 3.0/4.0*gei/gsi*Ti/Tr;
+    Delta = 3.0 / 4.0 * gei / gsi * Ti / Tr;
     Get_Te();
 
+    SPDLOG_INFO_FILE("Setting Temperature Te = {:+9.8e}.", Te);
     gee = ge(Te);
     gse = gs(Te);
 
-    CoverD = 5.0/2.0;//BRM;
-    Hubble_RD_at_Tr = M_PI*sqrt(ger)/3.0/sqrt(10.0)*Tr*Tr/PHY_MP;
-
+    CoverD = 5.0 / 2.0; // BRM;
+    Hubble_RD_at_Tr = M_PI * sqrt(ger) / 3.0 / sqrt(10.0) * Tr * Tr / PHY_MP;
 }
 
 double Equation_For_LogTe(double logTe, void *params)
 {
-    EMD *ml = (EMD*)params;
+    EMD *ml = (EMD *)params;
     REAL Tr = ml->Tr;
     REAL Delta = ml->Delta;
     REAL ger = ml->ger;
-    REAL gee = ge(pow(10,logTe));
-    REAL gse = gs(pow(10,logTe));
-    return 5.0*logTe - 5.0*log10(Tr) - log10(Delta) - log10(4.0/3.0) - log10(gse) - log10(ger) + 2.0*log10(gee);
+    REAL gee = ge(pow(10, logTe));
+    REAL gse = gs(pow(10, logTe));
+    return 5.0 * logTe - 5.0 * log10(Tr) - log10(Delta) - log10(4.0 / 3.0) -
+           log10(gse) - log10(ger) + 2.0 * log10(gee);
 }
 
 void EMD::Get_Te()
 {
+    SPDLOG_DEBUG_FILE("Try to Get Te from Ti ({:+9.8e}) and Tr ({:+9.8e})", Ti, Tr);
     int status;
     int iter = 0, max_iter = 100;
     const gsl_root_fsolver_type *T = gsl_root_fsolver_brent;
     gsl_root_fsolver *s = gsl_root_fsolver_alloc(T);
-    // long double logTemax = log10(Tr*pow(Delta*4.0l/3.0l*gsi/ger,1.0l/5.0l))+0.01;
-    // long double logTemin = log10(Tr*pow(Delta*4.0l/3.0l*gsr/ger,1.0l/5.0l))-0.01;
-    long double logTemax = log10(Tr*pow(Delta*4.0l/3.0l,1.0l/5.0l))+0.01;
-    long double logTemin = log10(Tr*pow(Delta*4.0l/3.0l*gsr*ger/gei/gei,1.0l/5.0l))-0.01;
+    // long double logTemax =
+    // log10(Tr*pow(Delta*4.0l/3.0l*gsi/ger,1.0l/5.0l))+0.01; long double logTemin
+    // = log10(Tr*pow(Delta*4.0l/3.0l*gsr/ger,1.0l/5.0l))-0.01;
+    long double logTemax = log10(Tr * pow(Delta * 4.0l / 3.0l, 1.0l / 5.0l)) + 0.01;
+    long double logTemin = log10(Tr * pow(Delta * 4.0l / 3.0l * gsr * ger / gei / gei, 1.0l / 5.0l)) - 0.01;
+    SPDLOG_DEBUG_FILE("The range for finding Te is [{:+9.8e},{:+9.8e}]", pow(10, logTemin), pow(10, logTemax));
     double r;
     double logTe;
     gsl_function F;
     F.function = &Equation_For_LogTe;
     F.params = this;
-    gsl_root_fsolver_set(s, &F, logTemin,logTemax);
+    gsl_root_fsolver_set(s, &F, logTemin, logTemax);
     do
     {
         iter++;
@@ -71,60 +79,79 @@ void EMD::Get_Te()
         r = gsl_root_fsolver_root(s);
         logTemin = gsl_root_fsolver_x_lower(s);
         logTemax = gsl_root_fsolver_x_upper(s);
-        status = gsl_root_test_interval(logTemin,logTemax,1e-4,1e-3);
+        status = gsl_root_test_interval(logTemin, logTemax, 1e-4, 1e-3);
+        SPDLOG_DEBUG_FILE("At Iter = {}, the interval is [{:+9.8e},{:+9.8e}]", iter, pow(10, logTemin), pow(10, logTemax));
     } while (status == GSL_CONTINUE && iter < max_iter);
-    
+
     if (status == GSL_SUCCESS)
     {
         logTe = gsl_root_fsolver_root(s);
     }
     else
     {
-        std::cout<<"Not find solution for Te, using dof at Tr to calculate it instead"<<std::endl;
-        logTe = log10(Tr*pow(Delta*4.0l/3.0l*gsr/ger,1.0l/5.0l));
+        logTe = log10(Tr * pow(Delta * 4.0l / 3.0l * gsr / ger, 1.0l / 5.0l));
+        SPDLOG_WARN_FILE("NOT FINDING SOLUTION FOR Te, USING NAIVE ESTIMATIONS: Te = {:+9.8e}.", pow(10, logTe));
     }
     gsl_root_fsolver_free(s);
-    
-    Te = pow(10,logTe);
+
+    Te = pow(10, logTe);
+    SPDLOG_DEBUG_FILE("Solution is Te = {:+9.8e}.", Te);
 }
 
 REAL EMD::Get_Hubble_at_T(REAL Temp)
 {
-    double geT = ge(Temp);
-    double gsT = gs(Temp);
-
+    SPDLOG_INFO_FILE("Calculate Hubble at T = {:+9.8e}.", Temp);
+    REAL geT = ge(Temp);
+    REAL gsT = gs(Temp);
+    REAL HatT;
     if (Temp <= Tr)
     {
-        return M_PI*sqrt(geT)/3.0/sqrt(10.0)*Temp*Temp/PHY_MP;
+        HatT = M_PI * sqrt(geT) / 3.0 / sqrt(10.0) * Temp * Temp / PHY_MP;
+        SPDLOG_INFO_FILE("Late Radiation Era, H = {:+9.8e}, T = {:+9.8e}.", HatT, Temp);
+        return HatT;
     }
-    
+
     if (Temp <= Te)
     {
-        return Hubble_RD_at_Tr*geT/ger*pow(Temp/Tr,4.0);
+        HatT = Hubble_RD_at_Tr * geT / ger * pow(Temp / Tr, 4.0);
+        SPDLOG_INFO_FILE("Entropy Production Era, H = {:+9.8e}, T = {:+9.8e}.", HatT, Temp);
+        return HatT;
     }
 
     if (Temp <= Ti)
     {
-        return Hubble_RD_at_Tr*sqrt(Delta*4.0/3.0*gsT/ger)*pow(Temp/Tr,1.5);
+        HatT = Hubble_RD_at_Tr * sqrt(Delta * 4.0 / 3.0 * gsT / ger) *
+               pow(Temp / Tr, 1.5);
+        SPDLOG_INFO_FILE("Early Matter Era, H = {:+9.8e}, T = {:+9.8e}.", HatT, Temp);
+        return HatT;
     }
 
-    return M_PI*sqrt(geT)/3.0/sqrt(10.0)*Temp*Temp/PHY_MP;
-
+    HatT = M_PI * sqrt(geT) / 3.0 / sqrt(10.0) * Temp * Temp / PHY_MP;
+    SPDLOG_INFO_FILE("Early Radiation Era, H = {:+9.8e}, T = {:+9.8e}.", HatT, Temp);
+    return HatT;
 }
 
 REAL Number_Density_Eq(REAL T, REAL M, REAL g)
 {
-    double z = M/T;
-    double z2K2 = z*z*gsl_sf_bessel_Kn(2,z);
-    return g*pow(T,3)/2/M_PI/M_PI*z2K2;
+    REAL z = M / T;
+    SPDLOG_INFO_FILE("Calculating Particle Number Density at Equilibrium, T = {:+9.8e}, M = {:+9.8e}, g = {}, z = {:+9.8e}", T, M, g, z);
+    REAL z2K2 = z * z * gsl_sf_bessel_Kn(2, z);
+    SPDLOG_DEBUG_FILE("For Calculating Particle Number Density at Eq, z^2*K2@z = {:+9.8e}", z2K2);
+    REAL neq = g * pow(T, 3) / 2 / M_PI / M_PI * z2K2;
+    SPDLOG_DEBUG_FILE("For Calculating Particle Number Density at Eq, neq = {:+9.8e}", neq);
+    return neq;
 }
 
 REAL Entropy_Density(REAL T)
 {
-    return 2*M_PI*M_PI/45.0*106.5*pow(T,3);
+    REAL s = 2 * M_PI * M_PI / 45.0 * 106.5 * pow(T, 3);
+    SPDLOG_DEBUG_FILE("Entropy density s = {:+9.8e} at T = {:+9.8e}.", s, T);
+    return s;
 }
 
 REAL Yield_Eq(REAL T, REAL M, REAL g)
 {
-    return Number_Density_Eq(T,M,g)/Entropy_Density(T);
+    REAL yeq = Number_Density_Eq(T, M, g) / Entropy_Density(T);
+    SPDLOG_DEBUG_FILE("Yield at Equilibrium Yeq = {:+9.8e} at T = {:+9.8e}, for M = {:+9.8e}, g = {}.", yeq, T, M, g);
+    return yeq;
 }
