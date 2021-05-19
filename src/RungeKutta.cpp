@@ -7,11 +7,11 @@
 
 using namespace std;
 
-RungeKutta::RungeKutta() : DOF(0), derivs(nullptr), SOLVED(false), SAFETY(0.9), POW_GROW(-0.2), POW_SHRINK(-0.25), TINY(1e-30), MAXSTEPS(10000)
+RungeKutta::RungeKutta() : DOF(0), derivs(nullptr), SOLVED(false), SAFETY(0.9), POW_GROW(-0.2), POW_SHRINK(-0.25), TINY_REL_THRESHOLD(1e-30), MAXSTEPS(10000)
 {
 }
 
-RungeKutta::RungeKutta(ODE_FUNCS *ode) : SOLVED(false), SAFETY(0.9), POW_GROW(-0.2), POW_SHRINK(-0.25), TINY(1e-30), MAXSTEPS(10000)
+RungeKutta::RungeKutta(ODE_FUNCS *ode) : SOLVED(false), SAFETY(0.9), POW_GROW(-0.2), POW_SHRINK(-0.25), TINY_REL_THRESHOLD(1e-30), MAXSTEPS(10000)
 {
     Set_ODE(ode);
 }
@@ -41,6 +41,7 @@ void RungeKutta::INIT()
     X_BEGIN = derivs->Get_X_BEGIN();
     X_END = derivs->Get_X_END();
     BOUNDARY_AT_BEGIN = derivs->Get_BOUNDARY_CONDITION();
+    ZERO_THRESHOLD = BOUNDARY_AT_BEGIN * TINY_REL_THRESHOLD;
 
     // * Initialize the system at X_BEGIN:
     _X.push_back(X_BEGIN);
@@ -53,7 +54,7 @@ void RungeKutta::INIT()
     SPDLOG_DEBUG_FILE("Boundary Condition at x = {:+9.8e}:", X_BEGIN);
     for (int i = 0; i < DOF; i++)
     {
-        SPDLOG_DEBUG_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e};", i, BOUNDARY_AT_BEGIN[i], _dYdX[0][i]);
+        SPDLOG_DEBUG_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, ZERO_THRESHOLD[{0}] = {3:+9.8e};", i, BOUNDARY_AT_BEGIN[i], _dYdX[0][i], ZERO_THRESHOLD[i]);
     }
 }
 
@@ -73,7 +74,7 @@ void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_
     SPDLOG_DEBUG_FILE("  4th Order RK Step-1:");
     for (int i = 0; i < DOF; i++)
     {
-        SPDLOG_DEBUG_FILE("    dY1[{}] = {:+9.8e};", i, dY_Step1);
+        SPDLOG_DEBUG_FILE("    dY1[{}] = {:+9.8e};", i, dY_Step1[i]);
     }
 
     // * 2. Using dx/2 and dY_Step1/2
@@ -81,7 +82,7 @@ void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_
     SPDLOG_DEBUG_FILE("  4th Order RK Step-2:");
     for (int i = 0; i < DOF; i++)
     {
-        SPDLOG_DEBUG_FILE("    dY2[{}] = {:+9.8e};", i, dY_Step2);
+        SPDLOG_DEBUG_FILE("    dY2[{}] = {:+9.8e};", i, dY_Step2[i]);
     }
 
     // * 3. Using dx/2 and dY_Step2/2
@@ -89,7 +90,7 @@ void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_
     SPDLOG_DEBUG_FILE("  4th Order RK Step-3:");
     for (int i = 0; i < DOF; i++)
     {
-        SPDLOG_DEBUG_FILE("    dY3[{}] = {:+9.8e};", i, dY_Step3);
+        SPDLOG_DEBUG_FILE("    dY3[{}] = {:+9.8e};", i, dY_Step3[i]);
     }
 
     // * 4. Using dx and dY_Step3
@@ -97,7 +98,7 @@ void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_
     SPDLOG_DEBUG_FILE("  4th Order RK Step-4:");
     for (int i = 0; i < DOF; i++)
     {
-        SPDLOG_DEBUG_FILE("    dY4[{}] = {:+9.8e};", i, dY_Step4);
+        SPDLOG_DEBUG_FILE("    dY4[{}] = {:+9.8e};", i, dY_Step4[i]);
     }
 
     // * Combine above 4 steps:
@@ -152,7 +153,12 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x + half_step_size);
         for (int i = 0; i < DOF; i++)
         {
-            SPDLOG_DEBUG_FILE("  Y[{}] = {:+9.8e};", y[i]);
+            if (y[i] < ZERO_THRESHOLD[i])
+            {
+                SPDLOG_WARN_FILE("  REACH ZERO THRESHOLD AS Y[{0}] = {1:+9.8e} < {2:+9.8e};", i, y[i], ZERO_THRESHOLD[i]);
+                y[i] = 0;
+            }
+            SPDLOG_DEBUG_FILE("  Y[{}] = {:+9.8e};", i, y[i]);
         }
 
         // * Take one full step
@@ -162,7 +168,12 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x);
         for (int i = 0; i < DOF; i++)
         {
-            SPDLOG_DEBUG_FILE("  Y[{}] = {:+9.8e};", y_temp[i]);
+            if (y_temp[i] < ZERO_THRESHOLD[i])
+            {
+                SPDLOG_WARN_FILE("  REACH ZERO THRESHOLD AS Y[{0}] = {1:+9.8e} < {2:+9.8e};", i, y_temp[i], ZERO_THRESHOLD[i]);
+                y_temp[i] = 0;
+            }
+            SPDLOG_DEBUG_FILE("  Y[{}] = {:+9.8e};", i, y_temp[i]);
         }
 
         // * Check the difference between above two methods
@@ -171,12 +182,17 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         error_temp = fabs(Delta_y / Y_Scale);
         error_max = *max_element(error_temp.begin(), error_temp.end());
         error_max /= eps;
+        for (int i = 0; i < DOF; i++)
+        {
+            SPDLOG_DEBUG_FILE("Calc Error: DeltaY[{0}] = {1:+9.8e},  YScale[{0}] = {2:+9.8e}, error[{0}] = {3:+9.8e}", i, Delta_y[i], Y_Scale[i], error_temp[i]);
+        }
+
         SPDLOG_DEBUG_FILE("Error max: {:+9.8e};", error_max);
         if (error_max <= 1.0)
         {
             // * The error is acceptable, we will proceed, and even try to enlarge the step size
             step_size_did = step_size;
-            step_size_temp = SAFETY * step_size * exp(POW_GROW * log(error_max));
+            step_size_temp = SAFETY * step_size * exp(POW_GROW * log(error_max + 1e-5));
             max_step_size = 4 * step_size_did;
             step_size_further = min(step_size_temp, max_step_size);
             SPDLOG_DEBUG_FILE("Error is small, enlarge the step size to: {:+9.8e};", step_size_further);
@@ -205,7 +221,7 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
     SPDLOG_DEBUG_FILE("  dx = {:+9.8e};", step_size_did);
     for (int i = 0; i < DOF; i++)
     {
-        SPDLOG_DEBUG_FILE(" Y = {:+9.8e}, dYdX = {:+9.8e};", y[i], dy[i]);
+        SPDLOG_DEBUG_FILE(" Y[{0}] = {1:+9.8e}, dYdX = {2:+9.8e};", i, y[i], dy[i]);
     }
 }
 
@@ -232,7 +248,8 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps)
         Y_Scale = fabs(y) + fabs(dydx * step_size);
         for (int i = 0; i < DOF; i++)
         {
-            Y_Scale[i] = min(1.0, Y_Scale[i]);
+            // Y_Scale[i] = min(1.0, Y_Scale[i]);
+            Y_Scale[i] = max(1e-50, Y_Scale[i]);
             SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, YScale[{0}] = {3:+9.8e};", i, y[i], dydx[i], Y_Scale[i]);
         }
 

@@ -9,7 +9,7 @@
  */
 class ODE_FUNCS
 {
-private:
+protected:
     int DOF;
     REAL X_BEGIN;
     REAL X_END;
@@ -19,20 +19,18 @@ public:
     ODE_FUNCS(){};
     virtual ~ODE_FUNCS(){};
 
-    void Set_DOF(int dof) {DOF = dof;}
-    void Set_X_BEGIN(REAL xi) {X_BEGIN=xi;}
-    void Set_X_END(REAL xf) {X_END=xf;}
-    void Set_BOUNDARY_CONDITION(VD boundary) {BOUNDARY_CONDITION = boundary;}
+    void Set_DOF(int dof) { DOF = dof; }
+    void Set_X_BEGIN(REAL xi) { X_BEGIN = xi; }
+    void Set_X_END(REAL xf) { X_END = xf; }
+    void Set_BOUNDARY_CONDITION(VD boundary) { BOUNDARY_CONDITION = boundary; }
 
-    int Get_DOF() const {return DOF;}
-    REAL Get_X_BEGIN() const {return X_BEGIN;}
-    REAL Get_X_END() const {return X_END;}
-    VD Get_BOUNDARY_CONDITION() const {return BOUNDARY_CONDITION;}
-    VD operator()(REAL x, VD y) {return dYdX(x,y);}
+    int Get_DOF() const { return DOF; }
+    REAL Get_X_BEGIN() const { return X_BEGIN; }
+    REAL Get_X_END() const { return X_END; }
+    VD Get_BOUNDARY_CONDITION() const { return BOUNDARY_CONDITION; }
+    VD operator()(REAL x, VD y) { return dYdX(x, y); }
     virtual VD dYdX(REAL x, VD y) = 0;
 };
-
-
 
 /*
  * RungeKutta method solving ODE:
@@ -41,7 +39,8 @@ public:
 class RungeKutta
 {
 public:
-    typedef enum {
+    typedef enum
+    {
         SUCCESS = 1,
         TOOMANYSTEP = -1
     } STATUS;
@@ -54,14 +53,13 @@ public:
      * @param ode a pointer to the ODE object.
      */
     void Set_ODE(ODE_FUNCS *ode);
- 
 
     /*
      * @brief Solve the ODE system
      * @param step_start, the initial step size
      * @param eps, tolarance in solving the ODE function
     */
-    STATUS Solve(REAL step_start, REAL eps=1e-6);
+    STATUS Solve(REAL step_start, REAL eps = 1e-6);
 
     /*
      * @brief dump the solution into file
@@ -74,19 +72,20 @@ private:
     REAL SAFETY;
     REAL POW_GROW;
     REAL POW_SHRINK;
-    REAL TINY;
+    REAL TINY_REL_THRESHOLD;
     int MAXSTEPS;
 
-    bool SOLVED; // * Store the status whether the ODE functions is solved
-    int DOF; // * The degree of freedon of the ODE functions
+    bool SOLVED;  // * Store the status whether the ODE functions is solved
+    int DOF;      // * The degree of freedon of the ODE functions
     REAL X_BEGIN; // * The starting point in x (the argument)
-    REAL X_END; // * The ending point in x (the argument)
+    REAL X_END;   // * The ending point in x (the argument)
 
-    VD _X; // * The vector storing the points in x
-    VVD _Y; // * The vector storing the points in y, len(_Y) = len(_X) and the second dimension is DOF
+    VD _X;     // * The vector storing the points in x
+    VVD _Y;    // * The vector storing the points in y, len(_Y) = len(_X) and the second dimension is DOF
     VVD _dYdX; // * Similar to _Y, but storing dy/dx
 
     VD BOUNDARY_AT_BEGIN; // * The boundary condition at X_BEGIN
+    VD ZERO_THRESHOLD;    // * The threshold to treat the corresponding value as 0;
 
     ODE_FUNCS *derivs; // * The ODE function, dy/dx = derivs(x,y,xxxx), we don't own it, we just have one pointer pointing it.
 

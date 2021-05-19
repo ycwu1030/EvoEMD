@@ -1,6 +1,6 @@
 #ifndef __SPDLOG_WRAPPER_H__
 #define __SPDLOG_WRAPPER_H__
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO //
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG //
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 
@@ -14,6 +14,7 @@ public:
     {
         spdlog::set_pattern("[%Y/%m/%d %H:%M:%S][%l][%s:%#:%!] %v");
         file_logger = spdlog::rotating_logger_mt(LOGGER_NAME, LOGGER_SAVE_PATH, 1048576 * 10, 5);
+        file_logger->set_level(spdlog::level::debug);
     }
     ~FILE_LOGGER(){};
     std::shared_ptr<spdlog::logger> file_logger;
