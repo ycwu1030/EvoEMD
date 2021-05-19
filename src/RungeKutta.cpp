@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -299,10 +300,12 @@ void RungeKutta::Dump_Solution(string filename)
     }
     for (size_t i = 0; i < DOF; i++)
     {
-        output << "dy_" << i << "/dx"
-               << "\t";
+        output << "dydx_" << i << "\t";
     }
     output << endl;
+    output << scientific;
+    output << showpos;
+    output << setprecision(8);
     for (size_t i = 0; i < _X.size(); i++)
     {
         output << _X[i] << "\t";

@@ -13,12 +13,12 @@ public:
         Set_DOF(3);
         c1 = sqrt(3) * 5.0 / 2.0 * M_PI * sqrt(106.5) / 3.0 / sqrt(10);
         cs = c1 * pow(2 * M_PI * M_PI / 45 * 106.5, 1.0 / 3.0);
-        X_BEGIN = log(1.1e-16);
-        X_END = log(1e8);
+        X_BEGIN = log(1e-30);
+        X_END = log(1e20);
         BOUNDARY_CONDITION = VD(3);
         BOUNDARY_CONDITION[1] = 1790;
         BOUNDARY_CONDITION[2] = 897;
-        BOUNDARY_CONDITION[0] = BOUNDARY_CONDITION[1] / exp(X_BEGIN);
+        BOUNDARY_CONDITION[0] = BOUNDARY_CONDITION[1] / 1.1e-16;
     }
     ~HODE(){};
 
