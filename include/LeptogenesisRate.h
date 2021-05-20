@@ -4,6 +4,8 @@
 #include "EMD.h"
 #include "Neutrino.h"
 
+int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp, REAL ff[], void *_params);
+
 class LeptogenesisRate
 {
 public:
@@ -52,8 +54,14 @@ private:
     void Calc_N_Width();
     void Calc_CP_Asym();
     void Calc_Gammas(REAL Temp);
-    REAL Calc_NChiS_Gamma(REAL Temp, REAL MA, REAL MB, REAL MC); // A -> B C, for N Chi S system
+    REAL Calc_NChiS_Gamma(REAL Temp, int i); // A -> B C, for N Chi S system
+    REAL Calc_ChiSN_Gamma(REAL Temp, int i);
+    REAL Calc_SChiN_Gamma(REAL Temp, int i);
     REAL Calc_NLPhi_Gamma(REAL Temp, int i);
+    REAL SqAmp_dOmega_with_SQkaller(REAL s, int processid, int i);
+    REAL SqAmp_dOmega_with_SQkaller_LPhiChiS(REAL s);
+    REAL SqAmp_dOmega_with_SQkaller_NNChiChi(REAL s, int i);
+    REAL SqAmp_dOmega_with_SQkaller_NNSS(REAL s, int i);
     REAL Calc_LPhiChiS_Gamma(REAL Temp);
     REAL Calc_NNChiChi_Gamma(REAL Temp, int i);
     REAL Calc_NNSS_Gamma(REAL Temp, int i);
@@ -65,6 +73,8 @@ private:
     REAL R2(REAL Temp, VD y); // For N2
     REAL R3(REAL Temp, VD y); // For Chi
     REAL R4(REAL Temp, VD y); // For S
+
+    friend int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp, REAL ff[], void *_params);
 };
 
 REAL SQkaller(REAL x, REAL y, REAL z);

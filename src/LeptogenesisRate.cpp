@@ -71,12 +71,12 @@ VD LeptogenesisRate::Ri(REAL Temp, VD y)
 
 void LeptogenesisRate::Calc_Gammas(REAL Temp)
 {
-    gamma_Ni_Chi_S[0] = Calc_NChiS_Gamma(Temp, MNR1, MCHI, MS);
-    gamma_Ni_Chi_S[1] = Calc_NChiS_Gamma(Temp, MNR2, MCHI, MS);
-    gamma_S_Chi_Ni[0] = Calc_NChiS_Gamma(Temp, MS, MNR1, MCHI);
-    gamma_S_Chi_Ni[1] = Calc_NChiS_Gamma(Temp, MS, MNR2, MCHI);
-    gamma_Chi_S_Ni[0] = Calc_NChiS_Gamma(Temp, MCHI, MNR1, MS);
-    gamma_Chi_S_Ni[1] = Calc_NChiS_Gamma(Temp, MCHI, MNR2, MS);
+    gamma_Ni_Chi_S[0] = Calc_NChiS_Gamma(Temp, 0);
+    gamma_Ni_Chi_S[1] = Calc_NChiS_Gamma(Temp, 1);
+    gamma_S_Chi_Ni[0] = Calc_SChiN_Gamma(Temp, 0);
+    gamma_S_Chi_Ni[1] = Calc_SChiN_Gamma(Temp, 1);
+    gamma_Chi_S_Ni[0] = Calc_ChiSN_Gamma(Temp, 0);
+    gamma_Chi_S_Ni[1] = Calc_ChiSN_Gamma(Temp, 1);
     gamma_L_Phi_Chi_S = Calc_LPhiChiS_Gamma(Temp);
     gamma_Ni_Ni_Chi_Chi[0] = Calc_NNChiChi_Gamma(Temp, 0);
     gamma_Ni_Ni_Chi_Chi[1] = Calc_NNChiChi_Gamma(Temp, 1);
