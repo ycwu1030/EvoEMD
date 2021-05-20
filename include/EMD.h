@@ -7,10 +7,10 @@ class EMD
 {
 private:
     REAL TInflation; // Temperature at the end of Inflation.
-    REAL Ti; // Temperature at the beginning of Early Matter Dominant Era 
-    REAL Te; // Temperature at which we start the Entropy Production period
-    REAL Tr; // Reheating Temperature at the end of the Early Matter Dominant Era (at the end of Entropy production)
-    REAL Tf; // Final Temperature where we stop the evolution.
+    REAL Ti;         // Temperature at the beginning of Early Matter Dominant Era
+    REAL Te;         // Temperature at which we start the Entropy Production period
+    REAL Tr;         // Reheating Temperature at the end of the Early Matter Dominant Era (at the end of Entropy production)
+    REAL Tf;         // Final Temperature where we stop the evolution.
 
     // D.O.F
     REAL gei, gsi;
@@ -22,18 +22,61 @@ private:
     REAL CoverD;
     REAL Hubble_RD_at_Tr;
 
-    void Get_Te();
-    void Set_Temperature(REAL _Ti, REAL _Tr, REAL _Tf = 1e-3, REAL _TInflation = 1e15);
+    void Solve_Te();
+
 public:
+    typedef enum
+    {
+        ERDE = 0,
+        EMDE = 1,
+        EPE = 2,
+        RDE = 3
+    } Period;
     EMD();
     EMD(REAL _Ti, REAL _Tr, REAL _Tf = 1e-3, REAL _TInflation = 1e15);
     ~EMD() = default;
 
+    void Set_Temperature(REAL _Ti, REAL _Tr, REAL _Tf = 1e-3, REAL _TInflation = 1e15);
+
     REAL Get_Hubble_at_T(REAL Temp);
+    REAL Get_Hubble_at_T_Period(Period pd, REAL Temp);
+    REAL Get_Delta() const { return Delta; }
+    REAL Get_Ti() const { return Ti; }
+    REAL Get_Tr() const { return Tr; }
+    REAL Get_Te() const { return Te; }
+    REAL Get_TInflation() const { return TInflation; }
+    REAL Get_Tf() const { return Tf; }
     friend double Equation_For_LogTe(double logTe, void *param);
 };
 
+/**
+ * @brief  Calculate the particle number density at equilibrium
+ * @note
+ * @param  T: The temperature
+ * @param  M: The mass of the particle
+ * @param  g: The internal dof of the particle
+ * @retval The particle number density at equilibrium
+ */
+REAL Number_Density_Eq(REAL T, REAL M, REAL g);
+REAL Number_Density_Eq_Massless(REAL T, REAL g);
 
+/**
+ * @brief  Calculate the Entropy density at Temperature T
+ * @note
+ * @param  T: The Temperature
+ * @retval The entropy density
+ */
+REAL Entropy_Density(REAL T);
 
+/**
+ * @brief Calculate the Yield (n/s) at equilibrium
+ * @note
+ * @param  T: The Temperature
+ * @param  M: The mass of the particle
+ * @param  g: The internal dof of the particle
+ * @retval The Yield at equilibrium
+ */
+REAL Yield_Eq(REAL T, REAL M, REAL g);
+REAL Yield_Eq_Massless(REAL T, REAL g);
 
 #endif
