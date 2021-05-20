@@ -67,6 +67,10 @@ public:
     */
     void Dump_Solution(std::string filename);
 
+    VD Get_Solution_X() const { return _X; }
+    VVD Get_Solution_Y() const { return _Y; }
+    VD Get_Solution_Y_END() const { return _Y.back(); }
+
 private:
     // * Following are parameters controling the adaptive step size
     REAL SAFETY;

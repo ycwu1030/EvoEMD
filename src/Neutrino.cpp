@@ -190,21 +190,27 @@ void Nu_TypeI_SeeSaw::Set_RHN_Angle(double rw12, double iw12, double rw13, doubl
 
 void Nu_TypeI_SeeSaw::Set_Mixing_Matrix()
 {
-    if (!UPDATED)
-    {
-        complex<double> II = complex<double>(0.0, 1.0);
-        Ynu = II * sqrt(2.0) / 246.0 * UPMNS * Mnu_sqrt * RHN * MNR_sqrt;
-        SPDLOG_INFO_FILE("Updating the Yukawa Coupling matrix:");
-        SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(0, 0)), imag(Ynu(0, 0)), real(Ynu(0, 1)), imag(Ynu(0, 1)), real(Ynu(0, 2)), imag(Ynu(0, 2)));
-        SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(1, 0)), imag(Ynu(1, 0)), real(Ynu(1, 1)), imag(Ynu(1, 1)), real(Ynu(1, 2)), imag(Ynu(1, 2)));
-        SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(2, 0)), imag(Ynu(2, 0)), real(Ynu(2, 1)), imag(Ynu(2, 1)), real(Ynu(2, 2)), imag(Ynu(2, 2)));
-        UPDATED = true;
-    }
+    complex<double> II = complex<double>(0.0, 1.0);
+    Ynu = II * sqrt(2.0) / 246.0 * UPMNS * Mnu_sqrt * RHN * MNR_sqrt;
+    YdagY = Ynu.adjoint() * Ynu;
+    SPDLOG_INFO_FILE("Updating the Yukawa Coupling matrix:");
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(0, 0)), imag(Ynu(0, 0)), real(Ynu(0, 1)), imag(Ynu(0, 1)), real(Ynu(0, 2)), imag(Ynu(0, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(1, 0)), imag(Ynu(1, 0)), real(Ynu(1, 1)), imag(Ynu(1, 1)), real(Ynu(1, 2)), imag(Ynu(1, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(2, 0)), imag(Ynu(2, 0)), real(Ynu(2, 1)), imag(Ynu(2, 1)), real(Ynu(2, 2)), imag(Ynu(2, 2)));
+    UPDATED = true;
 }
 
 complex<double> Nu_TypeI_SeeSaw::Get_Yij(int i, int j)
 {
+    if (!UPDATED)
+        Set_Mixing_Matrix();
     return Ynu(i, j);
+}
+complex<double> Nu_TypeI_SeeSaw::Get_Yij(int i, int j)
+{
+    if (!UPDATED)
+        Set_Mixing_Matrix();
+    return YdagY(i, j);
 }
 
 complex<double> Nu_TypeI_SeeSaw::Get_UPMNSij(int i, int j)

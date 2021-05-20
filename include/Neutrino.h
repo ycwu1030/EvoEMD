@@ -8,11 +8,12 @@
 class Nu_TypeI_SeeSaw
 {
 public:
-    typedef enum {
+    typedef enum
+    {
         NORMAL_ORDER = 0,
         INVERTED_ORDER = 1,
         NO = 2, // * Alternative name for normal order
-        IO = 3 // * Alternative name for inverted order
+        IO = 3  // * Alternative name for inverted order
     } MassOrdering;
     Nu_TypeI_SeeSaw();
     Nu_TypeI_SeeSaw(MassOrdering od);
@@ -29,7 +30,7 @@ public:
      *        The other two are determined by the mass ording and the mass difference measurement
      * @param m1, the lightest neutrino mass
     */
-    void Set_Light_Neutrino_Mass(double m1 = 0.1*eV);
+    void Set_Light_Neutrino_Mass(double m1 = 0.1 * eV);
 
     /*
      * @brief set the heavy neutrino mass
@@ -38,8 +39,8 @@ public:
      * @param m2, mass for another heavy neutrino
      * @param m3, mass for the last heavy neutrino
     */
-    void Set_Heavy_Neutrino_Mass(double m1 = 3000*GeV, double m2 = 3000*GeV, double m3 = 3000*GeV);
-    
+    void Set_Heavy_Neutrino_Mass(double m1 = 3000 * GeV, double m2 = 3000 * GeV, double m3 = 3000 * GeV);
+
     /*
      * @brief set the angle in the matrix R
      * @param rw12,iw12, the real/imaginary part of w12
@@ -48,16 +49,18 @@ public:
     */
     void Set_RHN_Angle(double rw12 = 0, double iw12 = 0, double rw13 = 0, double iw13 = 0, double rw23 = 0, double iw23 = 0);
 
-
     /*
      * @brief get the (i,j) element of the Yukawa Coupling Matrix
     */
     std::complex<double> Get_Yij(int i, int j);
+    std::complex<double> Get_YdagYij(int i, int j);
 
     /*
      * @brief get the (i,j) element of the Yukawa Coupling Matrix
     */
     std::complex<double> Get_UPMNSij(int i, int j);
+
+    double Get_NR_Mass(int i);
 
 private:
     // * Flag
@@ -75,7 +78,7 @@ private:
     // * PMNS Matrix
     Eigen::Matrix3cd UPMNS;
 
-    // * Angles in R matrix, 
+    // * Angles in R matrix,
     double w12_R, w12_I;
     double w13_R, w13_I;
     double w23_R, w23_I;
@@ -104,9 +107,9 @@ private:
     Eigen::Matrix3cd MNR_sqrt_inverse;
 
     // * The Yukawa coupling matrix  Ynu L.H.nuR
-    Eigen::Matrix3cd Ynu; // * = i sqrt2/vev UPMNS.Mnu_sqrt.RHN.MNR_sqrt;
+    Eigen::Matrix3cd Ynu;   // * = i sqrt2/vev UPMNS.Mnu_sqrt.RHN.MNR_sqrt;
+    Eigen::Matrix3cd YdagY; // * Y^dagger*Y
 
-    
     /*
      * @brief: Set up the PMNS matrix based on current mass ordering
      *         Will also set the mass square difference
@@ -118,9 +121,6 @@ private:
      *         This function will be called based on flag: UPDATED
     */
     void Set_Mixing_Matrix();
-
 };
-
-
 
 #endif //__NEUTRINO_H__
