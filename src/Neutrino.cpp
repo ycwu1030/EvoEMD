@@ -206,7 +206,7 @@ complex<double> Nu_TypeI_SeeSaw::Get_Yij(int i, int j)
         Set_Mixing_Matrix();
     return Ynu(i, j);
 }
-complex<double> Nu_TypeI_SeeSaw::Get_Yij(int i, int j)
+complex<double> Nu_TypeI_SeeSaw::Get_YdagYij(int i, int j)
 {
     if (!UPDATED)
         Set_Mixing_Matrix();

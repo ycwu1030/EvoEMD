@@ -11,7 +11,7 @@ LeptogenesisBE::LeptogenesisBE() : ODE_FUNCS(), EMDEvo(1e14, 1e-1)
     solver.Set_ODE(this);
 }
 
-void LeptogenesisBE::Set_Temperatures(REAL Ti, REAL Tr, REAL Tf = 1e-3, REAL TInflation = 1e15)
+void LeptogenesisBE::Set_Temperatures(REAL Ti, REAL Tr, REAL Tf, REAL TInflation)
 {
     EMDEvo.Set_Temperature(Ti, Tr, Tf, TInflation);
 }
