@@ -274,5 +274,51 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNSS(REAL s, int i, int j) {
     }
     REAL SQLamFactor = sqrt(Kallen_Lam(1.0, MNI * MNI / s, MNJ * MNJ / s) *
                             Kallen_Lam(1.0, MS * MS / s, MS * MS / s));
-    return 0;
+    REAL prefix = 2 * M_PI * pow(LamX, 4);
+    REAL EI = Ei(sqrt(s), MNI, MNJ);
+    REAL EJ = Ei(sqrt(s), MNJ, MNI);
+    REAL Pc = Pi(sqrt(s), MNI, MNJ);
+    REAL E1 = Ei(sqrt(s), MS, MS);
+    REAL E2 = Ei(sqrt(s), MS, MS);
+    REAL Pf = Pi(sqrt(s), MS, MS);
+
+    REAL c = 2 * Pc * Pf;
+    REAL t_neg_a = 2 * E1 * EI - MNI * MNI - MS * MS;
+    REAL u_neg_a = 2 * E1 * EJ - MNJ * MNJ - MS * MS;
+    // * T-Channel
+    // TODO: write the expression into the note
+    REAL RES_T =
+        (MS * MS - MNI * MNI) * (MS * MS - MNJ * MNJ) * 2 /
+            (pow(t_neg_a + MCHI * MCHI, 2) - pow(c, 2)) -
+        (MNI * MNI + MNJ * MNJ) *
+            (log((t_neg_a + MCHI * MCHI + c) / (t_neg_a + MCHI * MCHI - c)) /
+                 c -
+             2 * MCHI * MCHI / (pow(t_neg_a + MCHI * MCHI, 2) - pow(c, 2))) +
+        (2 -
+         (t_neg_a + u_neg_a + 2 * MCHI * MCHI) *
+             log((t_neg_a + MCHI * MCHI + c) / (t_neg_a + MCHI * MCHI - c)) /
+             c +
+         2 * (t_neg_a + u_neg_a + MCHI * MCHI) * (MCHI * MCHI) /
+             (pow(t_neg_a + MCHI * MCHI, 2) - pow(c, 2)));
+    // * U-Channel
+    REAL RES_U =
+        (MS * MS - MNI * MNI) * (MS * MS - MNJ * MNJ) * 2 /
+            (pow(u_neg_a + MCHI + MCHI, 2) - pow(c, 2)) -
+        (MNI * MNI + MNJ * MNJ) *
+            (log((u_neg_a + MCHI + MCHI + c) / (u_neg_a + MCHI + MCHI - c)) /
+                 c -
+             2 * MCHI * MCHI / (pow(u_neg_a + MCHI + MCHI, 2) - pow(c, 2))) +
+        (2 -
+         (u_neg_a + t_neg_a + 2 * MCHI * MCHI) *
+             log((u_neg_a + MCHI + MCHI + c) / (u_neg_a + MCHI + MCHI - c)) /
+             c +
+         2 * (u_neg_a + t_neg_a + MCHI * MCHI) * (MCHI * MCHI) /
+             (pow(u_neg_a + MCHI + MCHI, 2) - pow(c, 2)));
+    // * Interference between t and u channel
+    REAL RES_INTER =
+        2 * MNI * MNI * MNJ * MNJ * (MNI * MNI + MNJ * MNJ - 2 * MS * MS) /
+        (u_neg_a + t_neg_a) / c *
+        (log((u_neg_a + MCHI + MCHI + c) / (u_neg_a + MCHI + MCHI - c)) +
+         log((t_neg_a + MCHI * MCHI + c) / (t_neg_a + MCHI * MCHI - c)));
+    return prefix * SQLamFactor * (RES_T + RES_U + RES_INTER);
 }
