@@ -127,7 +127,7 @@ int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp,
 
 REAL LeptogenesisRate::Calc_LPhiChiS_Gamma(REAL Temp) {
     INTE_PARAM param = {
-        this, 0, -1, Temp, pow(MCHI + MS, 2), pow(100 * Temp, 2)};
+        this, 0, -1, -1, Temp, pow(MCHI + MS, 2), pow(100 * Temp, 2)};
     int fail, neval;
     const int NDIM = 1;
     const int NCOMP = 1;
