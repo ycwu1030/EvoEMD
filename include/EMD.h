@@ -19,7 +19,7 @@ private:
 
     // Parameter related to EMD:
     REAL Delta;
-    REAL CoverD;
+    REAL CoverD;//bla
     REAL Hubble_RD_at_Tr;
 
     void Solve_Te();
