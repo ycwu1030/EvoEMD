@@ -1,16 +1,15 @@
 #ifndef __SPDLOG_WRAPPER_H__
 #define __SPDLOG_WRAPPER_H__
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG //
-#include "spdlog/spdlog.h"
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG  //
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/spdlog.h"
 
 constexpr auto LOGGER_NAME = "log";
 constexpr auto LOGGER_SAVE_PATH = "logs/rotating.log";
 
-class FILE_LOGGER
-{
+class FILE_LOGGER {
 public:
-    FILE_LOGGER() //: file_logger(spdlog::rotating_logger_mt(LOGGER_NAME, LOGGER_SAVE_PATH, 1048576 * 10, 5))
+    FILE_LOGGER()  //: file_logger(spdlog::rotating_logger_mt(LOGGER_NAME, LOGGER_SAVE_PATH, 1048576 * 10, 5))
     {
         spdlog::set_pattern("[%Y/%m/%d %H:%M:%S][%l][%s:%#:%!] %v");
         file_logger = spdlog::rotating_logger_mt(LOGGER_NAME, LOGGER_SAVE_PATH, 1048576 * 10, 5);
@@ -20,11 +19,9 @@ public:
     std::shared_ptr<spdlog::logger> file_logger;
 };
 
-class SPDLOGGER
-{
+class SPDLOGGER {
 public:
-    static FILE_LOGGER Get_Logger()
-    {
+    static FILE_LOGGER Get_Logger() {
         static FILE_LOGGER log;
         return log;
     }
@@ -61,4 +58,4 @@ private:
 //         SPDLOG_LOGGER_ERROR(logger2, __VA_ARGS__);           \
 //     }
 
-#endif //__SPDLOG_WRAPPER_H__
+#endif  //__SPDLOG_WRAPPER_H__
