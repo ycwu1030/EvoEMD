@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iomanip>
 
+#include "spdlog_wrapper.h"
+
 using namespace std;
 
 LeptogenesisBE::LeptogenesisBE() : ODE_FUNCS(), EMDEvo(1e14, 1e-1) {
@@ -24,6 +26,10 @@ void LeptogenesisBE::Set_Dark_Sector_Masses(REAL MCHI, REAL MS) { R_Calculator.S
 void LeptogenesisBE::Set_LambdaX(REAL lamx) { R_Calculator.Set_LambdaX(lamx); }
 
 VD LeptogenesisBE::dYdX(REAL x, VD y) {
+    SPDLOG_INFO_FILE("Calculate dY/dX at x = {:+9.8e}", x);
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("   and at Y[{}] = {:+9.8}", i, y[i]);
+    }
     switch (PeriodID) {
         case 0:
             return dYdX0(x, y);
@@ -40,25 +46,45 @@ VD LeptogenesisBE::dYdX(REAL x, VD y) {
 
 VD LeptogenesisBE::dYdX0(REAL x, VD y) {
     REAL z = exp(x);
+    SPDLOG_INFO_FILE("Calculate dY/dX at x = {:+9.8e} corresponding to z = {:+9.8e} for ERDE", x, z);
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("   and at Y[{}] = {:+9.8}", i, y[i]);
+    }
     VD res(DOF);
     REAL Temp = R_Calculator.Get_Temperature_from_Z(z);
     REAL Temp1 = R_Calculator.Get_Temperature_from_Z(1);
     res = z * z * R_Calculator.Ri(Temp, y) / Entropy_Density(Temp) / EMDEvo.Get_Hubble_at_T_Period(EMD::ERDE, Temp1);
+    SPDLOG_INFO_FILE("The results is:");
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("    dY/dX[{}] = {:+9.8e}", i, res[i]);
+    }
     return res;
 }
 
 VD LeptogenesisBE::dYdX1(REAL x, VD y) {
     REAL z = exp(x);
+    SPDLOG_INFO_FILE("Calculate dY/dX at x = {:+9.8e} corresponding to z = {:+9.8e} for EMDE", x, z);
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("   and at Y[{}] = {:+9.8}", i, y[i]);
+    }
     VD res(DOF);
     REAL Temp = R_Calculator.Get_Temperature_from_Z(z);
     REAL Temp1 = R_Calculator.Get_Temperature_from_Z(1);
     res = z * sqrt(z) * R_Calculator.Ri(Temp, y) / Entropy_Density(Temp) /
           EMDEvo.Get_Hubble_at_T_Period(EMD::EMDE, Temp1);
+    SPDLOG_INFO_FILE("The results is:");
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("    dY/dX[{}] = {:+9.8e}", i, res[i]);
+    }
     return res;
 }
 
 VD LeptogenesisBE::dYdX2(REAL x, VD y) {
     REAL z = exp(x);
+    SPDLOG_INFO_FILE("Calculate dY/dX at x = {:+9.8e} corresponding to z = {:+9.8e} for EPE", x, z);
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("   and at Y[{}] = {:+9.8}", i, y[i]);
+    }
     VD res(DOF);
     REAL Temp = R_Calculator.Get_Temperature_from_Z(z);
     REAL Temp1 = R_Calculator.Get_Temperature_from_Z(1);
@@ -73,15 +99,27 @@ VD LeptogenesisBE::dYdX2(REAL x, VD y) {
                         sati / satz * exp(-5.0 * HRDatr / HEPatZ / 3.0);
     res = 8.0 * z * z * z * z * R_Calculator.Ri(Temp, y) / satz / EMDEvo.Get_Hubble_at_T_Period(EMD::EPE, Temp1) -
           y * entropy_term;
+    SPDLOG_INFO_FILE("The results is:");
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("    dY/dX[{}] = {:+9.8e}", i, res[i]);
+    }
     return res;
 }
 
 VD LeptogenesisBE::dYdX3(REAL x, VD y) {
     REAL z = exp(x);
+    SPDLOG_INFO_FILE("Calculate dY/dX at x = {:+9.8e} corresponding to z = {:+9.8e} for RDE", x, z);
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("   and at Y[{}] = {:+9.8}", i, y[i]);
+    }
     VD res(DOF);
     REAL Temp = R_Calculator.Get_Temperature_from_Z(z);
     REAL Temp1 = R_Calculator.Get_Temperature_from_Z(1);
     res = z * z * R_Calculator.Ri(Temp, y) / Entropy_Density(Temp) / EMDEvo.Get_Hubble_at_T_Period(EMD::RDE, Temp1);
+    SPDLOG_INFO_FILE("The results is:");
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_INFO_FILE("    dY/dX[{}] = {:+9.8e}", i, res[i]);
+    }
     return res;
 }
 
@@ -93,9 +131,14 @@ void LeptogenesisBE::Solve() {
     zi[2] = R_Calculator.Get_Z_from_Temperature(EMDEvo.Get_Te());
     zi[3] = R_Calculator.Get_Z_from_Temperature(EMDEvo.Get_Tr());
     zi[4] = R_Calculator.Get_Z_from_Temperature(EMDEvo.Get_Tf());
-
+    SPDLOG_INFO_FILE("Start Solving Boltzmann Equation for Leptogenesis with EMD:");
+    SPDLOG_INFO_FILE("z for ERDE [{:+9.8e}, {:+9.8e}]", zi[0], zi[1]);
+    SPDLOG_INFO_FILE("z for EMDE [{:+9.8e}, {:+9.8e}]", zi[1], zi[2]);
+    SPDLOG_INFO_FILE("z for EPE  [{:+9.8e}, {:+9.8e}]", zi[2], zi[3]);
+    SPDLOG_INFO_FILE("z for RDE  [{:+9.8e}, {:+9.8e}]", zi[3], zi[4]);
     double TSphaleron = 100;
     double zsphaleron = R_Calculator.Get_Z_from_Temperature(TSphaleron);
+    SPDLOG_INFO_FILE("z for Sphaleron Deactivate: {:+9.8e}", zsphaleron);
     VD Y_PERIOD_BEGIN(DOF);
     for (int i = 0; i < DOF; i++) {
         Y_PERIOD_BEGIN[i] = 0;
@@ -103,20 +146,36 @@ void LeptogenesisBE::Solve() {
     for (int i = 0; i < NPeriods; i++) {
         PeriodID = i;
         Set_X_BEGIN(log(zi[i]));
+        SPDLOG_INFO_FILE("Solving BE in Period-{}.", PeriodID);
         if (zi[i + 1] < zsphaleron) {
+            SPDLOG_INFO_FILE("Sphaleron freeze out outside this period");
+            SPDLOG_INFO_FILE("Solve for whole period [{:+9.8e}, {:+9.8e}]", zi[i], zi[i + 1]);
             Set_X_END(log(zi[i + 1]));
             Set_BOUNDARY_CONDITION(Y_PERIOD_BEGIN);
             solver.Solve(0.01);
             logz.push_back(solver.Get_Solution_X());
             Yields.push_back(solver.Get_Solution_Y());
             Y_PERIOD_BEGIN = solver.Get_Solution_Y_END();
+            for (int did = 0; did < DOF; did++) {
+                SPDLOG_INFO_FILE("Evolute Y[{}] from {:+9.8e} to {:+9.8e}", did, solver.Get_Solution_Y().front()[did],
+                                 Y_PERIOD_BEGIN[did]);
+            }
+
         } else {
+            SPDLOG_INFO_FILE("Sphaleron freeze out inside this period");
+            SPDLOG_INFO_FILE("Solve for two separate periods: ");
+            SPDLOG_INFO_FILE("[{0:+9.8e}, {1:+9.8e}] and [{1:+9.8e}, {2:+9.8e}]", zi[i], zsphaleron, zi[i + 1]);
             Set_X_END(log(zsphaleron));
             Set_BOUNDARY_CONDITION(Y_PERIOD_BEGIN);
             solver.Solve(0.01);
             logz.push_back(solver.Get_Solution_X());
             Yields.push_back(solver.Get_Solution_Y());
             Y_PERIOD_BEGIN = solver.Get_Solution_Y_END();
+            SPDLOG_INFO_FILE("For period [{:+9.8e}, {:+9.8e}]", zi[i], zsphaleron);
+            for (int did = 0; did < DOF; did++) {
+                SPDLOG_INFO_FILE("Evolute Y[{}] from {:+9.8e} to {:+9.8e}", did, solver.Get_Solution_Y().front()[did],
+                                 Y_PERIOD_BEGIN[did]);
+            }
             Set_X_BEGIN(log(zsphaleron));
             Set_X_END(log(zi[i + 1]));
             Y_PERIOD_BEGIN[0] = 0;
@@ -125,6 +184,11 @@ void LeptogenesisBE::Solve() {
             logz.push_back(solver.Get_Solution_X());
             Yields.push_back(solver.Get_Solution_Y());
             Y_PERIOD_BEGIN = solver.Get_Solution_Y_END();
+            SPDLOG_INFO_FILE("For period [{:+9.8e}, {:+9.8e}]", zsphaleron, zi[i + 1]);
+            for (int did = 0; did < DOF; did++) {
+                SPDLOG_INFO_FILE("Evolute Y[{}] from {:+9.8e} to {:+9.8e}", did, solver.Get_Solution_Y().front()[did],
+                                 Y_PERIOD_BEGIN[did]);
+            }
         }
     }
 }
