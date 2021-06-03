@@ -1,5 +1,7 @@
 #include "PhaseSpace.h"
 
+#include <cmath>
+
 REAL Kallen_Lam(REAL x, REAL y, REAL z) {
     REAL lam = x * x + y * y + z * z - 2 * x * y - 2 * y * z - 2 * z * x;
     return lam;
