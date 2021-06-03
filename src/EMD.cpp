@@ -5,6 +5,7 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_roots.h"
 #include "gsl/gsl_sf_bessel.h"
+#include "gsl/gsl_sf_zeta.h"
 #include "spdlog_wrapper.h"
 
 EMD::EMD()
@@ -174,17 +175,27 @@ REAL Number_Density_Eq(REAL T, REAL M, REAL g)
     return neq;
 }
 
-REAL Number_Density_Eq_Massless(REAL T, REAL g)
+REAL Number_Density_Eq_BE(REAL T, REAL g)
 {
-    SPDLOG_INFO_FILE("Calculating Particle Number Density at Equilibrium for Massless Particle, T = {:+9.8e}, g = {}", T, g);
+    SPDLOG_INFO_FILE("Calculating Particle Number Density at Equilibrium for Massless Boson, T = {:+9.8e}, g = {}", T, g);
     REAL neq = g * pow(T, 3) / M_PI / M_PI;
+    SPDLOG_DEBUG_FILE("For Calculating Particle Number Density at Eq, neq = {:+9.8e}", neq);
+    return neq;
+}
+
+REAL Number_Density_Eq_FD(REAL T, REAL g)
+{
+    SPDLOG_INFO_FILE("Calculating Particle Number Density at Equilibrium for Massless Fermion, T = {:+9.8e}, g = {}", T, g);
+    REAL neq = 3.0 / 4.0 *g * gsl_sf_zeta_int(3.0) * pow(T, 3) / M_PI / M_PI;
     SPDLOG_DEBUG_FILE("For Calculating Particle Number Density at Eq, neq = {:+9.8e}", neq);
     return neq;
 }
 
 REAL Entropy_Density(REAL T)
 {
-    REAL s = 2 * M_PI * M_PI / 45.0 * 106.5 * pow(T, 3);
+    REAL gsT = gs(T);
+
+    REAL s = 2 * M_PI * M_PI / 45.0 * gsT * pow(T, 3);
     SPDLOG_DEBUG_FILE("Entropy density s = {:+9.8e} at T = {:+9.8e}.", s, T);
     return s;
 }
@@ -196,9 +207,16 @@ REAL Yield_Eq(REAL T, REAL M, REAL g)
     return yeq;
 }
 
-REAL Yield_Eq_Massless(REAL T, REAL g)
+REAL Yield_Eq_BE(REAL T, REAL g)
 {
-    REAL yeq = Number_Density_Eq_Massless(T, g) / Entropy_Density(T);
-    SPDLOG_DEBUG_FILE("Yield at Equilibrium for Massless Particle Yeq = {:+9.8e} at T = {:+9.8e}, g = {}.", yeq, T, g);
+    REAL yeq = Number_Density_Eq_BE(T, g) / Entropy_Density(T);
+    SPDLOG_DEBUG_FILE("Yield at Equilibrium for Massless Boson Yeq = {:+9.8e} at T = {:+9.8e}, g = {}.", yeq, T, g);
+    return yeq;
+}
+
+REAL Yield_Eq_FD(REAL T, REAL g)
+{
+    REAL yeq = Number_Density_Eq_FD(T, g) / Entropy_Density(T);
+    SPDLOG_DEBUG_FILE("Yield at Equilibrium for Massless Fermion Yeq = {:+9.8e} at T = {:+9.8e}, g = {}.", yeq, T, g);
     return yeq;
 }
