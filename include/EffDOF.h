@@ -19,4 +19,4 @@ REAL ge(REAL T);
  */
 REAL gs(REAL T);
 
-#endif //EFFDOF_H
+#endif  // EFFDOF_H

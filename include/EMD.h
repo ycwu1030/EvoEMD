@@ -19,7 +19,7 @@ private:
 
     // Parameter related to EMD:
     REAL Delta;
-    REAL CoverD;//bla
+    REAL CoverD;  // bla
     REAL Hubble_RD_at_Tr;
 
     /**
@@ -110,9 +110,9 @@ public:
  * @param  g: The internal dof of the particle
  * @retval The particle number density at equilibrium
  */
-REAL Number_Density_Eq(REAL T, REAL M, REAL g); // Equilibrium number density - Maxwell-Boltzmann statistics
-REAL Number_Density_Eq_BE(REAL T, REAL g);      // Equilibrium number density - Bose-Einstein statistics
-REAL Number_Density_Eq_FD(REAL T, REAL g);      // Equilibrium number density - Fermi-Dirac statistics
+REAL Number_Density_Eq(REAL T, REAL M, REAL g);  // Equilibrium number density - Maxwell-Boltzmann statistics
+REAL Number_Density_Eq_BE(REAL T, REAL g);       // Equilibrium number density - Bose-Einstein statistics
+REAL Number_Density_Eq_FD(REAL T, REAL g);       // Equilibrium number density - Fermi-Dirac statistics
 
 // TODO: Using the Boltzmann-Einstein/Fermi-Dirac distribution for the number
 // density
