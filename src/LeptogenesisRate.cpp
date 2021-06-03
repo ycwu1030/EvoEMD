@@ -90,11 +90,11 @@ void LeptogenesisRate::Calc_Gammas(REAL Temp) {
 }
 
 void LeptogenesisRate::Calc_Yield_Equilibrium(REAL Temp) {
-    Yeq[0] = Yield_Eq_FD(Temp, 2 * 2);  // For lepton
-    Yeq[1] = Yield_Eq(Temp, MNR1, 2);         // For N1;
-    Yeq[2] = Yield_Eq(Temp, MNR2, 2);         // For N2;
-    Yeq[3] = Yield_Eq(Temp, MCHI, 2 * 2);     // For Chi
-    Yeq[4] = Yield_Eq(Temp, MS, 2);           // For S
+    Yeq[0] = Yield_Eq_FD(Temp, 2 * 2);     // For lepton
+    Yeq[1] = Yield_Eq(Temp, MNR1, 2);      // For N1;
+    Yeq[2] = Yield_Eq(Temp, MNR2, 2);      // For N2;
+    Yeq[3] = Yield_Eq(Temp, MCHI, 2 * 2);  // For Chi
+    Yeq[4] = Yield_Eq(Temp, MS, 2);        // For S
     SPDLOG_INFO_FILE("Calculate Yield at Equilibrium at T = {:+9.8}.", Temp);
     SPDLOG_INFO_FILE("For Lep, Yeq = {:+9.8e}", Yeq[0]);
     SPDLOG_INFO_FILE("For N1,  Yeq = {:+9.8e}", Yeq[1]);

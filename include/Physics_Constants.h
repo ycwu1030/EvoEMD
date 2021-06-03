@@ -6,4 +6,4 @@
 #define TeV 1000
 #define eV 1e-9
 
-#endif //PHYSICS_CONSTANTS_H
+#endif  // PHYSICS_CONSTANTS_H
