@@ -32,12 +32,12 @@ REAL LeptogenesisRate::Calc_NChiS_Gamma(REAL Temp, int i) {
     if (MN < MCHI + MS) {
         return 0;
     }
-    REAL A = MN / MNR1;
-    REAL B = MCHI / MNR1;
-    REAL C = MS / MNR1;
+    REAL A = pow(MN / MNR1,2);
+    REAL B = pow(MCHI / MNR1,2);
+    REAL C = pow(MS / MNR1,2);
     REAL z = MNR1 / Temp;
     REAL SQLam = sqrt(Kallen_Lam(1, B / A, C / A));
-    REAL gamma = LamX * LamX / 16 / pow(M_PI, 3) * pow(MNR1, 4) *
+    REAL gamma = LamX * LamX / 16.0 / pow(M_PI, 3) * pow(MNR1, 4) *
                  sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z *
                  (1 + B / A - C / A) * SQLam;
     return gamma;
@@ -48,12 +48,12 @@ REAL LeptogenesisRate::Calc_ChiSN_Gamma(REAL Temp, int i) {
     if (MCHI < MN + MS) {
         return 0;
     }
-    REAL A = MCHI / MNR1;
-    REAL B = MN / MNR1;
-    REAL C = MS / MNR1;
+    REAL A = pow(MCHI / MNR1,2);
+    REAL B = pow(MN / MNR1,2);
+    REAL C = pow(MS / MNR1,2);
     REAL z = MNR1 / Temp;
     REAL SQLam = sqrt(Kallen_Lam(1, B / A, C / A));
-    REAL gamma = LamX * LamX / 16 / pow(M_PI, 3) * pow(MNR1, 4) *
+    REAL gamma = LamX * LamX / 8.0 / pow(M_PI, 3) * pow(MNR1, 4) *
                  sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z *
                  (1 + B / A - C / A) * SQLam;
     return gamma;
@@ -64,12 +64,12 @@ REAL LeptogenesisRate::Calc_SChiN_Gamma(REAL Temp, int i) {
     if (MS < MN + MCHI) {
         return 0;
     }
-    REAL A = MS / MNR1;
-    REAL B = MN / MNR1;
-    REAL C = MCHI / MNR1;
+    REAL A = pow(MS / MNR1,2);
+    REAL B = pow(MN / MNR1,2);
+    REAL C = pow(MCHI / MNR1,2);
     REAL z = MNR1 / Temp;
     REAL SQLam = sqrt(Kallen_Lam(1, B / A, C / A));
-    REAL gamma = LamX * LamX / 16 / pow(M_PI, 3) * pow(MNR1, 4) *
+    REAL gamma = LamX * LamX / 16.0 / pow(M_PI, 3) * pow(MNR1, 4) *
                  sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z *
                  (1 - B / A - C / A) * SQLam;
     return gamma;
