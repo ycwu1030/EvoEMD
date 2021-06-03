@@ -90,7 +90,7 @@ void LeptogenesisRate::Calc_Gammas(REAL Temp) {
 }
 
 void LeptogenesisRate::Calc_Yield_Equilibrium(REAL Temp) {
-    Yeq[0] = Yield_Eq_Massless(Temp, 2 * 2);  // For lepton
+    Yeq[0] = Yield_Eq_FD(Temp, 2 * 2);  // For lepton
     Yeq[1] = Yield_Eq(Temp, MNR1, 2);         // For N1;
     Yeq[2] = Yield_Eq(Temp, MNR2, 2);         // For N2;
     Yeq[3] = Yield_Eq(Temp, MCHI, 2 * 2);     // For Chi
