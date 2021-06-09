@@ -1,2 +1,2 @@
 # EvoEMD
-The Evolution in Early Matter Dominate Universe
+The Evolution in Early Matter Dominated Universe
