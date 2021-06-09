@@ -85,7 +85,7 @@ REAL LeptogenesisRate::Calc_NLPhi_Gamma(REAL Temp, int i) {
     SPDLOG_INFO_FILE("Calculate gammas for N{} -> L Phi at T = {:+9.8e}", i + 1, Temp);
     REAL z = MNR1 / Temp;
     REAL MN = i == 0 ? MNR1 : MNR2;
-    REAL A = MN / MNR1;
+    REAL A = pow(MN / MNR1,2);
     REAL coup = real(Nu_Param.Get_YdagYij(i, i));
     REAL gamma = coup * coup / 8 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z;
     SPDLOG_INFO_FILE("gamma(N{} -> L Phi) = {:+9.8e}.", i + 1, gamma);
@@ -124,6 +124,8 @@ int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp, REAL ff[]
     REAL smin = params->smin;
     REAL smax = params->smax;
     REAL s = smin + (smax - smin) * x[0];
+    REAL s = smin*exp(x[0]*log(smax/smin));
+
     ff[0] = (smax - smin) * params->ptr->SqAmp_dOmega_with_Kallen(s, procid, ni, nj) * sqrt(s) *
             gsl_sf_bessel_K1(sqrt(s) / Temp) * Temp / 32.0 / pow(2 * M_PI, 6);
     return 0;
