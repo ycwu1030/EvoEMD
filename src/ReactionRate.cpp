@@ -124,9 +124,12 @@ int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp, REAL ff[]
     REAL smin = params->smin;
     REAL smax = params->smax;
     REAL s = smin + (smax - smin) * x[0];
-    REAL s = smin*exp(x[0]*log(smax/smin));
+    REAL JacS = (smax - smin); 
+    // REAL s = smin*exp(x[0]*log(smax/smin));
+    // JacS = smin*log(smax/smin)*exp(x[0]*log(smax/smin));
 
-    ff[0] = (smax - smin) * params->ptr->SqAmp_dOmega_with_Kallen(s, procid, ni, nj) * sqrt(s) *
+
+    ff[0] = JacS * params->ptr->SqAmp_dOmega_with_Kallen(s, procid, ni, nj) * sqrt(s) *
             gsl_sf_bessel_K1(sqrt(s) / Temp) * Temp / 32.0 / pow(2 * M_PI, 6);
     return 0;
 }
@@ -195,7 +198,7 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_LPhiChiS(REAL s) {
     if (s < pow(M3 + M4, 2) || s < pow(M1 + M2, 2)) {
         return 0;
     }
-    REAL SQLamFactor = sqrt(Kallen_Lam(1.0, M1 * M1 / s, M2 * M2 / s) * Kallen_Lam(1.0, M3 * M3 / s, M3 * M3 / s));
+    REAL SQLamFactor = sqrt(Kallen_Lam(1.0, M1 * M1 / s, M2 * M2 / s) * Kallen_Lam(1.0, M3 * M3 / s, M4 * M4 / s));
     REAL prefix = 2 * M_PI * LamX * LamX * (s + MCHI * MCHI - MS * MS);
     REAL h1a2coup = 0;
     REAL h2a2coup = 0;
