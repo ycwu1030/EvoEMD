@@ -123,10 +123,10 @@ int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp, REAL ff[]
     REAL Temp = params->Temp;
     REAL smin = params->smin;
     REAL smax = params->smax;
-    REAL s = smin + (smax - smin) * x[0];
-    REAL JacS = (smax - smin);
-    // REAL s = smin*exp(x[0]*log(smax/smin));
-    // JacS = smin*log(smax/smin)*exp(x[0]*log(smax/smin));
+    // REAL s = smin + (smax - smin) * x[0];
+    // REAL JacS = (smax - smin);
+    REAL s = smin * exp(x[0] * log(smax / smin));
+    REAL JacS = smin * log(smax / smin) * exp(x[0] * log(smax / smin));
 
     ff[0] = JacS * params->ptr->SqAmp_dOmega_with_Kallen(s, procid, ni, nj) * sqrt(s) *
             gsl_sf_bessel_K1(sqrt(s) / Temp) * Temp / 32.0 / pow(2 * M_PI, 6);
