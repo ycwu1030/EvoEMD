@@ -198,27 +198,16 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_LPhiChiS(REAL s) {
         return 0;
     }
     REAL SQLamFactor = sqrt(Kallen_Lam(1.0, M1 * M1 / s, M2 * M2 / s) * Kallen_Lam(1.0, M3 * M3 / s, M4 * M4 / s));
-    REAL prefix = 2 * M_PI * LamX * LamX * (s + MCHI * MCHI - MS * MS);
-    REAL h1a2coup = 0;
-    REAL h2a2coup = 0;
-    REAL Rh1aha2coup = 0;
-    REAL Ih1aha2coup = 0;
-    for (int lep_index = 0; lep_index < 3; lep_index++) {
-        auto h1a = Nu_Param.Get_Yij(0, lep_index);
-        auto h2a = Nu_Param.Get_Yij(1, lep_index);
-        h1a2coup += norm(h1a);  // norm is the square of its magnitude
-        h2a2coup += norm(h2a);
-        Rh1aha2coup += real(h1a * conj(h2a));
-        Ih1aha2coup += imag(h1a * conj(h2a));
-    }
+    REAL prefix = 8 * M_PI * LamX * LamX * (s + MCHI * MCHI - MS * MS);
+    REAL YY11 = real(Nu_Param.Get_YdagYij(1, 1));
+    REAL YY22 = real(Nu_Param.Get_YdagYij(2, 2));
+    REAL YY12 = real(Nu_Param.Get_YdagYij(1, 2));
     REAL N1Diag = (s + MNR1 * MNR1) / (pow(s - MNR1 * MNR1, 2) + pow(MNR1 * GammaN1, 2));
     REAL N2Diag = (s + MNR2 * MNR2) / (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
     REAL InterPref = 2 * (s + MNR1 * MNR2) / (pow(s - MNR1 * MNR1, 2) + pow(MNR1 * GammaN1, 2)) /
                      (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
     REAL InterR = InterPref * ((s - MNR1 * MNR1) * (s - MNR2 * MNR2) + MNR1 * MNR2 * GammaN1 * GammaN2);
-    REAL InterI = InterPref * ((s - MNR1 * MNR1) * MNR2 * GammaN2 - (s - MNR2 * MNR2) * MNR1 * GammaN1);
-    REAL RES =
-        SQLamFactor * prefix * (h1a2coup * N1Diag + h2a2coup * N2Diag + Rh1aha2coup * InterR + Ih1aha2coup * InterI);
+    REAL RES = SQLamFactor * prefix * (YY11 * N1Diag + YY22 * N2Diag + YY12 * InterR);
     return RES;
 }
 
@@ -228,9 +217,10 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNChiChi(REAL s, int i, int j) {
     if (s < pow(MNI + MNJ, 2) || s < pow(2 * MCHI, 2)) {
         return 0;
     }
+    REAL SYM = i == j ? 1.0 / 2.0 : 1.0;
     REAL SQLamFactor =
         sqrt(Kallen_Lam(1.0, MNI * MNI / s, MNJ * MNJ / s) * Kallen_Lam(1.0, MCHI * MCHI / s, MCHI * MCHI / s));
-    REAL prefix = 2 * M_PI * pow(LamX, 4);
+    REAL prefix = 2 * M_PI * pow(LamX, 4) * SYM;
     REAL EI = Ei(sqrt(s), MNI, MNJ);
     REAL EJ = Ei(sqrt(s), MNJ, MNI);
     REAL Pc = Pi(sqrt(s), MNI, MNJ);
@@ -270,8 +260,9 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNSS(REAL s, int i, int j) {
     if (s < pow(MNI + MNJ, 2) || s < pow(2 * MS, 2)) {
         return 0;
     }
+    REAL SYM = i == j ? 1.0 / 2.0 : 1.0;
     REAL SQLamFactor = sqrt(Kallen_Lam(1.0, MNI * MNI / s, MNJ * MNJ / s) * Kallen_Lam(1.0, MS * MS / s, MS * MS / s));
-    REAL prefix = 2 * M_PI * pow(LamX, 4);
+    REAL prefix = 2 * M_PI * pow(LamX, 4) * SYM;
     REAL EI = Ei(sqrt(s), MNI, MNJ);
     REAL EJ = Ei(sqrt(s), MNJ, MNI);
     REAL Pc = Pi(sqrt(s), MNI, MNJ);
@@ -280,28 +271,23 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNSS(REAL s, int i, int j) {
     REAL Pf = Pi(sqrt(s), MS, MS);
 
     REAL c = 2 * Pc * Pf;
-    REAL t_neg_a = 2 * E1 * EI - MNI * MNI - MS * MS;
-    REAL u_neg_a = 2 * E1 * EJ - MNJ * MNJ - MS * MS;
+    REAL at = 2 * E1 * EI - MNI * MNI - MS * MS;
+    REAL au = 2 * E1 * EJ - MNJ * MNJ - MS * MS;
+    REAL bt = at + MCHI * MCHI;
+    REAL bu = au + MCHI * MCHI;
+    REAL k1 = MNI * MNI + MNJ * MNJ;
+    REAL k22 = (MS * MS - MNI * MNI) * (MS * MS - MNJ * MNJ);
     // * T-Channel
-    // TODO: write the expression into the note
-    REAL RES_T =
-        (MS * MS - MNI * MNI) * (MS * MS - MNJ * MNJ) * 2 / (pow(t_neg_a + MCHI * MCHI, 2) - pow(c, 2)) -
-        (MNI * MNI + MNJ * MNJ) * (log((t_neg_a + MCHI * MCHI + c) / (t_neg_a + MCHI * MCHI - c)) / c -
-                                   2 * MCHI * MCHI / (pow(t_neg_a + MCHI * MCHI, 2) - pow(c, 2))) +
-        (2 -
-         (t_neg_a + u_neg_a + 2 * MCHI * MCHI) * log((t_neg_a + MCHI * MCHI + c) / (t_neg_a + MCHI * MCHI - c)) / c +
-         2 * (t_neg_a + u_neg_a + MCHI * MCHI) * (MCHI * MCHI) / (pow(t_neg_a + MCHI * MCHI, 2) - pow(c, 2)));
+    // * Int[((at-c*x)(au+c*x)-k1*(at-c*x)-k22)/(bt-c*x)^2,{x,-1,1}]
+    REAL RES_T = -2 + (2 * bt + au - at - k1) / c * log((bt + c) / (bt - c)) +
+                 2 * ((at - bt) * (au + bt - k1) - k22) / (bt * bt - c * c);
     // * U-Channel
-    REAL RES_U =
-        (MS * MS - MNI * MNI) * (MS * MS - MNJ * MNJ) * 2 / (pow(u_neg_a + MCHI + MCHI, 2) - pow(c, 2)) -
-        (MNI * MNI + MNJ * MNJ) * (log((u_neg_a + MCHI + MCHI + c) / (u_neg_a + MCHI + MCHI - c)) / c -
-                                   2 * MCHI * MCHI / (pow(u_neg_a + MCHI + MCHI, 2) - pow(c, 2))) +
-        (2 -
-         (u_neg_a + t_neg_a + 2 * MCHI * MCHI) * log((u_neg_a + MCHI + MCHI + c) / (u_neg_a + MCHI + MCHI - c)) / c +
-         2 * (u_neg_a + t_neg_a + MCHI * MCHI) * (MCHI * MCHI) / (pow(u_neg_a + MCHI + MCHI, 2) - pow(c, 2)));
+    // * Int[((at-c*x)(au+c*x)-k1*(au+c*x)-k22)/(bu+c*x)^2,{x,-1,1}]
+    REAL RES_U = -2 + (2 * bu + at - au - k1) / c * log((bu + c) / (bu - c)) +
+                 2 * ((au - bu) * (at + bu - k1) - k22) / (bu * bu - c * c);
     // * Interference between t and u channel
-    REAL RES_INTER = 2 * MNI * MNI * MNJ * MNJ * (MNI * MNI + MNJ * MNJ - 2 * MS * MS) / (u_neg_a + t_neg_a) / c *
-                     (log((u_neg_a + MCHI + MCHI + c) / (u_neg_a + MCHI + MCHI - c)) +
-                      log((t_neg_a + MCHI * MCHI + c) / (t_neg_a + MCHI * MCHI - c)));
+    // * Int[1/(bt-c*x)/(bu+c*x),{x,-1,1}]
+    REAL RES_INTER = 2 * MNI * MNJ * (MS * MS - MNI * MNI - MNJ * MNJ) / c / (bt + bu) *
+                     (log((bt + c) / (bt - c)) + log((bu + c) / (bu - c)));
     return prefix * SQLamFactor * (RES_T + RES_U + RES_INTER);
 }
