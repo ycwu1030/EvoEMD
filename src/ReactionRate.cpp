@@ -198,27 +198,16 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_LPhiChiS(REAL s) {
         return 0;
     }
     REAL SQLamFactor = sqrt(Kallen_Lam(1.0, M1 * M1 / s, M2 * M2 / s) * Kallen_Lam(1.0, M3 * M3 / s, M4 * M4 / s));
-    REAL prefix = 2 * M_PI * LamX * LamX * (s + MCHI * MCHI - MS * MS);
-    REAL h1a2coup = 0;
-    REAL h2a2coup = 0;
-    REAL Rh1aha2coup = 0;
-    REAL Ih1aha2coup = 0;
-    for (int lep_index = 0; lep_index < 3; lep_index++) {
-        auto h1a = Nu_Param.Get_Yij(0, lep_index);
-        auto h2a = Nu_Param.Get_Yij(1, lep_index);
-        h1a2coup += norm(h1a);  // norm is the square of its magnitude
-        h2a2coup += norm(h2a);
-        Rh1aha2coup += real(h1a * conj(h2a));
-        Ih1aha2coup += imag(h1a * conj(h2a));
-    }
+    REAL prefix = 8 * M_PI * LamX * LamX * (s + MCHI * MCHI - MS * MS);
+    REAL YY11 = real(Nu_Param.Get_YdagYij(1, 1));
+    REAL YY22 = real(Nu_Param.Get_YdagYij(2, 2));
+    REAL YY12 = real(Nu_Param.Get_YdagYij(1, 2));
     REAL N1Diag = (s + MNR1 * MNR1) / (pow(s - MNR1 * MNR1, 2) + pow(MNR1 * GammaN1, 2));
     REAL N2Diag = (s + MNR2 * MNR2) / (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
     REAL InterPref = 2 * (s + MNR1 * MNR2) / (pow(s - MNR1 * MNR1, 2) + pow(MNR1 * GammaN1, 2)) /
                      (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
     REAL InterR = InterPref * ((s - MNR1 * MNR1) * (s - MNR2 * MNR2) + MNR1 * MNR2 * GammaN1 * GammaN2);
-    REAL InterI = InterPref * ((s - MNR1 * MNR1) * MNR2 * GammaN2 - (s - MNR2 * MNR2) * MNR1 * GammaN1);
-    REAL RES =
-        SQLamFactor * prefix * (h1a2coup * N1Diag + h2a2coup * N2Diag + Rh1aha2coup * InterR + Ih1aha2coup * InterI);
+    REAL RES = SQLamFactor * prefix * (YY11 * N1Diag + YY22 * N2Diag + YY12 * InterR);
     return RES;
 }
 
