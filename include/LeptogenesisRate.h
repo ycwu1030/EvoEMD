@@ -176,6 +176,14 @@ private:
     REAL Calc_LPhiChiS_Gamma(REAL Temp);
 
     /**
+     * @brief  Calculate gamma for L Phi -> Lbar Phibar
+     * @note
+     * @param  Temp: Temperature
+     * @retval
+     */
+    REAL Calc_LPhiLbarPhibar_Gamma(REAL Temp);
+
+    /**
      * @brief  Calculate gamma for N_i N_j -> Chi Chi
      * @note
      * @param  Temp: Temperature

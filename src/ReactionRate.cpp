@@ -100,6 +100,8 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen(REAL s, int processid, int i, in
             return SqAmp_dOmega_with_Kallen_NNChiChi(s, i, j);
         case 2:
             return SqAmp_dOmega_with_Kallen_NNSS(s, i, j);
+        case 3:
+            return SqAmp_dOmega_with_Kallen_LPhiLbarPhiBar(s);
         default:
             return SqAmp_dOmega_with_Kallen_LPhiChiS(s);
     }
@@ -187,6 +189,22 @@ REAL LeptogenesisRate::Calc_NNSS_Gamma(REAL Temp, int i, int j) {
           NBATCH, GRIDNO, NULL, NULL, &neval, &fail, RES, ERR, PROB);
 
     SPDLOG_INFO_FILE("gamma(N{} N{} <-> S S) = {:+9.8e}.", i + 1, j + 1, Temp);
+    return RES[0];
+}
+
+REAL LeptogenesisRate::Calc_LPhiLbarPhibar_Gamma(REAL Temp) {
+    SPDLOG_INFO_FILE("Calculate gammas for L Phi <-> Lbar Phibar at T = {:+9.8e}.", Temp);
+    INTE_PARAM param = {this, 3, -1, -1, Temp, 0., pow(100 * Temp, 2)};
+    int fail, neval;
+    const int NDIM = 1;
+    const int NCOMP = 1;
+    REAL RES[NCOMP];
+    REAL ERR[NCOMP];
+    REAL PROB[NCOMP];
+
+    Vegas(NDIM, NCOMP, gamma_Integrand, &param, NVEC, EPSREL, EPSABS, FLAGS, SEED, MINEVAL, MAXEVAL, NSTART, NINCREASE,
+          NBATCH, GRIDNO, NULL, NULL, &neval, &fail, RES, ERR, PROB);
+    SPDLOG_INFO_FILE("gamma(L Phi <-> Lbar Phibar) = {:+9.8e}.", RES[0]);
     return RES[0];
 }
 
