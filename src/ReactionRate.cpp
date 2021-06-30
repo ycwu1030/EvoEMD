@@ -57,7 +57,7 @@ REAL LeptogenesisRate::Calc_ChiSN_Gamma(REAL Temp, int i) {
     REAL C = pow(MS / MNR1, 2);
     REAL z = MNR1 / Temp;
     REAL SQLam = sqrt(Kallen_Lam(1, B / A, C / A));
-    REAL gamma = LamX * LamX / 8.0 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z *
+    REAL gamma = LamX * LamX / 16.0 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z *
                  (1 + B / A - C / A) * SQLam;
     SPDLOG_INFO_FILE("gamma(Chi -> S N{}) = {:+9.8e}", i + 1, gamma);
     return gamma;
@@ -87,7 +87,7 @@ REAL LeptogenesisRate::Calc_NLPhi_Gamma(REAL Temp, int i) {
     REAL MN = i == 0 ? MNR1 : MNR2;
     REAL A = pow(MN / MNR1,2);
     REAL coup = real(Nu_Param.Get_YdagYij(i, i));
-    REAL gamma = coup * coup / 8 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z;
+    REAL gamma = coup * coup / 16 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z;
     SPDLOG_INFO_FILE("gamma(N{} -> L Phi) = {:+9.8e}.", i + 1, gamma);
     return gamma;
 }
