@@ -87,7 +87,7 @@ REAL LeptogenesisRate::Calc_NLPhi_Gamma(REAL Temp, int i) {
     REAL MN = i == 0 ? MNR1 : MNR2;
     REAL A = pow(MN / MNR1, 2);
     REAL coup = real(Nu_Param.Get_YdagYij(i, i));
-    REAL gamma = coup / 8 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z;
+    REAL gamma = coup * coup / 16 / pow(M_PI, 3) * pow(MNR1, 4) * sqrt(pow(A, 3)) * gsl_sf_bessel_K1(z * sqrt(A)) / z;
     SPDLOG_INFO_FILE("gamma(N{} -> L Phi) = {:+9.8e}.", i + 1, gamma);
     return gamma;
 }
@@ -100,6 +100,8 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen(REAL s, int processid, int i, in
             return SqAmp_dOmega_with_Kallen_NNChiChi(s, i, j);
         case 2:
             return SqAmp_dOmega_with_Kallen_NNSS(s, i, j);
+        case 3:
+            return SqAmp_dOmega_with_Kallen_LPhiLbarPhiBar(s);
         default:
             return SqAmp_dOmega_with_Kallen_LPhiChiS(s);
     }
@@ -189,6 +191,22 @@ REAL LeptogenesisRate::Calc_NNSS_Gamma(REAL Temp, int i, int j) {
     return RES[0];
 }
 
+REAL LeptogenesisRate::Calc_LPhiLbarPhibar_Gamma(REAL Temp) {
+    SPDLOG_INFO_FILE("Calculate gammas for L Phi <-> Lbar Phibar at T = {:+9.8e}.", Temp);
+    INTE_PARAM param = {this, 3, -1, -1, Temp, 0., pow(100 * Temp, 2)};
+    int fail, neval;
+    const int NDIM = 1;
+    const int NCOMP = 1;
+    REAL RES[NCOMP];
+    REAL ERR[NCOMP];
+    REAL PROB[NCOMP];
+
+    Vegas(NDIM, NCOMP, gamma_Integrand, &param, NVEC, EPSREL, EPSABS, FLAGS, SEED, MINEVAL, MAXEVAL, NSTART, NINCREASE,
+          NBATCH, GRIDNO, NULL, NULL, &neval, &fail, RES, ERR, PROB);
+    SPDLOG_INFO_FILE("gamma(L Phi <-> Lbar Phibar) = {:+9.8e}.", RES[0]);
+    return RES[0];
+}
+
 REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_LPhiChiS(REAL s) {
     REAL M1 = 0;
     REAL M2 = 0;
@@ -208,6 +226,42 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_LPhiChiS(REAL s) {
                      (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
     REAL InterR = InterPref * ((s - MNR1 * MNR1) * (s - MNR2 * MNR2) + MNR1 * MNR2 * GammaN1 * GammaN2);
     REAL RES = SQLamFactor * prefix * (YY11 * N1Diag + YY22 * N2Diag + YY12 * InterR);
+    return RES;
+}
+
+REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_LPhiLbarPhiBar(REAL s) {
+    if (s < 0) {
+        return 0;
+    }
+    REAL SQLamFactor = 1.;
+    REAL prefix = 2 * M_PI * s*s;
+    REAL h1a2coup = 0;
+    REAL h2a2coup = 0;
+    REAL h1b2coup = 0;
+    REAL h2b2coup = 0;
+    REAL Rh1aha2h1bhb2coup = 0;
+    REAL Ih1aha2h1bhb2coup = 0;
+    for (int lep_index_a = 0; lep_index_a < 3; lep_index_a++) {
+        for (int lep_index_b = 0; lep_index_b < 3; lep_index_b++) {
+            auto h1a = Nu_Param.Get_Yij(0, lep_index_a);
+            auto h2a = Nu_Param.Get_Yij(1, lep_index_a);
+            auto h1b = Nu_Param.Get_Yij(0, lep_index_b);
+            auto h2b = Nu_Param.Get_Yij(1, lep_index_b);
+            h1a2coup += norm(h1a);  // norm is the square of its magnitude
+            h1b2coup += norm(h1b);  
+            h2a2coup += norm(h2a);
+            h2b2coup += norm(h2b);
+            Rh1aha2h1bhb2coup += real(h1a * conj(h2a) * h1b * conj(h2b));
+            Ih1aha2h1bhb2coup += imag(h1a * conj(h2a) * h1b * conj(h2b));
+        }
+    }
+    REAL N1Diag = 1. / (pow(s - MNR1 * MNR1, 2) + pow(MNR1 * GammaN1, 2));
+    REAL N2Diag = 1. / (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
+    REAL InterPref = 2. / (pow(s - MNR1 * MNR1, 2) + pow(MNR1 * GammaN1, 2)) / (pow(s - MNR2 * MNR2, 2) + pow(MNR2 * GammaN2, 2));
+    REAL InterR = InterPref * ((s - MNR1 * MNR1) * (s - MNR2 * MNR2) + MNR1 * MNR2 * GammaN1 * GammaN2);
+    REAL InterI = InterPref * ((s - MNR1 * MNR1) * MNR2 * GammaN2 - (s - MNR2 * MNR2) * MNR1 * GammaN1);
+    REAL RES =
+        SQLamFactor * prefix * (h1a2coup * h1b2coup * N1Diag + h2a2coup * h2b2coup * N2Diag + Rh1aha2h1bhb2coup * InterR + Ih1aha2h1bhb2coup * InterI);
     return RES;
 }
 
@@ -290,4 +344,85 @@ REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNSS(REAL s, int i, int j) {
     REAL RES_INTER = 2 * MNI * MNJ * (MS * MS - MNI * MNI - MNJ * MNJ) / c / (bt + bu) *
                      (log((bt + c) / (bt - c)) + log((bu + c) / (bu - c)));
     return prefix * SQLamFactor * (RES_T + RES_U + RES_INTER);
+}
+
+REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNChiChi_v2(REAL s, int i, int j) {
+    REAL MNI = i == 0 ? MNR1 : MNR2;
+    REAL MNJ = j == 0 ? MNR1 : MNR2;
+    if (s < pow(MNI + MNJ, 2) || s < pow(2 * MCHI, 2)) {
+        return 0;
+    }
+    REAL SQLamFactor =
+        sqrt(Kallen_Lam(1.0, MNI * MNI / s, MNJ * MNJ / s) * Kallen_Lam(1.0, MCHI * MCHI / s, MCHI * MCHI / s));
+    REAL prefix = 2 * M_PI * pow(LamX, 4);
+    
+    REAL E1 = Ei(sqrt(s), MNI, MNJ);
+    REAL E2 = Ei(sqrt(s), MNJ, MNI);
+    REAL E3 = Ei(sqrt(s), MCHI, MCHI);
+    REAL E4 = Ei(sqrt(s), MCHI, MCHI);
+    REAL P12 = Pi(sqrt(s), MNI, MNJ);
+    REAL P34 = Pi(sqrt(s), MCHI, MCHI);
+    
+    REAL a = 4 * E1 * E3;
+    REAL b = 4 * E2 * E4;
+    REAL c = 4 * P12 * P34;
+    REAL d = 2 * MS * MS + 4 * E1 * E3 - 2 * MNI * MNI - 2 * MCHI * MCHI;
+    // Conditional expression for the integration over cosine
+    if (d < c) {
+        return 0;
+    }
+
+    // * T-channel
+    // * Int[(a - c x)(b - c x)/(d - c x)/(d - c x),{x, -1, 1}]
+    REAL RES_T = (a + b - 2 * d)/c * log((d + c) / (d - c)) -
+                      2 * (c*c + d * (b - 2 * d) + a * (d - b)) / (d*d - c*c);
+    // * U-channel
+    // * Int[(a + c x)(b + c x)/(d + c x)/(d + c x),{x, -1, 1}]
+    REAL RES_U = RES_T;
+    // * Interference between t and u channel
+    // * propto Int[1/(d^2 - c^2 x), {x, -1 ,1}]
+    REAL RES_INTER = 8 * MNI * MNJ * (s - 2 * MCHI * MCHI) / c / d * log((d + c) / (d - c));
+    REAL RES = prefix * SQLamFactor * (RES_T + RES_U + RES_INTER);
+    return RES;
+}
+
+REAL LeptogenesisRate::SqAmp_dOmega_with_Kallen_NNSS_v2(REAL s, int i, int j) {
+    REAL MNI = i == 0 ? MNR1 : MNR2;
+    REAL MNJ = j == 0 ? MNR1 : MNR2;
+    if (s < pow(MNI + MNJ, 2) || s < pow(2 * MS, 2)) {
+        return 0;
+    }
+    REAL SQLamFactor =
+        sqrt(Kallen_Lam(1.0, MNI * MNI / s, MNJ * MNJ / s) * Kallen_Lam(1.0, MS * MS / s, MS * MS / s));
+    REAL prefix = 2 * M_PI * pow(LamX, 4);
+    
+    REAL E1 = Ei(sqrt(s), MNI, MNJ);
+    REAL E2 = Ei(sqrt(s), MNJ, MNI);
+    REAL E3 = Ei(sqrt(s), MS, MS);
+    REAL E4 = Ei(sqrt(s), MS, MS);
+    REAL P12 = Pi(sqrt(s), MNI, MNJ);
+    REAL P34 = Pi(sqrt(s), MS, MS);
+    
+    REAL a = 4 * E1 * E3;
+    REAL b = 4 * E2 * E4;
+    REAL c = 4 * P12 * P34;
+    REAL d = 2 * MCHI*MCHI + 4 * E1*E3 - 2 * MNI*MNI - 2 * MS*MS;
+    REAL g = 2 * ( (s - MNJ*MNJ) * (s - 4*MS*MS + MNJ*MNJ) - pow(MNI,4) - MNI*MNI * (6 * MNJ*MNJ - 4 * MS*MS )  );
+    // Conditional expression for the integration over cosine
+    if (d < c) {
+        return 0;
+    }
+
+    // * T-channel
+    // * Int[(g - 4(m1^2 + m2^2) c x - 2c^2 x^2)/2/(d - c x)/(d - c x),{x, -1, 1}]
+    REAL RES_T = 2 * (d + MNI*MNI + MNJ*MNJ)/c * log((d + c) / (d - c)) +
+                      (2 * c*c + g - 4 * d * (d + MNI*MNI + MNJ*MNJ)) / (d*d - c*c);
+    // * U-channel
+    // * Int[(g + 4(m1^2 + m2^2) c x - 2c^2 x^2)/2/(d + c x)/(d + c x),{x, -1, 1}]
+    REAL RES_U = RES_T;
+    // * Interference between t and u channel
+    // * propto Int[1/(d^2 - c^2 x), {x, -1 ,1}]
+    REAL RES_INTER = - 8 * MNI * MNJ * (MNI*MNI + MNJ*MNJ - 2 * MS*MS) / c / d * log((d + c) / (d - c));
+    REAL RES = prefix * SQLamFactor * (RES_T + RES_U + RES_INTER);
+    return RES;
 }

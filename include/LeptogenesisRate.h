@@ -176,6 +176,14 @@ private:
     REAL Calc_LPhiChiS_Gamma(REAL Temp);
 
     /**
+     * @brief  Calculate gamma for L Phi -> Lbar Phibar
+     * @note
+     * @param  Temp: Temperature
+     * @retval
+     */
+    REAL Calc_LPhiLbarPhibar_Gamma(REAL Temp);
+
+    /**
      * @brief  Calculate gamma for N_i N_j -> Chi Chi
      * @note
      * @param  Temp: Temperature
@@ -209,6 +217,10 @@ private:
     REAL SqAmp_dOmega_with_Kallen_LPhiChiS(REAL s);
     REAL SqAmp_dOmega_with_Kallen_NNChiChi(REAL s, int i, int j);
     REAL SqAmp_dOmega_with_Kallen_NNSS(REAL s, int i, int j);
+
+    REAL SqAmp_dOmega_with_Kallen_NNChiChi_v2(REAL s, int i, int j);
+    REAL SqAmp_dOmega_with_Kallen_NNSS_v2(REAL s, int i, int j);
+    REAL SqAmp_dOmega_with_Kallen_LPhiLbarPhiBar(REAL s);
 
     /**
      * @brief  Calculate the Yield at equilibrium
