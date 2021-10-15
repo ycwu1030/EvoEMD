@@ -13,3 +13,7 @@ REAL Hubble_For_Single_Period::Get_Hubble_For_RD(REAL T) {
     REAL geT = ge(T);
     return M_PI / 3.0 * sqrt(geT / 10.0) * T * T / PHY_MP / PHY_MP;
 }
+
+Hubble_RD::Hubble_RD(REAL T_start, REAL T_end) : Hubble_For_Single_Period(T_start, T_end) {}
+
+REAL Hubble_RD::Get_Hubble_at_T(REAL T) { return Get_Hubble_For_RD(T); }

@@ -40,4 +40,12 @@ public:
     bool Is_Isentropic() const { return Isentropic; }
 };
 
+class Hubble_RD : public Hubble_For_Single_Period {
+public:
+    Hubble_RD(REAL T_start, REAL T_end);
+    ~Hubble_RD(){};
+
+    virtual REAL Get_Hubble_at_T(REAL T);
+};
+
 #endif  //_HUBBLE_H_
