@@ -80,6 +80,8 @@ Hubble_History &Hubble_History::operator=(const Hubble_History &HH) {
     Periods.push_back(new Hubble_EMD(Ti, Te));
     Periods.push_back(new Hubble_EP(Te, Tr));
     Periods.push_back(new Hubble_RD(Tr, Tf));
+
+    return *this;
 }
 
 void Hubble_History::Solve_Te() {
