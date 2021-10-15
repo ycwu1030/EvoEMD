@@ -23,3 +23,13 @@ Hubble_EMD::Hubble_EMD(REAL T_start, REAL T_end) : Hubble_For_Single_Period(T_st
 }
 
 REAL Hubble_EMD::Get_Hubble_at_T(REAL T) { return HRD_at_T_start * pow(T / T_start, 1.5); }
+
+Hubble_EP::Hubble_EP(REAL T_start, REAL T_end) : Hubble_For_Single_Period(T_start, T_end, false, 3.0 / 8.0, 9.0 / 8.0) {
+    HRD_at_T_end = Get_Hubble_For_RD(T_end);
+    ge_at_T_end = ge(T_end);
+}
+
+REAL Hubble_EP::Get_Hubble_at_T(REAL T) {
+    REAL geT = ge(T);
+    return HRD_at_T_end * geT / ge_at_T_end * pow(T / T_end, 4);
+}

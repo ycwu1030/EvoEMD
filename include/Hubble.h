@@ -59,4 +59,16 @@ public:
     virtual REAL Get_Hubble_at_T(REAL T);
 };
 
+class Hubble_EP : public Hubble_For_Single_Period {
+private:
+    REAL HRD_at_T_end;
+    REAL ge_at_T_end;
+
+public:
+    Hubble_EP(REAL T_start, REAL T_end);
+    ~Hubble_EP(){};
+
+    virtual REAL Get_Hubble_at_T(REAL T);
+};
+
 #endif  //_HUBBLE_H_
