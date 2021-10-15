@@ -82,6 +82,28 @@ Hubble_History &Hubble_History::operator=(const Hubble_History &HH) {
     Periods.push_back(new Hubble_RD(Tr, Tf));
 }
 
+void Hubble_History::Solve_Te() {
+    // * Te satisfies following function
+    // * 5*log(Te) + 2*log(ge(Te)) == log(Ti) + 4*log(Tr) + 2*log(ge(Tr));
+    // * We solve this equation using binary search, the starting bracket is [Tr,Ti]
+    REAL x_max = log(Ti);
+    REAL x_min = log(Tr);
+    REAL x_eps = 1e-5 * fabs(x_max - x_min);
+    REAL target_value = log(Ti) + 4 * log(Tr) + 2 * log(ge(Tr));
+    REAL test_value;
+    REAL x_test;
+    while (fabs(x_max - x_min) > x_eps) {
+        x_test = (x_max + x_min) / 2.0;
+        test_value = 5 * x_test + 2 * log(ge(exp(x_test)));
+        if (test_value > target_value) {
+            x_max = x_test;
+        } else {
+            x_min = x_test;
+        }
+    }
+    Te = exp((x_max + x_min) / 2.0);
+}
+
 int Hubble_History::Get_Period_ID_at_T(const REAL T) const {
     if (T > TRH || T <= Tf) return -1;
     int id_low = 0;
