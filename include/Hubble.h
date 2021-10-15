@@ -4,7 +4,7 @@
 #include "RealTypes.h"
 
 class Hubble_For_Single_Period {
-private:
+protected:
     REAL T_start;
     REAL T_end;
     bool Isentropic;
@@ -44,6 +44,17 @@ class Hubble_RD : public Hubble_For_Single_Period {
 public:
     Hubble_RD(REAL T_start, REAL T_end);
     ~Hubble_RD(){};
+
+    virtual REAL Get_Hubble_at_T(REAL T);
+};
+
+class Hubble_EMD : public Hubble_For_Single_Period {
+private:
+    REAL HRD_at_T_start;
+
+public:
+    Hubble_EMD(REAL T_start, REAL T_end);
+    ~Hubble_EMD(){};
 
     virtual REAL Get_Hubble_at_T(REAL T);
 };
