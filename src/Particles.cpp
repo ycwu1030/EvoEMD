@@ -18,6 +18,13 @@ REAL Particle::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) cons
     return neq;
 }
 
+REAL Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
+    REAL z = mass / T;
+    REAL z2K2 = z * z * gsl_sf_bessel_Kn(2, z);
+    REAL Yeq = z2K2 / 2 / M_PI / M_PI;
+    return Yeq;
+}
+
 Fermion::Fermion(int PID, int DOF, bool selfconjugate) : Particle(PID, DOF, selfconjugate) {}
 
 Fermion::Fermion(double mass, int PID, int DOF, bool selfconjugate) : Particle(mass, PID, DOF, selfconjugate) {}
@@ -25,8 +32,39 @@ Fermion::Fermion(double mass, int PID, int DOF, bool selfconjugate) : Particle(m
 REAL Fermion::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
     if (massless) {
-        return 3.0 * 4.0 * zeta3 / M_PI / M_PI * pow(T, 3);
+        return 3.0 / 4.0 * zeta3 / M_PI / M_PI * pow(T, 3);
     } else {
         return Get_Equilibrium_Number_Density_per_DOF_Maxwell(T);
+    }
+}
+
+REAL Fermion::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
+    static const double zeta3 = gsl_sf_zeta_int(3);
+    if (massless) {
+        return 3.0 / 4.0 * zeta3 / M_PI / M_PI;
+    } else {
+        return Get_Equilibrium_Yield_per_DOF_Maxwell(T);
+    }
+}
+
+Boson::Boson(int PID, int DOF, bool selfconjugate) : Particle(PID, DOF, selfconjugate) {}
+
+Boson::Boson(double mass, int PID, int DOF, bool selfconjugate) : Particle(mass, PID, DOF, selfconjugate) {}
+
+REAL Boson::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
+    static const double zeta3 = gsl_sf_zeta_int(3);
+    if (massless) {
+        return zeta3 / M_PI / M_PI * pow(T, 3);
+    } else {
+        return Get_Equilibrium_Number_Density_per_DOF_Maxwell(T);
+    }
+}
+
+REAL Boson::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
+    static const double zeta3 = gsl_sf_zeta_int(3);
+    if (massless) {
+        return zeta3 / M_PI / M_PI;
+    } else {
+        return Get_Equilibrium_Yield_per_DOF_Maxwell(T);
     }
 }
