@@ -1,6 +1,8 @@
 #ifndef _PARTICLE_H_
 #define _PARTICLE_H_
 
+#include <set>
+
 #include "RealTypes.h"
 
 class Process;
@@ -15,7 +17,7 @@ protected:
     REAL Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const;
     virtual REAL Get_Equilibrium_Number_Density_per_DOF(const REAL T) const = 0;
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const = 0;
-    std::vector<Process*> Process_List;
+    std::set<Process *> Process_List;
 
 public:
     /**
@@ -49,6 +51,8 @@ public:
         return DOF * Get_Equilibrium_Number_Density_per_DOF(T);
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
+
+    void Register_Process(Process *proc) { Process_List.insert(proc); }
 };
 
 class Fermion : public Particle {
