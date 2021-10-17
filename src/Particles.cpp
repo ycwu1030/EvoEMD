@@ -5,6 +5,15 @@
 #include "gsl/gsl_sf_bessel.h"
 #include "gsl/gsl_sf_zeta.h"
 
+void Particle_Base::Register_Client(Particle_Client *pc) { Particle_Client_Set.insert(pc); }
+void Particle_Base::Register_Process(Process *proc) { Process_Set.insert(proc); }
+void Particle_Base::Notify_Client() {
+    std::set<Particle_Client *>::iterator iter = Particle_Client_Set.begin();
+    for (iter = 0; iter != Particle_Client_Set.end(); iter++) {
+        iter->Update_Particle_Info();
+    }
+}
+
 Particle::Particle(int PID_in, int DOF_in, bool selfconjugate_in)
     : mass(0), DOF(DOF_in), PID(PID_in), selfconjugate(selfconjugate_in), massless(true) {}
 
