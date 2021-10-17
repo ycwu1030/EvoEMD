@@ -4,21 +4,20 @@
 #include <cmath>
 #include <vector>
 
-#include "BaseModel.h"
+#include "ParticleFactory.h"
 #include "Particles.h"
 #include "spdlog_wrapper.h"
 using namespace std;
 using namespace Eigen;
+using Particle_Name = Particle_Factory::Particle_Name;
 
 Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw() : ORDER(NO), UPDATED(false) {
     SPDLOG_INFO_FILE("Default TypeI SeeSaw Constructor. Normal Ordering");
-    Particle *RHN1 = new Fermion(1000.0, 900001, 2, true);
-    Particle *RHN2 = new Fermion(1001.0, 900002, 2, true);
-    Particle *RHN3 = new Fermion(3000.0, 900003, 2, true);
-    BaseModel &pm = BaseModel::Get_Particle_Model();
-    pm.Register_Particle(RHN1);
-    pm.Register_Particle(RHN2);
-    pm.Register_Particle(RHN3);
+    Particle_Factory &PF = Particle_Factory::Get_Particle_Factory();
+    PF.Get_Particle(Particle_Name::RHN1)->Register_Client(this);
+    PF.Get_Particle(Particle_Name::RHN2)->Register_Client(this);
+    PF.Get_Particle(Particle_Name::RHN3)->Register_Client(this);
+    PF.Get_Particle(Particle_Name::LNU1)->Register_Client(this);
     Set_PMNS_Matrix();
     Set_Light_Neutrino_Mass();
     Set_Heavy_Neutrino_Mass();
@@ -39,6 +38,15 @@ Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw() : ORDER(NO), UPDATED(false) {
 Nu_TypeI_SeeSaw &Nu_TypeI_SeeSaw::Get_Neutrino_Model() {
     static Nu_TypeI_SeeSaw NM;
     return NM;
+}
+
+void Nu_TypeI_SeeSaw::Update_Particle_Info() {
+    Particle_Factory &PF = Particle_Factory::Get_Particle_Factory();
+    Set_Light_Neutrino_Mass(PF.Get_Particle(Particle_Name::LNU1)->Get_Mass());
+    double MN1 = PF.Get_Particle(Particle_Name::RHN1)->Get_Mass();
+    double MN2 = PF.Get_Particle(Particle_Name::RHN2)->Get_Mass();
+    double MN3 = PF.Get_Particle(Particle_Name::RHN3)->Get_Mass();
+    Set_Heavy_Neutrino_Mass(MN1, MN2, MN3);
 }
 
 void Nu_TypeI_SeeSaw::Set_PMNS_Matrix() {
@@ -142,10 +150,6 @@ void Nu_TypeI_SeeSaw::Set_Heavy_Neutrino_Mass(double m1, double m2, double m3) {
     MNR1 = mm[0];
     MNR2 = mm[1];
     MNR3 = mm[2];
-    BaseModel &pm = BaseModel::Get_Particle_Model();
-    pm.Set_Mass(900001, MNR1);
-    pm.Set_Mass(900002, MNR2);
-    pm.Set_Mass(900003, MNR3);
     MNR_sqrt = Matrix3cd::Zero();
     MNR_sqrt_inverse = Matrix3cd::Zero();
     MNR_sqrt(0, 0) = sqrt(MNR1);

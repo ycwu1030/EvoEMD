@@ -9,7 +9,7 @@ Particle_Factory::~Particle_Factory() {
     }
 }
 
-Particle_Factory &Particle_Factory::Get_Particle_Model() {
+Particle_Factory &Particle_Factory::Get_Particle_Factory() {
     static Particle_Factory PF;
     return PF;
 }
@@ -38,6 +38,9 @@ Pseudo_Particle *Particle_Factory::Register_Default_Particle(Particle_Name pn) {
             break;
         case DeltaL:
             tmp = new Fermion(static_cast<int>(pn), 3 * (2 + 1));
+            break;
+        case LNU1:
+            tmp = new Fermion(0.05 * eV, static_cast<int>(pn), 2);
             break;
         case Phi:
             tmp = new Boson(static_cast<int>(pn), 2);

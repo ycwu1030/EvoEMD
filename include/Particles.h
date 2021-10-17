@@ -11,7 +11,7 @@ public:
     Particle_Client(){};
     virtual ~Particle_Client(){};
 
-    virtual Update_Particle_Info() = 0;
+    virtual void Update_Particle_Info() = 0;
 };
 
 class Particle_Base {
