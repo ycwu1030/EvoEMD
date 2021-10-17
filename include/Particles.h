@@ -53,6 +53,7 @@ public:
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
     void Register_Process(Process *proc) { Process_List.insert(proc); }
+    void Set_Mass(double mass);
 };
 
 class Fermion : public Particle {

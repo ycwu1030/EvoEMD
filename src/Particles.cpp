@@ -25,6 +25,14 @@ REAL Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
     return Yeq;
 }
 
+void Particle::Set_Mass(double mass) {
+    if (massless) {
+        std::cout << "Setting mass for a massless particle, the mass is ignored" << std::endl;
+    } else {
+        this->mass = mass;
+    }
+}
+
 Fermion::Fermion(int PID, int DOF, bool selfconjugate) : Particle(PID, DOF, selfconjugate) {}
 
 Fermion::Fermion(double mass, int PID, int DOF, bool selfconjugate) : Particle(mass, PID, DOF, selfconjugate) {}
