@@ -14,31 +14,32 @@ void Particle_Base::Notify_Client() {
     }
 }
 
-Particle::Particle(int PID_in, int DOF_in, bool selfconjugate_in)
+Pseudo_Particle::Pseudo_Particle(int PID_in, int DOF_in, bool selfconjugate_in)
     : mass(0), DOF(DOF_in), PID(PID_in), selfconjugate(selfconjugate_in), massless(true) {}
 
-Particle::Particle(double mass_in, int PID_in, int DOF_in, bool selfconjugate_in)
+Pseudo_Particle::Pseudo_Particle(double mass_in, int PID_in, int DOF_in, bool selfconjugate_in)
     : mass(mass_in), PID(PID_in), DOF(DOF_in), selfconjugate(selfconjugate_in), massless(false) {}
 
-REAL Particle::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const {
+REAL Pseudo_Particle::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const {
     REAL z = mass / T;
     REAL z2K2 = z * z * gsl_sf_bessel_Kn(2, z);
     REAL neq = pow(T, 3) / 2 / M_PI / M_PI * z2K2;
     return neq;
 }
 
-REAL Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
+REAL Pseudo_Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
     REAL z = mass / T;
     REAL z2K2 = z * z * gsl_sf_bessel_Kn(2, z);
     REAL Yeq = z2K2 / 2 / M_PI / M_PI;
     return Yeq;
 }
 
-void Particle::Set_Mass(double mass) {
+void Pseudo_Particle::Set_Mass(double mass) {
     if (massless) {
         std::cout << "Setting mass for a massless particle, the mass is ignored" << std::endl;
     } else {
         this->mass = mass;
+        Notify_Client();
     }
 }
 

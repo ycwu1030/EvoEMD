@@ -35,7 +35,7 @@ public:
     void Notify_Client();
 };
 
-class PseudoParticle : public Particle_Base {
+class Pseudo_Particle : public Particle_Base {
     // * Pseudo-Particle: not really a particle
     // * Stored Pseudo-Particle information:
     // * Masses, whether Massless
@@ -62,7 +62,7 @@ public:
      * @param  selfconjugate: Self conjugate or not
      * @retval
      */
-    PseudoParticle(int PID, int DOF, bool selfconjugate = false);
+    Pseudo_Particle(int PID, int DOF, bool selfconjugate = false);
 
     /**
      * @brief  Constructor for massive particle
@@ -73,8 +73,8 @@ public:
      * @param  selfconjugate: Self conjugate or not
      * @retval
      */
-    PseudoParticle(double mass, int PID, int DOF, bool selfconjugate = false);
-    virtual ~PseudoParticle(){};
+    Pseudo_Particle(double mass, int PID, int DOF, bool selfconjugate = false);
+    virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
     int Get_DOF() const { return DOF; }
@@ -90,7 +90,7 @@ public:
     void Set_Mass(double mass);
 };
 
-class Fermion : public PseudoParticle {
+class Fermion : public Pseudo_Particle {
 protected:
     virtual REAL Get_Equilibrium_Number_Density_per_DOF(const REAL T) const override;
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
@@ -101,7 +101,7 @@ public:
     ~Fermion(){};
 };
 
-class Boson : public PseudoParticle {
+class Boson : public Pseudo_Particle {
 protected:
     virtual REAL Get_Equilibrium_Number_Density_per_DOF(const REAL T) const override;
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
