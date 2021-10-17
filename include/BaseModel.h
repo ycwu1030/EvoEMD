@@ -2,6 +2,7 @@
 #define _BASE_MODEL_H_
 
 #include <map>
+#include <set>
 
 #include "Neutrino.h"
 #include "Particles.h"
@@ -9,18 +10,17 @@
 class BaseModel {
 public:
     typedef std::map<int, Particle *> Particle_List;
-    static BaseModel *Get_Model();
+    static BaseModel &Get_Particle_Model();
     void Register_Particle(Particle *);
-    void Register_POI(Particle *);
+    bool Register_POI(int PID);
+    bool Set_Mass(int PID, double mass);
 
 private:
     BaseModel();
     ~BaseModel();
 
     Particle_List PL;   // All Particle
-    Particle_List POI;  // Particle of Interested
-
-    void Register_Particle(Particle *, Particle_List &pp);
+    std::set<int> POI;  // Particle of Interested
 };
 
 #endif  //_BASE_MODEL_H_

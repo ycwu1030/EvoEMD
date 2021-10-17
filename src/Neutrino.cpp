@@ -1,14 +1,24 @@
 #include "Neutrino.h"
-#include "spdlog_wrapper.h"
-#include <vector>
-#include <cmath>
+
 #include <algorithm>
+#include <cmath>
+#include <vector>
+
+#include "BaseModel.h"
+#include "Particles.h"
+#include "spdlog_wrapper.h"
 using namespace std;
 using namespace Eigen;
 
-Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw() : ORDER(NO), UPDATED(false)
-{
+Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw() : ORDER(NO), UPDATED(false) {
     SPDLOG_INFO_FILE("Default TypeI SeeSaw Constructor. Normal Ordering");
+    Particle *RHN1 = new Fermion(1000.0, 900001, 2, true);
+    Particle *RHN2 = new Fermion(1001.0, 900002, 2, true);
+    Particle *RHN3 = new Fermion(3000.0, 900003, 2, true);
+    BaseModel &pm = BaseModel::Get_Particle_Model();
+    pm.Register_Particle(RHN1);
+    pm.Register_Particle(RHN2);
+    pm.Register_Particle(RHN3);
     Set_PMNS_Matrix();
     Set_Light_Neutrino_Mass();
     Set_Heavy_Neutrino_Mass();
@@ -16,32 +26,33 @@ Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw() : ORDER(NO), UPDATED(false)
     Set_Mixing_Matrix();
 }
 
-Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw(MassOrdering od) : ORDER(od), UPDATED(false)
-{
-    SPDLOG_INFO_FILE("TypeI SeeSaw Constructor. Mass Ordering = {}.", od);
-    Set_PMNS_Matrix();
-    Set_Light_Neutrino_Mass();
-    Set_Heavy_Neutrino_Mass();
-    Set_RHN_Angle();
-    Set_Mixing_Matrix();
+// Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw(MassOrdering od) : ORDER(od), UPDATED(false)
+// {
+//     SPDLOG_INFO_FILE("TypeI SeeSaw Constructor. Mass Ordering = {}.", od);
+//     Set_PMNS_Matrix();
+//     Set_Light_Neutrino_Mass();
+//     Set_Heavy_Neutrino_Mass();
+//     Set_RHN_Angle();
+//     Set_Mixing_Matrix();
+// }
+
+Nu_TypeI_SeeSaw &Nu_TypeI_SeeSaw::Get_Neutrino_Model() {
+    static Nu_TypeI_SeeSaw NM;
+    return NM;
 }
 
-void Nu_TypeI_SeeSaw::Set_PMNS_Matrix()
-{
-    if (ORDER == NO || ORDER == NORMAL_ORDER)
-    {
+void Nu_TypeI_SeeSaw::Set_PMNS_Matrix() {
+    if (ORDER == NO || ORDER == NORMAL_ORDER) {
         theta12 = 0.59027;
         theta13 = 0.15027;
         theta23 = 0.86743;
         deltaCP = 3.78736;
-        mj_alpha1 = 0.0; // Not available;
-        mj_alpha2 = 0.0; // Not available;
+        mj_alpha1 = 0.0;  // Not available;
+        mj_alpha2 = 0.0;  // Not available;
 
         dm221 = 7.39e-5 * eV * eV;
         dm23l = 2.525e-3 * eV * eV;
-    }
-    else if (ORDER == IO || ORDER == INVERTED_ORDER)
-    {
+    } else if (ORDER == IO || ORDER == INVERTED_ORDER) {
         theta12 = 0.59027;
         theta13 = 0.15097;
         theta23 = 0.86743;
@@ -51,16 +62,14 @@ void Nu_TypeI_SeeSaw::Set_PMNS_Matrix()
 
         dm221 = 7.39e-5 * eV * eV;
         dm23l = -2.512e-3 * eV * eV;
-    }
-    else
-    {
+    } else {
         // ! Un-recognized ordering, using normal order instead
         theta12 = 0.59027;
         theta13 = 0.15027;
         theta23 = 0.86743;
         deltaCP = 3.78736;
-        mj_alpha1 = 0.0; // Not available;
-        mj_alpha2 = 0.0; // Not available;
+        mj_alpha1 = 0.0;  // Not available;
+        mj_alpha2 = 0.0;  // Not available;
 
         dm221 = 7.39e-5 * eV * eV;
         dm23l = 2.525e-3 * eV * eV;
@@ -82,37 +91,33 @@ void Nu_TypeI_SeeSaw::Set_PMNS_Matrix()
     UPDATED = false;
 
     SPDLOG_INFO_FILE("Set Up PMNS Matrix for mass ordering = {}", ORDER);
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(UPMNS(0, 0)), imag(UPMNS(0, 0)), real(UPMNS(0, 1)), imag(UPMNS(0, 1)), real(UPMNS(0, 2)), imag(UPMNS(0, 2)));
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(UPMNS(1, 0)), imag(UPMNS(1, 0)), real(UPMNS(1, 1)), imag(UPMNS(1, 1)), real(UPMNS(1, 2)), imag(UPMNS(1, 2)));
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(UPMNS(2, 0)), imag(UPMNS(2, 0)), real(UPMNS(2, 1)), imag(UPMNS(2, 1)), real(UPMNS(2, 2)), imag(UPMNS(2, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(UPMNS(0, 0)),
+                     imag(UPMNS(0, 0)), real(UPMNS(0, 1)), imag(UPMNS(0, 1)), real(UPMNS(0, 2)), imag(UPMNS(0, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(UPMNS(1, 0)),
+                     imag(UPMNS(1, 0)), real(UPMNS(1, 1)), imag(UPMNS(1, 1)), real(UPMNS(1, 2)), imag(UPMNS(1, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(UPMNS(2, 0)),
+                     imag(UPMNS(2, 0)), real(UPMNS(2, 1)), imag(UPMNS(2, 1)), real(UPMNS(2, 2)), imag(UPMNS(2, 2)));
 }
 
-void Nu_TypeI_SeeSaw::Set_Mass_Ordering(MassOrdering od)
-{
+void Nu_TypeI_SeeSaw::Set_Mass_Ordering(MassOrdering od) {
     ORDER = od;
     Set_PMNS_Matrix();
     UPDATED = false;
 }
 
-void Nu_TypeI_SeeSaw::Set_Light_Neutrino_Mass(double m1)
-{
+void Nu_TypeI_SeeSaw::Set_Light_Neutrino_Mass(double m1) {
     // Light Neutrino:
-    if (ORDER == NORMAL_ORDER || ORDER == NO)
-    {
+    if (ORDER == NORMAL_ORDER || ORDER == NO) {
         // m1 < m2 < m3
         mnu1 = m1;
         mnu2 = sqrt(mnu1 * mnu1 + dm221);
         mnu3 = sqrt(mnu1 * mnu1 + dm23l);
-    }
-    else if (ORDER == INVERTED_ORDER || ORDER == IO)
-    {
+    } else if (ORDER == INVERTED_ORDER || ORDER == IO) {
         // m3 < m1 < m2
         mnu3 = m1;
         mnu2 = sqrt(mnu3 * mnu3 - dm23l);
         mnu1 = sqrt(mnu2 * mnu2 - dm221);
-    }
-    else
-    {
+    } else {
         // ! Un-recognized ordering, using normal order instead
         // m1 < m2 < m3
         mnu1 = m1;
@@ -126,17 +131,21 @@ void Nu_TypeI_SeeSaw::Set_Light_Neutrino_Mass(double m1)
 
     UPDATED = false;
 
-    SPDLOG_INFO_FILE("Set up light neutrino mass for mass ordering = {}: m1 = {:+9.8e}, m2 = {:+9.8e}, m3 = {:+9.8e}.", ORDER, mnu1, mnu2, mnu3);
+    SPDLOG_INFO_FILE("Set up light neutrino mass for mass ordering = {}: m1 = {:+9.8e}, m2 = {:+9.8e}, m3 = {:+9.8e}.",
+                     ORDER, mnu1, mnu2, mnu3);
 }
 
-void Nu_TypeI_SeeSaw::Set_Heavy_Neutrino_Mass(double m1, double m2, double m3)
-{
+void Nu_TypeI_SeeSaw::Set_Heavy_Neutrino_Mass(double m1, double m2, double m3) {
     vector<double> mm({m1, m2, m3});
     sort(mm.begin(), mm.end());
 
     MNR1 = mm[0];
     MNR2 = mm[1];
     MNR3 = mm[2];
+    BaseModel &pm = BaseModel::Get_Particle_Model();
+    pm.Set_Mass(900001, MNR1);
+    pm.Set_Mass(900002, MNR2);
+    pm.Set_Mass(900003, MNR3);
     MNR_sqrt = Matrix3cd::Zero();
     MNR_sqrt_inverse = Matrix3cd::Zero();
     MNR_sqrt(0, 0) = sqrt(MNR1);
@@ -149,8 +158,7 @@ void Nu_TypeI_SeeSaw::Set_Heavy_Neutrino_Mass(double m1, double m2, double m3)
     SPDLOG_INFO_FILE("Set up heavy neutrino masses: m1 = {:+9.8e}, m2 = {:+9.8e}, m3 = {:+9.8e}.", MNR1, MNR2, MNR3);
 }
 
-void Nu_TypeI_SeeSaw::Set_RHN_Angle(double rw12, double iw12, double rw13, double iw13, double rw23, double iw23)
-{
+void Nu_TypeI_SeeSaw::Set_RHN_Angle(double rw12, double iw12, double rw13, double iw13, double rw23, double iw23) {
     w12_R = rw12;
     w12_I = iw12;
     w13_R = rw13;
@@ -181,39 +189,37 @@ void Nu_TypeI_SeeSaw::Set_RHN_Angle(double rw12, double iw12, double rw13, doubl
     RHN(2, 2) = c13 * c23;
 
     SPDLOG_INFO_FILE("Set Up R Matrix:");
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(RHN(0, 0)), imag(RHN(0, 0)), real(RHN(0, 1)), imag(RHN(0, 1)), real(RHN(0, 2)), imag(RHN(0, 2)));
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(RHN(1, 0)), imag(RHN(1, 0)), real(RHN(1, 1)), imag(RHN(1, 1)), real(RHN(1, 2)), imag(RHN(1, 2)));
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(RHN(2, 0)), imag(RHN(2, 0)), real(RHN(2, 1)), imag(RHN(2, 1)), real(RHN(2, 2)), imag(RHN(2, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(RHN(0, 0)), imag(RHN(0, 0)),
+                     real(RHN(0, 1)), imag(RHN(0, 1)), real(RHN(0, 2)), imag(RHN(0, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(RHN(1, 0)), imag(RHN(1, 0)),
+                     real(RHN(1, 1)), imag(RHN(1, 1)), real(RHN(1, 2)), imag(RHN(1, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(RHN(2, 0)), imag(RHN(2, 0)),
+                     real(RHN(2, 1)), imag(RHN(2, 1)), real(RHN(2, 2)), imag(RHN(2, 2)));
 
     UPDATED = false;
 }
 
-void Nu_TypeI_SeeSaw::Set_Mixing_Matrix()
-{
+void Nu_TypeI_SeeSaw::Set_Mixing_Matrix() {
     complex<double> II = complex<double>(0.0, 1.0);
     Ynu = II * sqrt(2.0) / 246.0 * UPMNS * Mnu_sqrt * RHN * MNR_sqrt;
     YdagY = Ynu.adjoint() * Ynu;
     SPDLOG_INFO_FILE("Updating the Yukawa Coupling matrix:");
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(0, 0)), imag(Ynu(0, 0)), real(Ynu(0, 1)), imag(Ynu(0, 1)), real(Ynu(0, 2)), imag(Ynu(0, 2)));
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(1, 0)), imag(Ynu(1, 0)), real(Ynu(1, 1)), imag(Ynu(1, 1)), real(Ynu(1, 2)), imag(Ynu(1, 2)));
-    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(2, 0)), imag(Ynu(2, 0)), real(Ynu(2, 1)), imag(Ynu(2, 1)), real(Ynu(2, 2)), imag(Ynu(2, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(0, 0)), imag(Ynu(0, 0)),
+                     real(Ynu(0, 1)), imag(Ynu(0, 1)), real(Ynu(0, 2)), imag(Ynu(0, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(1, 0)), imag(Ynu(1, 0)),
+                     real(Ynu(1, 1)), imag(Ynu(1, 1)), real(Ynu(1, 2)), imag(Ynu(1, 2)));
+    SPDLOG_INFO_FILE("({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})  ({:+9.8e},{:+9.8e})", real(Ynu(2, 0)), imag(Ynu(2, 0)),
+                     real(Ynu(2, 1)), imag(Ynu(2, 1)), real(Ynu(2, 2)), imag(Ynu(2, 2)));
     UPDATED = true;
 }
 
-complex<double> Nu_TypeI_SeeSaw::Get_Yij(int i, int j)
-{
-    if (!UPDATED)
-        Set_Mixing_Matrix();
+complex<double> Nu_TypeI_SeeSaw::Get_Yij(int i, int j) {
+    if (!UPDATED) Set_Mixing_Matrix();
     return Ynu(i, j);
 }
-complex<double> Nu_TypeI_SeeSaw::Get_YdagYij(int i, int j)
-{
-    if (!UPDATED)
-        Set_Mixing_Matrix();
+complex<double> Nu_TypeI_SeeSaw::Get_YdagYij(int i, int j) {
+    if (!UPDATED) Set_Mixing_Matrix();
     return YdagY(i, j);
 }
 
-complex<double> Nu_TypeI_SeeSaw::Get_UPMNSij(int i, int j)
-{
-    return UPMNS(i, j);
-}
+complex<double> Nu_TypeI_SeeSaw::Get_UPMNSij(int i, int j) { return UPMNS(i, j); }
