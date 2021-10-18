@@ -4,19 +4,6 @@
 #include "Particles.h"
 #include "RealTypes.h"
 
-class Process {
-public:
-    typedef std::vector<Particle *> INITIAL_PARTICLES;
-    typedef std::vector<Particle *> FINAL_PARTICLES;
-
-    Process();
-    ~Process();
-
-protected:
-    INITIAL_PARTICLES INIT;
-    FINAL_PARTICLES FINAL;
-};
-
 class Collision_Rate {
     // For any process x -> y
     // CP conserving rate means, gamma(x->y) + gamma(xbar -> ybar)
@@ -38,11 +25,26 @@ public:
     virtual REAL Get_CP_Violating_Rate(REAL T) = 0;
 };
 
+class Process {
+public:
+    typedef std::vector<Pseudo_Particle *> INITIAL_PARTICLES;
+    typedef std::vector<Pseudo_Particle *> FINAL_PARTICLES;
+
+    Process();
+    ~Process();
+
+protected:
+    INITIAL_PARTICLES INIT;
+    FINAL_PARTICLES FINAL;
+
+    virtual REAL Matrix_Element_Square_Integrated_over_Final_State_Phase_Space(REAL T) = 0;
+};
+
 class Decay12_Rate : public Collision_Rate {
     // * For two body decay
 private:
 public:
-    Decay12_Rate(Particle *p1, Particle *p2, Particle *p3);
+    Decay12_Rate();
     ~Decay12_Rate();
 
     virtual REAL Get_CP_Conserving_Rate(REAL T);
