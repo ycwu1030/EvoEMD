@@ -20,7 +20,7 @@ Parameter_Factory &Parameter_Factory::Get_Parameter_Factory() {
     return PF;
 }
 
-bool Parameter_Factory::Set_Independent_Parameter(std::string name, double value) {
+bool Parameter_Factory::Set_Independent_Parameter(std::string name, REAL value) {
     Independent_Parameter_List::iterator iter = IPL.find(name);
     if (iter == IPL.end()) {
         return false;
@@ -30,7 +30,7 @@ bool Parameter_Factory::Set_Independent_Parameter(std::string name, double value
     }
 }
 
-double Parameter_Factory::Get_Parameter_Value(std::string name, double default_value) {
+REAL Parameter_Factory::Get_Parameter_Value(std::string name, REAL default_value) {
     Independent_Parameter_List::iterator iter_IPL = IPL.find(name);
     Dependent_Parameter_List::iterator iter_DPL = DPL.find(name);
     if (iter_IPL != IPL.end() && iter_DPL != DPL.end()) {
@@ -65,7 +65,7 @@ void Dependent_Parameter::Update_Version_ID() {
     }
 }
 
-double Dependent_Parameter::Get_Value() {
+REAL Dependent_Parameter::Get_Value() {
     if (!Is_Updated()) {
         Update_Value();
         Update_Version_ID();

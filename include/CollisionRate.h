@@ -16,6 +16,13 @@ struct Process_Amp {
 };
 
 class Amplitude {
+    // * Amplitude used to calculate the collision rate;
+    // * As the purpose of this class is to assist the collision rate calculation and solving Boltzmann equation
+    // * The relevant dof is summed insided Get_Amp()
+    // * The dof has two parts:
+    // * 1. The spin dof: the amp is summed over spin dof for all external particles
+    // * 2. The species dof: CP conjugated component is summed as 1 -> 2 3 is added with 1bar -> 2bar 3bar etc.
+    // *                     If CP violating rate is needed, (1->23) - (1bar->2bar3bar) is provided
 public:
     typedef std::vector<Pseudo_Particle *> INITIAL_STATES;
     typedef std::vector<Pseudo_Particle *> FINAL_STATES;
@@ -52,19 +59,18 @@ public:
     Collision_Rate(Amplitude *amp) { this->amp = amp; }
     virtual ~Collision_Rate(){};
 
-    virtual REAL Get_CP_Conserving_Rate(REAL T) = 0;
-    virtual REAL Get_CP_Violating_Rate(REAL T) = 0;
+    virtual REAL Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) = 0;
+    virtual REAL Get_Collision_Rate(REAL T) = 0;
 };
 
 class Decay12_Rate : public Collision_Rate {
     // * For two body decay
-
 public:
     Decay12_Rate(Amplitude *amp) : Collision_Rate(amp){};
     ~Decay12_Rate(){};
 
-    virtual REAL Get_CP_Conserving_Rate(REAL T);
-    virtual REAL Get_CP_Violating_Rate(REAL T);
+    virtual REAL Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat);
+    virtual REAL Get_Collision_Rate(REAL T);
 };
 
 class Scatter22_Rate : public Collision_Rate {
@@ -73,8 +79,7 @@ public:
     Scatter22_Rate(Amplitude *amp) : Collision_Rate(amp){};
     ~Scatter22_Rate(){};
 
-    virtual REAL Get_CP_Conserving_Rate(REAL T);
-    virtual REAL Get_CP_Violating_Rate(REAL T);
+    virtual REAL Get_Collision_Rate(REAL T);
 };
 
 class Process {
