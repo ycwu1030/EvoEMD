@@ -11,8 +11,9 @@ struct Process_Amp {
     // * For squared, then it has 3x3 cases.
     // * But in real calculation, we will add s-t and t-s together, so Amp_xxx[0][1] == s-t + t-s = Amp_xxx[1][0] etc
     // * For decay process, treated as s-channel, [0][0] is used.
-    REAL Amp_Numerator[3][3];
-    REAL Amp_Denominator[3][3];
+    // * The last index is for store expression in cth expansion, [x][y][0] + [x][y][1]*cth + [x][y][2]*cth^2
+    REAL Amp_Numerator[3][3][3];
+    REAL Amp_Denominator[3][3][3];
 };
 
 class Amplitude {

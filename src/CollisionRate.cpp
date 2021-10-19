@@ -20,10 +20,10 @@ REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
 
     // * Two body phase space volumn
     REAL PS2 = 1.0 / (2.0 * m1) * pf / (16.0 * M_PI * M_PI * m1);
-    REAL RES = 2.0                                     // * From integral over theta
-               * 2.0 * M_PI                            // * From integral over phi
-               * (amp->Get_Amp().Amp_Numerator[0][0])  // * The amplitude
-               * PS2;                                  // * The two body phase space
+    REAL RES = 2.0                                        // * From integral over cos(theta)
+               * 2.0 * M_PI                               // * From integral over phi
+               * (amp->Get_Amp().Amp_Numerator[0][0][0])  // * The amplitude
+               * PS2;                                     // * The two body phase space
     return RES;
 }
 
