@@ -10,6 +10,7 @@ struct Process_Amp {
     typedef enum { SS = 0, ST = 1, SU = 2, TT = 3, TU = 4, UU = 5 } Channel;
     static const Process_Amp::Channel All_Channel[6];
     typedef std::map<Process_Amp::Channel, unsigned> AMP_DIAG;
+    // * used to store how many squared diagrams we have for corresponding channel
     AMP_DIAG n_diag;
 
     // * bool determine whether the corresponding REAL is actually exactly zero
@@ -23,15 +24,13 @@ struct Process_Amp {
     // * The key used to access the results: Channel + Diagram_ID;
     typedef std::pair<Channel, int> AMP_KEY;
 
-    // * Key -> RES[3] for numerator: [0] + [1]*cth + [2]*cth^2;
-    // * Key -> RES[4] for denominator: ([0] + [1]*cth)*([2]+[3]*cth)
     typedef std::map<AMP_KEY, NUMERATOR_STRUCTURE> AMP_NUM;
     typedef std::map<AMP_KEY, DENOMINATOR_STRUCTURE> AMP_DEN;
     AMP_NUM amps_numerator;
     AMP_DEN amps_denominator;
 
-    NUMERATOR_STRUCTURE &Get_Numerator(Channel chan1 = Channel::SS, int diagram_id = 0) const;
-    DENOMINATOR_STRUCTURE &Get_Denominator(Channel chan1 = Channel::SS, int diagram_id = 0) const;
+    const NUMERATOR_STRUCTURE &Get_Numerator(Channel chan1 = Channel::SS, int diagram_id = 0) const;
+    const DENOMINATOR_STRUCTURE &Get_Denominator(Channel chan1 = Channel::SS, int diagram_id = 0) const;
 };
 const Process_Amp::Channel Process_Amp::All_Channel[6] = {SS, ST, SU, TT, TU, UU};
 
@@ -47,8 +46,6 @@ class Amplitude {
 public:
     typedef std::vector<Pseudo_Particle *> INITIAL_STATES;
     typedef std::vector<Pseudo_Particle *> FINAL_STATES;
-    typedef enum { SS = 0, ST = 1, SU = 2, TT = 3, TU = 4, UU = 5 } Channel;
-    typedef enum { CONST = 0, LINEAR = 1, QUAD = 2 } CTH_ORDER;
 
     Amplitude();
     virtual ~Amplitude(){};
@@ -57,7 +54,7 @@ public:
         Update_Amp(sqrt_shat);
         return amp_res;
     };
-    virtual REAL Get_Coeff() = 0;
+    virtual REAL Get_Coeff(REAL T) = 0;
 
     unsigned N_INITIAL;
     INITIAL_STATES INITIAL;
@@ -124,10 +121,8 @@ public:
     Process(Amplitude *amp);
     ~Process();
 
-    REAL Get_CP_Conserving_Rate(REAL T);
-    REAL Get_CP_Conserving_Coeff(REAL T);
-    REAL Get_CP_Violating_Rate(REAL T);
-    REAL Get_CP_Violating_Coeff(REAL T);
+    REAL Get_Collision_Rate(REAL T);
+    REAL Get_Yield_Coeff(REAL T);
 
 protected:
     INITIAL_STATES INIT;
