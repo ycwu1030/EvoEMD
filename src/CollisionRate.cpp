@@ -42,7 +42,7 @@ REAL Decay12_Rate::Get_Collision_Rate(REAL T) {
 
     REAL m1 = amp->INITIAL[0]->Get_Mass();
     REAL z = m1 / T;
-    REAL k1z = gsl_sf_bessel_Kn(1, z);
+    REAL k1z = gsl_sf_bessel_K1(z);
     REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z;
     return RES;
 }
