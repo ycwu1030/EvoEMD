@@ -22,7 +22,7 @@ protected:
 
     // * Processes that involve current particle
     // * The process calculates its value lazily, it will acquire particle's infor when it needs
-    // * This sed is used to keep aware what are the processes involving current particle
+    // * This set is used to keep aware what are the processes involving current particle
     std::set<Process *> Process_Set;
 
 public:
@@ -45,6 +45,7 @@ class Pseudo_Particle : public Particle_Base {
 protected:
     bool selfconjugate;
     bool massless;
+    bool thermalized;
     double mass;
     int PID;
     int DOF;
@@ -87,6 +88,8 @@ public:
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
+    REAL Yield;
+    REAL Numer_Density;
     void Set_Mass(double mass);
 };
 

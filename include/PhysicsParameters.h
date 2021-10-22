@@ -10,14 +10,14 @@
 class Base_Parameter {
 protected:
     std::string name;
-    double value;
+    REAL value;
 
 public:
     Base_Parameter(std::string par_name) : name(par_name){};
     virtual ~Base_Parameter(){};
 
-    virtual void Set_Value(double input) { value = input; }
-    virtual double Get_Value() = 0;
+    virtual void Set_Value(REAL input) { value = input; }
+    virtual REAL Get_Value() = 0;
     std::string Get_Name() const { return name; }
 };
 
@@ -27,11 +27,11 @@ public:
     Independent_Parameter(std::string par_name) : Base_Parameter(par_name){};
     ~Independent_Parameter(){};
 
-    virtual void Set_Value(double input) {
+    virtual void Set_Value(REAL input) {
         value = input;
         ++VERSION_ID;
     }
-    virtual double Get_Value() { return value; }
+    virtual REAL Get_Value() { return value; }
     VERSION_TYPE Get_Version_ID() const { return VERSION_ID; }
 
 private:
@@ -52,7 +52,7 @@ public:
     Dependent_Parameter(std::string par_name) : Base_Parameter(par_name){};
     ~Dependent_Parameter(){};
 
-    virtual double Get_Value();
+    virtual REAL Get_Value();
 };
 
 class Parameter_Factory {
@@ -67,8 +67,10 @@ private:
 public:
     static Parameter_Factory &Get_Parameter_Factory();
 
-    bool Set_Independent_Parameter(std::string name, double value);
-    double Get_Parameter_Value(std::string name, double default_value = 0);
+    void Register_Parameter(Independent_Parameter *par);
+    void Register_Parameter(Dependent_Parameter *par);
+    bool Set_Independent_Parameter(std::string name, REAL value);
+    REAL Get_Parameter_Value(std::string name, REAL default_value = 0);
 };
 
 #endif  //_PHYSICS_PARAMETERS_H_
