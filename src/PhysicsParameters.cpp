@@ -20,6 +20,25 @@ Parameter_Factory &Parameter_Factory::Get_Parameter_Factory() {
     return PF;
 }
 
+void Parameter_Factory::Register_Parameter(Independent_Parameter *par) {
+    std::string name = par->Get_Name();
+    Independent_Parameter_List::iterator iter = IPL.find(name);
+    if (iter == IPL.end()) {
+        IPL[name] = par;
+    } else {
+        std::cout << "You are duplicated name: [" << name << "] for independent parameter" << std::endl;
+    }
+}
+void Parameter_Factory::Register_Parameter(Dependent_Parameter *par) {
+    std::string name = par->Get_Name();
+    Dependent_Parameter_List::iterator iter = DPL.find(name);
+    if (iter == DPL.end()) {
+        DPL[name] = par;
+    } else {
+        std::cout << "You are duplicated name: [" << name << "] for dependent parameter" << std::endl;
+    }
+}
+
 bool Parameter_Factory::Set_Independent_Parameter(std::string name, REAL value) {
     Independent_Parameter_List::iterator iter = IPL.find(name);
     if (iter == IPL.end()) {

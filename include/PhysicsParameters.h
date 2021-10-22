@@ -67,6 +67,8 @@ private:
 public:
     static Parameter_Factory &Get_Parameter_Factory();
 
+    void Register_Parameter(Independent_Parameter *par);
+    void Register_Parameter(Dependent_Parameter *par);
     bool Set_Independent_Parameter(std::string name, REAL value);
     REAL Get_Parameter_Value(std::string name, REAL default_value = 0);
 };
