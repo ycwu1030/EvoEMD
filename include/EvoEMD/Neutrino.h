@@ -4,8 +4,10 @@
 #include <Eigen/Dense>
 #include <complex>
 
-#include "Particles.h"
-#include "Physics_Constants.h"
+#include "EvoEMD/ParticlesBase.h"
+#include "EvoEMD/Physics_Constants.h"
+
+namespace EvoEMD {
 
 class Nu_TypeI_SeeSaw : public Particle_Client {
 public:
@@ -126,5 +128,5 @@ private:
      */
     void Set_Mixing_Matrix();
 };
-
+}  // namespace EvoEMD
 #endif  //__NEUTRINO_H__

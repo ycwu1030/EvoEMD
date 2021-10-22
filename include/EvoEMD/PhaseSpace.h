@@ -1,7 +1,9 @@
 #ifndef __PHASE_SPACE_H__
 #define __PHASE_SPACE_H__
 
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 /**
  * @brief  The Kallen lambda function
@@ -36,5 +38,7 @@ REAL Ei(REAL sqrt_s, REAL mi, REAL mj);
  * @retval The magnitude of momentum of particle i or j in COM frame of i+j
  */
 REAL Pi(REAL sqrt_s, REAL mi, REAL mj);
+
+}  // namespace EvoEMD
 
 #endif  //__PHASE_SPACE_H__

@@ -1,15 +1,16 @@
-#include "EMD.h"
+#include "EvoEMD/EMD.h"
 
 #include <iostream>
 
-#include "EffDOF.h"
-#include "Physics_Constants.h"
+#include "EvoEMD/EffDOF.h"
+#include "EvoEMD/Physics_Constants.h"
+#include "EvoEMD/spdlog_wrapper.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_roots.h"
 #include "gsl/gsl_sf_bessel.h"
 #include "gsl/gsl_sf_zeta.h"
-#include "spdlog_wrapper.h"
 
+namespace EvoEMD {
 EMD::EMD() {
     SPDLOG_INFO_FILE("DEFAULT CONSTRUCTOR FOR EMD.");
     Set_Temperature(1e14, 1e5);
@@ -204,4 +205,6 @@ REAL Yield_Eq_FD(REAL T, REAL g) {
     REAL yeq = Number_Density_Eq_FD(T, g) / Entropy_Density(T);
     SPDLOG_DEBUG_FILE("Yield at Equilibrium for Massless Fermion Yeq = {:+9.8e} at T = {:+9.8e}, g = {}.", yeq, T, g);
     return yeq;
+}
+
 }

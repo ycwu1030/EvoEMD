@@ -1,7 +1,8 @@
-#include "PhysicsParameters.h"
+#include "EvoEMD/PhysicsParameters.h"
 
 #include <iostream>
 
+namespace EvoEMD {
 Parameter_Factory::Parameter_Factory() {}
 
 Parameter_Factory::~Parameter_Factory() {
@@ -91,3 +92,5 @@ REAL Dependent_Parameter::Get_Value() {
     }
     return value;
 }
+
+}  // namespace EvoEMD

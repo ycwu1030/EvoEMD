@@ -1,7 +1,9 @@
 #ifndef _HUBBLE_H_
 #define _HUBBLE_H_
 
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 class Hubble_For_Single_Period {
 protected:
@@ -96,5 +98,7 @@ public:
     REAL Get_Hubble_at_T(const REAL T);
     Hubble_For_Single_Period *operator[](const int pid);
 };
+
+}  // namespace EvoEMD
 
 #endif  //_HUBBLE_H_

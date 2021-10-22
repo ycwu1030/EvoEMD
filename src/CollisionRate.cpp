@@ -1,11 +1,12 @@
-#include "CollisionRate.h"
+#include "EvoEMD/CollisionRate.h"
 
 #include <cmath>
 
-#include "PhaseSpace.h"
+#include "EvoEMD/PhaseSpace.h"
 #include "cuba.h"
 #include "gsl/gsl_sf_bessel.h"
 
+namespace EvoEMD {
 const Process_Amp::NUMERATOR_STRUCTURE &Process_Amp::Get_Numerator(int diagram_id) const {
     return amps_numerator.at(diagram_id);
     // return res;
@@ -268,3 +269,5 @@ Process::~Process() { delete CR_Calculator; }
 REAL Process::Get_Collision_Rate(REAL T) { return CR_Calculator->Get_Collision_Rate(T); }
 
 REAL Process::Get_Yield_Coeff(REAL T) { return amp->Get_Coeff(T); }
+
+}  // namespace EvoEMD

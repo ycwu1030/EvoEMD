@@ -1,23 +1,24 @@
-#include "Neutrino.h"
+#include "EvoEMD/Neutrino.h"
 
 #include <algorithm>
 #include <cmath>
 #include <vector>
 
-#include "ParticleFactory.h"
-#include "Particles.h"
-#include "spdlog_wrapper.h"
+#include "EvoEMD/ParticleFactory.h"
+#include "EvoEMD/ParticlesBase.h"
+#include "EvoEMD/spdlog_wrapper.h"
 using namespace std;
 using namespace Eigen;
-using Particle_Name = Particle_Factory::Particle_Name;
+
+namespace EvoEMD {
 
 Nu_TypeI_SeeSaw::Nu_TypeI_SeeSaw() : ORDER(NO), UPDATED(false) {
     SPDLOG_INFO_FILE("Default TypeI SeeSaw Constructor. Normal Ordering");
     Particle_Factory &PF = Particle_Factory::Get_Particle_Factory();
-    PF.Get_Particle(Particle_Name::RHN1)->Register_Client(this);
-    PF.Get_Particle(Particle_Name::RHN2)->Register_Client(this);
-    PF.Get_Particle(Particle_Name::RHN3)->Register_Client(this);
-    PF.Get_Particle(Particle_Name::LNU1)->Register_Client(this);
+    PF.Get_Particle(900001)->Register_Client(this);
+    PF.Get_Particle(900002)->Register_Client(this);
+    PF.Get_Particle(900003)->Register_Client(this);
+    PF.Get_Particle(900011)->Register_Client(this);
     Set_PMNS_Matrix();
     Set_Light_Neutrino_Mass();
     Set_Heavy_Neutrino_Mass();
@@ -42,10 +43,10 @@ Nu_TypeI_SeeSaw &Nu_TypeI_SeeSaw::Get_Neutrino_Model() {
 
 void Nu_TypeI_SeeSaw::Update_Particle_Info() {
     Particle_Factory &PF = Particle_Factory::Get_Particle_Factory();
-    Set_Light_Neutrino_Mass(PF.Get_Particle(Particle_Name::LNU1)->Get_Mass());
-    double MN1 = PF.Get_Particle(Particle_Name::RHN1)->Get_Mass();
-    double MN2 = PF.Get_Particle(Particle_Name::RHN2)->Get_Mass();
-    double MN3 = PF.Get_Particle(Particle_Name::RHN3)->Get_Mass();
+    Set_Light_Neutrino_Mass(PF.Get_Particle(900011)->Get_Mass());
+    double MN1 = PF.Get_Particle(900001)->Get_Mass();
+    double MN2 = PF.Get_Particle(900002)->Get_Mass();
+    double MN3 = PF.Get_Particle(900003)->Get_Mass();
     Set_Heavy_Neutrino_Mass(MN1, MN2, MN3);
 }
 
@@ -227,3 +228,5 @@ complex<double> Nu_TypeI_SeeSaw::Get_YdagYij(int i, int j) {
 }
 
 complex<double> Nu_TypeI_SeeSaw::Get_UPMNSij(int i, int j) { return UPMNS(i, j); }
+
+}  // namespace EvoEMD

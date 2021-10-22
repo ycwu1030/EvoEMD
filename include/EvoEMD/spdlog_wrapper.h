@@ -4,6 +4,7 @@
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/spdlog.h"
 
+namespace EvoEMD {
 constexpr auto LOGGER_NAME = "log";
 constexpr auto LOGGER_SAVE_PATH = "logs/rotating.log";
 
@@ -57,5 +58,5 @@ private:
 //     {                                                        \
 //         SPDLOG_LOGGER_ERROR(logger2, __VA_ARGS__);           \
 //     }
-
+}  // namespace EvoEMD
 #endif  //__SPDLOG_WRAPPER_H__

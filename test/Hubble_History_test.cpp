@@ -2,10 +2,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "Hubble.h"
+#include "EvoEMD/Hubble.h"
 
 using namespace std;
-
+using namespace EvoEMD;
 int main(int argc, char const *argv[]) {
     Hubble_History EMDE(1e14, 10);
     ofstream output("Hubble_History.txt");

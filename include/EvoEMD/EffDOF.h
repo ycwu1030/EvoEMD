@@ -1,7 +1,9 @@
-#ifndef EFFDOF_H
-#define EFFDOF_H
+#ifndef _EFFDOF_H_
+#define _EFFDOF_H_
 
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 /**
  * @brief  Calculate the effective degree of freedom for energy density
@@ -18,5 +20,7 @@ REAL ge(REAL T);
  * @retval The effective dof at T
  */
 REAL gs(REAL T);
+
+}  // namespace EvoEMD
 
 #endif  // EFFDOF_H

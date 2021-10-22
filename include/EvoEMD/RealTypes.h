@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+namespace EvoEMD {
+
 #define REAL double
 #define VD std::vector<REAL>
 #define VVD std::vector<VD>
@@ -48,4 +50,5 @@ VD operator/(const VD &lhs, const REAL &s);
 
 std::ostream &operator<<(std::ostream &os, const VD &rhs);
 
+}  // namespace EvoEMD
 #endif  //__REALTYPES_H__
