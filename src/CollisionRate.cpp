@@ -30,10 +30,10 @@ REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
     // * Two body phase space volumn
     const Process_Amp &res = amp->Get_Amp(sqrt_shat);
     REAL PS2 = 1.0 / (2.0 * m1) * pf / (16.0 * M_PI * M_PI * m1);
-    REAL RES = 2.0                                // * From integral over cos(theta)
-               * 2.0 * M_PI                       // * From integral over phi
-               * (res.Get_Numerator()[0].second)  // * The amplitude
-               * PS2;                             // * The two body phase space
+    REAL RES = 2.0                         // * From integral over cos(theta)
+               * 2.0 * M_PI                // * From integral over phi
+               * (res.Get_Numerator()[0])  // * The amplitude
+               * PS2;                      // * The two body phase space
     return RES;
 }
 
@@ -90,30 +90,22 @@ inline REAL INT_RES_11_1(REAL a, REAL b, REAL c, REAL d, REAL e) {
 
 REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space_Single_Channel(
     const Process_Amp::NUMERATOR_STRUCTURE &numerator, const Process_Amp::DENOMINATOR_STRUCTURE &denominator) {
-    using CR = Process_Amp::CTH_RES;
-    CR n0 = numerator[0];
-    CR n1 = numerator[1];
-    CR n2 = numerator[2];
+    REAL n0 = numerator[0];
+    REAL n1 = numerator[1];
+    REAL n2 = numerator[2];
 
     using PS = Process_Amp::PROPAGATOR_STRUCTURE;
-    PS p0 = denominator.first;
-    PS p1 = denominator.second;
+    using CRF = Process_Amp::CTH_RES_FULL;
+    const PS &p0 = denominator.first;
+    const PS &p1 = denominator.second;
 
     int id_p0 = p0.first;
-    CR d00 = p0.second[0];
-    CR d01 = p0.second[1];
+    const CRF &crf_p0 = p0.second;
+    int ncth_p0 = crf_p0.size();
 
     int id_p1 = p1.first;
-    CR d10 = p1.second[0];
-    CR d11 = p1.second[1];
-
-    REAL nn0 = n0.second;
-    REAL nn1 = n1.second;
-    REAL nn2 = n2.second;
-    REAL nd00 = d00.second;
-    REAL nd01 = d01.second;
-    REAL nd10 = d10.second;
-    REAL nd11 = d11.second;
+    const CRF &crf_p1 = p1.second;
+    int ncth_p1 = crf_p1.size();
 
     // * The amplitude has following structure
     // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10+d11*cth)
@@ -121,38 +113,53 @@ REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space_Single_Channel(
     if (id_p0 == id_p1) {
         // * In this case d00==d10, and d01 == d11
         // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)^2
-        if (d01.first) {
+        if (ncth_p0 == 2) {
             // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)^2
             // * 2pi from integral over phi, INT_RES_XXXX from integral over cth
-            return 2.0 * M_PI * INT_RES_11_1(nn0, nn1, nn2, nd00, nd01);
+            REAL d00 = crf_p0[0];
+            REAL d01 = crf_p0[1];
+            return 2.0 * M_PI * INT_RES_11_1(n0, n1, n2, d00, d01);
         }
 
-        if (!d01.first) {
+        if (ncth_p0 == 1) {
             // * (n0 + n1*cth + n2*cth^2)/(d00)^2
-            return 2.0 * M_PI * INT_RES_00(nn0, nn1, nn2, nd00, nd00);
+            REAL d00 = crf_p0[0];
+            return 2.0 * M_PI * INT_RES_00(n0, n1, n2, d00, d00);
         }
     }
 
     if (id_p0 != id_p1) {
         // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10 + d11*cth)
-        if (d01.first && d11.first) {
+        if (ncth_p0 == 2 && ncth_p1 == 2) {
             // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10 + d11*cth)
-            return 2.0 * M_PI * INT_RES_11_0(nn0, nn1, nn2, nd00, nd01, nd10, nd11);
+            REAL d00 = crf_p0[0];
+            REAL d01 = crf_p0[1];
+            REAL d10 = crf_p1[0];
+            REAL d11 = crf_p1[1];
+            return 2.0 * M_PI * INT_RES_11_0(n0, n1, n2, d00, d01, d10, d11);
         }
 
-        if (d01.first && !d11.first) {
+        if (ncth_p0 == 2 && ncth_p1 == 1) {
             // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10)
-            return 2.0 * M_PI * INT_RES_01(nn0, nn1, nn2, nd00, nd01, nd10);
+            REAL d00 = crf_p0[0];
+            REAL d01 = crf_p0[1];
+            REAL d10 = crf_p1[0];
+            return 2.0 * M_PI * INT_RES_01(n0, n1, n2, d00, d01, d10);
         }
 
-        if (!d01.first && d11.first) {
+        if (ncth_p0 == 1 && ncth_p1 == 2) {
             // * (n0 + n1*cth + n2*cth^2)/(d00)/(d10 + d11*cth)
-            return 2.0 * M_PI * INT_RES_01(nn0, nn1, nn2, nd10, nd11, nd00);
+            REAL d00 = crf_p0[0];
+            REAL d10 = crf_p1[0];
+            REAL d11 = crf_p1[1];
+            return 2.0 * M_PI * INT_RES_01(n0, n1, n2, d10, d11, d00);
         }
 
-        if (!d01.first && !d11.first) {
+        if (ncth_p0 == 1 && ncth_p1 == 1) {
             // * (n0 + n1*cth + n2*cth^2)/(d00)/(d10)
-            return 2.0 * M_PI * INT_RES_00(nn0, nn1, nn2, nd00, nd10);
+            REAL d00 = crf_p0[0];
+            REAL d10 = crf_p1[0];
+            return 2.0 * M_PI * INT_RES_00(n0, n1, n2, d00, d10);
         }
     }
 
