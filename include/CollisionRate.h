@@ -11,8 +11,7 @@ struct Process_Amp {
     unsigned n_diag;
 
     // * bool determine whether the corresponding REAL is actually exactly zero
-    typedef std::pair<bool, REAL> CTH_RES;
-    typedef std::vector<CTH_RES> CTH_RES_FULL;
+    typedef std::vector<REAL> CTH_RES_FULL;
     typedef CTH_RES_FULL NUMERATOR_STRUCTURE;
     typedef int Propagator_ID;
     typedef std::pair<Propagator_ID, CTH_RES_FULL> PROPAGATOR_STRUCTURE;
