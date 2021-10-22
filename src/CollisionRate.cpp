@@ -6,13 +6,13 @@
 #include "cuba.h"
 #include "gsl/gsl_sf_bessel.h"
 
-const Process_Amp::NUMERATOR_STRUCTURE &Process_Amp::Get_Numerator(Channel chan, int diagram_id) const {
-    return amps_numerator.at(std::make_pair(chan, diagram_id));
+const Process_Amp::NUMERATOR_STRUCTURE &Process_Amp::Get_Numerator(int diagram_id) const {
+    return amps_numerator.at(diagram_id);
     // return res;
 }
 
-const Process_Amp::DENOMINATOR_STRUCTURE &Process_Amp::Get_Denominator(Channel chan, int diagram_id) const {
-    return amps_denominator.at(std::make_pair(chan, diagram_id));
+const Process_Amp::DENOMINATOR_STRUCTURE &Process_Amp::Get_Denominator(int diagram_id) const {
+    return amps_denominator.at(diagram_id);
 }
 
 REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
@@ -52,13 +52,10 @@ REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
     using DS = Process_Amp::DENOMINATOR_STRUCTURE;
     const Process_Amp &amp_res = amp->Get_Amp(sqrt_shat);
     REAL amp_total = 0;
-    for (auto &&chan : Process_Amp::All_Channel) {
-        unsigned n_diag = amp_res.n_diag.at(chan);
-        for (unsigned i_diag = 0; i_diag < n_diag; i_diag++) {
-            const NS &num = amp_res.Get_Numerator(chan, i_diag);
-            const DS &den = amp_res.Get_Denominator(chan, i_diag);
-            amp_total += Get_Amp_Integrate_over_Phase_Space_Single_Channel(num, den);
-        }
+    for (unsigned i_diag = 0; i_diag < amp_res.n_diag; i_diag++) {
+        const NS &num = amp_res.Get_Numerator(i_diag);
+        const DS &den = amp_res.Get_Denominator(i_diag);
+        amp_total += Get_Amp_Integrate_over_Phase_Space_Single_Channel(num, den);
     }
     return amp_total;  // * Extra 2pi from integrate over phi;
 }

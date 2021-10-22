@@ -7,11 +7,8 @@
 #include "RealTypes.h"
 
 struct Process_Amp {
-    typedef enum { SS = 0, ST = 1, SU = 2, TT = 3, TU = 4, UU = 5 } Channel;
-    static const Process_Amp::Channel All_Channel[6];
-    typedef std::map<Process_Amp::Channel, unsigned> AMP_DIAG;
-    // * used to store how many squared diagrams we have for corresponding channel
-    AMP_DIAG n_diag;
+    // * used to store how many squared diagrams we have for corresponding amplitude calculation
+    unsigned n_diag;
 
     // * bool determine whether the corresponding REAL is actually exactly zero
     typedef std::pair<bool, REAL> CTH_RES;
@@ -21,18 +18,14 @@ struct Process_Amp {
     typedef std::pair<Propagator_ID, CTH_RES_FULL> PROPAGATOR_STRUCTURE;
     typedef std::pair<PROPAGATOR_STRUCTURE, PROPAGATOR_STRUCTURE> DENOMINATOR_STRUCTURE;
 
-    // * The key used to access the results: Channel + Diagram_ID;
-    typedef std::pair<Channel, int> AMP_KEY;
-
-    typedef std::map<AMP_KEY, NUMERATOR_STRUCTURE> AMP_NUM;
-    typedef std::map<AMP_KEY, DENOMINATOR_STRUCTURE> AMP_DEN;
+    typedef std::vector<NUMERATOR_STRUCTURE> AMP_NUM;
+    typedef std::vector<DENOMINATOR_STRUCTURE> AMP_DEN;
     AMP_NUM amps_numerator;
     AMP_DEN amps_denominator;
 
-    const NUMERATOR_STRUCTURE &Get_Numerator(Channel chan1 = Channel::SS, int diagram_id = 0) const;
-    const DENOMINATOR_STRUCTURE &Get_Denominator(Channel chan1 = Channel::SS, int diagram_id = 0) const;
+    const NUMERATOR_STRUCTURE &Get_Numerator(int diagram_id = 0) const;
+    const DENOMINATOR_STRUCTURE &Get_Denominator(int diagram_id = 0) const;
 };
-const Process_Amp::Channel Process_Amp::All_Channel[6] = {SS, ST, SU, TT, TU, UU};
 
 class Amplitude {
     // * Amplitude used to calculate the collision rate;
