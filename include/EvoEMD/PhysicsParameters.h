@@ -13,65 +13,64 @@ class Base_Parameter {
 protected:
     std::string name;
     REAL value;
+    bool updated;
+    std::set<Base_Parameter *> base_parameters;  // Parameter in this set depends on current parameter
 
 public:
-    Base_Parameter(std::string par_name) : name(par_name){};
+    Base_Parameter(std::string par_name) : name(par_name), value(0), updated(true){};
     virtual ~Base_Parameter(){};
 
-    virtual void Set_Value(REAL input) { value = input; }
-    virtual REAL Get_Value() = 0;
+    bool Is_Independent() { return (base_parameters.size() == 0); }
+    void Claim_Dependence(Base_Parameter *par) { base_parameters.insert(par); }
+    void Notify() {
+        updated = false;
+        for (auto &&bp : base_parameters) {
+            bp->Notify();
+        }
+    }
+
+    // * Any parameter derived from this Base_Parameter should re-implement this function
+    virtual void Update_Value(REAL input) = 0;
+
+    void Set_Value(REAL input = 0) {
+        Notify();
+        Update_Value(input);
+        updated = true;
+    }
+    REAL Get_Value() {
+        if (updated) {
+            return value;
+        } else {
+            Set_Value();
+            return value;
+        }
+    }
     std::string Get_Name() const { return name; }
 };
 
-class Independent_Parameter : public Base_Parameter {
+class Free_Parameter : public Base_Parameter {
 public:
-    typedef ROTATION_NUMBER VERSION_TYPE;
-    Independent_Parameter(std::string par_name) : Base_Parameter(par_name){};
-    ~Independent_Parameter(){};
-
-    virtual void Set_Value(REAL input) {
-        value = input;
-        ++VERSION_ID;
+    Free_Parameter(std::string name, REAL default_value = 0) : Base_Parameter(name) {
+        value = default_value;
+        updated = true;
     }
-    virtual REAL Get_Value() { return value; }
-    VERSION_TYPE Get_Version_ID() const { return VERSION_ID; }
+    ~Free_Parameter(){};
 
-private:
-    VERSION_TYPE VERSION_ID;
-};
-
-class Dependent_Parameter : public Base_Parameter {
-protected:
-    // *
-    typedef std::map<std::string, std::pair<Independent_Parameter *, Independent_Parameter::VERSION_TYPE> >
-        Independent_Parameter_Set;
-    Independent_Parameter_Set IPS;
-    bool Is_Updated();
-    void Update_Version_ID();
-    virtual void Update_Value() = 0;
-
-public:
-    Dependent_Parameter(std::string par_name) : Base_Parameter(par_name){};
-    ~Dependent_Parameter(){};
-
-    virtual REAL Get_Value();
+    virtual void Update_Value(REAL input) override { value = input; }
 };
 
 class Parameter_Factory {
 private:
     Parameter_Factory();
     ~Parameter_Factory();
-    typedef std::map<std::string, Independent_Parameter *> Independent_Parameter_List;
-    Independent_Parameter_List IPL;
-    typedef std::map<std::string, Dependent_Parameter *> Dependent_Parameter_List;
-    Dependent_Parameter_List DPL;
+    typedef std::map<std::string, Base_Parameter *> Parameter_List;
+    Parameter_List PL;
 
 public:
     static Parameter_Factory &Get_Parameter_Factory();
 
-    void Register_Parameter(Independent_Parameter *par);
-    void Register_Parameter(Dependent_Parameter *par);
-    bool Set_Independent_Parameter(std::string name, REAL value);
+    void Register_Parameter(Base_Parameter *par);
+    bool Set_Parameter(std::string name, REAL value);
     REAL Get_Parameter_Value(std::string name, REAL default_value = 0);
 };
 }  // namespace EvoEMD
