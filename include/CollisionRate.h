@@ -62,7 +62,7 @@ public:
     unsigned N_FINAL;
     FINAL_STATES FINAL;
 
-private:
+protected:
     Process_Amp amp_res;
 };
 
