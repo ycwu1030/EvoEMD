@@ -21,16 +21,18 @@ public:
         using PS = Process_Amp::PROPAGATOR_STRUCTURE;
         using CRF = Process_Amp::CTH_RES_FULL;
         // * For decay, no propagator, using dummy propagator;
-        CRF dummy_CRF(2);
-        dummy_CRF[0] = std::make_pair(true, 1);
-        dummy_CRF[1] = std::make_pair(false, 0);
+        CRF dummy_CRF = {1};
 
         PS dummy_propagator = std::make_pair(0, dummy_CRF);
         amp_res.amps_denominator.clear();
         amp_res.amps_denominator.push_back(std::make_pair(dummy_propagator, dummy_propagator));
 
         // * Numerator:
-        CRF numerator(3);
+        CRF num(3);
+        Nu_TypeI_SeeSaw &nm = Nu_TypeI_SeeSaw::Get_Neutrino_Model();
+        num[0] = 2 * 2 * (INITIAL[0]->Get_Mass()) * nm.Get_YdagYij(ID, ID);
+        num[1] = 0;
+        num[2] = 0;
     }
     virtual REAL Get_Coeff(REAL T) { return 1; }
 };
