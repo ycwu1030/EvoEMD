@@ -1,10 +1,11 @@
-#include "Hubble.h"
+#include "EvoEMD/Hubble.h"
 
 #include <cmath>
 
-#include "EffDOF.h"
-#include "Physics_Constants.h"
+#include "EvoEMD/EffDOF.h"
+#include "EvoEMD/Physics_Constants.h"
 
+namespace EvoEMD {
 Hubble_For_Single_Period::Hubble_For_Single_Period(const REAL Ti, const REAL Tf, const bool Isentropic_in,
                                                    const double beta_T_in, const double beta_s_in)
     : T_start(Ti), T_end(Tf), Isentropic(Isentropic_in), beta_T(beta_T_in), beta_s(beta_s_in) {}
@@ -90,11 +91,11 @@ void Hubble_History::Solve_Te() {
     // * We solve this equation using binary search, the starting bracket is [Tr,Ti]
     REAL x_max = log(Ti);
     REAL x_min = log(Tr);
-    REAL x_eps = 1e-5 * fabs(x_max - x_min);
+    REAL x_eps = 1e-5 * std::fabs(x_max - x_min);
     REAL target_value = log(Ti) + 4 * log(Tr) + 2 * log(ge(Tr));
     REAL test_value;
     REAL x_test;
-    while (fabs(x_max - x_min) > x_eps) {
+    while (std::fabs(x_max - x_min) > x_eps) {
         x_test = (x_max + x_min) / 2.0;
         test_value = 5 * x_test + 2 * log(ge(exp(x_test)));
         if (test_value > target_value) {
@@ -125,3 +126,5 @@ int Hubble_History::Get_Period_ID_at_T(const REAL T) const {
 REAL Hubble_History::Get_Hubble_at_T(const REAL T) { return Periods[Get_Period_ID_at_T(T)]->Get_Hubble_at_T(T); }
 
 Hubble_For_Single_Period *Hubble_History::operator[](const int pid) { return Periods[pid]; }
+
+}  // namespace EvoEMD

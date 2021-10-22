@@ -1,8 +1,9 @@
-#include "LeptogenesisRate.h"
+#include "EvoEMD/LeptogenesisRate.h"
 
-#include "PhaseSpace.h"
-#include "spdlog_wrapper.h"
+#include "EvoEMD/PhaseSpace.h"
+#include "EvoEMD/spdlog_wrapper.h"
 
+namespace EvoEMD {
 LeptogenesisRate::LeptogenesisRate()
     : DOF(5), MNR1(3000), MNR2(3000), MNR3(1e10), MCHI(100), MS(300), LamX(1.0), Yeq(5) {
     Nu_Param.Set_Heavy_Neutrino_Mass(MNR1, MNR2, MNR3);
@@ -182,3 +183,4 @@ REAL LeptogenesisRate::R4(REAL Temp, VD y) {
     SPDLOG_INFO_FILE("Collision Rate for S: R4 = {:+9.8e}", RS);
     return RS;
 }
+}  // namespace EvoEMD

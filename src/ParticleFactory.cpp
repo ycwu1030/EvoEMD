@@ -1,5 +1,6 @@
-#include "ParticleFactory.h"
+#include "EvoEMD/ParticleFactory.h"
 
+namespace EvoEMD {
 Particle_Factory::Particle_Factory() {}
 
 Particle_Factory::~Particle_Factory() {
@@ -45,3 +46,4 @@ bool Particle_Factory::Set_Mass(int PID, double mass) {
         return true;
     }
 }
+}  // namespace EvoEMD

@@ -1,4 +1,4 @@
-#include "RungeKutta.h"
+#include "EvoEMD/RungeKutta.h"
 
 #include <algorithm>
 #include <cmath>
@@ -6,10 +6,11 @@
 #include <iomanip>
 #include <iostream>
 
-#include "spdlog_wrapper.h"
+#include "EvoEMD/spdlog_wrapper.h"
 
 using namespace std;
 
+namespace EvoEMD {
 RungeKutta::RungeKutta()
     : DOF(0),
       derivs(nullptr),
@@ -198,7 +199,7 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         error_max = error_max < 1e10 ? error_max : 1e10;
         step_size_temp = SAFETY * step_size * exp(POW_SHRINK * log(error_max));
         SPDLOG_DEBUG_FILE("Error is large, try to shrink the step size to: {:+9.8e};", step_size_temp);
-        if (fabs(step_size_temp) < fabs(min_step_size)) {
+        if (std::fabs(step_size_temp) < std::fabs(min_step_size)) {
             // * If after shrink, the step size is too small, then we don't shrink it any further, and accept current
             // possible large error.
             step_size_did = step_size;
@@ -229,7 +230,7 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
     VD dydx = _dYdX[0];
     VD Y_Scale(DOF);
 
-    double step_size = (X_END > X_BEGIN) ? fabs(step_start) : -fabs(step_start);
+    double step_size = (X_END > X_BEGIN) ? std::fabs(step_start) : -std::fabs(step_start);
     double step_size_did;
     double step_size_next;
 
@@ -264,10 +265,10 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
 
         // * If not reaching the end, we adapt the stepsize, but need to control it either not too large or too small.
         step_size = step_size_next;
-        if (fabs(step_size_next) > 1e-1 * fabs(X_END - X_BEGIN)) {
+        if (std::fabs(step_size_next) > 1e-1 * std::fabs(X_END - X_BEGIN)) {
             step_size = 1e-1 * (X_END - X_BEGIN);
         }
-        if (fabs(step_size_next) < 1e-5 * fabs(X_END - X_BEGIN)) {
+        if (std::fabs(step_size_next) < 1e-5 * std::fabs(X_END - X_BEGIN)) {
             step_size = 1e-5 * (X_END - X_BEGIN);
         }
     }
@@ -301,3 +302,4 @@ void RungeKutta::Dump_Solution(string filename) {
     }
     output.close();
 }
+}  // namespace EvoEMD

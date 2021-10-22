@@ -3,9 +3,10 @@
 
 #include <map>
 
-#include "Particles.h"
-#include "RealTypes.h"
+#include "EvoEMD/ParticlesBase.h"
+#include "EvoEMD/RealTypes.h"
 
+namespace EvoEMD {
 struct Process_Amp {
     // * used to store how many squared diagrams we have for corresponding amplitude calculation
     unsigned n_diag;
@@ -122,5 +123,5 @@ protected:
     Amplitude *amp;
     Collision_Rate *CR_Calculator;
 };
-
+}  // namespace EvoEMD
 #endif  //_COLLISION_RATE_H_

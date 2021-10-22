@@ -1,9 +1,10 @@
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
 
 #include <cmath>
 
 using namespace std;
 
+namespace EvoEMD {
 ROTATION_NUMBER &ROTATION_NUMBER::operator++() {
     ++value;
     value %= MAX_VERSION_ID;
@@ -21,7 +22,7 @@ bool ROTATION_NUMBER::operator==(const ROTATION_NUMBER &rh) { return this->value
 VD fabs(const VD &input) {
     VD res;
     for (int i = 0; i < input.size(); ++i) {
-        res.push_back(fabs(input[i]));
+        res.push_back(std::fabs(input[i]));
     }
     return res;
 }
@@ -119,3 +120,4 @@ std::ostream &operator<<(std::ostream &os, const VD &rhs) {
     os << rhs.back();
     return os;
 }
+}  // namespace EvoEMD

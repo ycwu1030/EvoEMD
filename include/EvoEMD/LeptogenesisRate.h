@@ -1,11 +1,13 @@
 #ifndef __LEPTOGENESIS_RATE_H__
 #define __LEPTOGENESIS_RATE_H__
 
-#include "EMD.h"
-#include "Neutrino.h"
+#include "EvoEMD/EMD.h"
+#include "EvoEMD/Neutrino.h"
 
 // int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp,
 //                     REAL ff[], void *_params);
+
+namespace EvoEMD {
 
 // * Calculation Collision Rate for Boltzmann
 // * We are considering 5 components:
@@ -240,5 +242,5 @@ private:
     // * This function did nothing but calling the corresponding SqAmp_dOmega_with_Kallen function
     friend int gamma_Integrand(const int *ndim, const REAL x[], const int *ncomp, REAL ff[], void *_params);
 };
-
+}  // namespace EvoEMD
 #endif  //__LEPTOGENESIS_RATE_H__

@@ -1,9 +1,11 @@
-#ifndef _PARTICLE_H_
-#define _PARTICLE_H_
+#ifndef _PARTICLE_BASE_H_
+#define _PARTICLE_BASE_H_
 
 #include <set>
 
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 class Process;
 class Particle_Client {
@@ -115,4 +117,5 @@ public:
     ~Boson(){};
 };
 
+}  // namespace EvoEMD
 #endif  //_PARTICLE_H_

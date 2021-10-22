@@ -3,7 +3,9 @@
 
 #include <string>
 
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 /*
  * The ODE System
@@ -127,5 +129,5 @@ private:
     void RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
                          REAL &step_size_did, REAL &step_size_further);
 };
-
+}  // namespace EvoEMD
 #endif  //__RUNGEKUTTA_H__

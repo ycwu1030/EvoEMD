@@ -5,7 +5,9 @@
 #include <set>
 #include <string>
 
-#include "Neutrino.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 class Base_Parameter {
 protected:
@@ -72,5 +74,5 @@ public:
     bool Set_Independent_Parameter(std::string name, REAL value);
     REAL Get_Parameter_Value(std::string name, REAL default_value = 0);
 };
-
+}  // namespace EvoEMD
 #endif  //_PHYSICS_PARAMETERS_H_

@@ -1,11 +1,12 @@
 #ifndef __LEPTOGENESIS_BEQ_H__
 #define __LEPTOGENESIS_BEQ_H__
 
-#include "EMD.h"
-#include "LeptogenesisRate.h"
-#include "Neutrino.h"
-#include "RungeKutta.h"
+#include "EvoEMD/EMD.h"
+#include "EvoEMD/LeptogenesisRate.h"
+#include "EvoEMD/Neutrino.h"
+#include "EvoEMD/RungeKutta.h"
 
+namespace EvoEMD {
 // * Y0 for Lepton Number, Y1 for N1, Y2 for N2, Y3 for Chi, Y4 for S
 // * This class assemble useful object to build up the Boltzmann equation
 class LeptogenesisBE : public ODE_FUNCS {
@@ -107,5 +108,5 @@ private:
     std::vector<VD> logz;
     std::vector<VVD> Yields;
 };
-
+}  // namespace EvoEMD
 #endif  //__LEPTOGENESIS_BEQ_H__

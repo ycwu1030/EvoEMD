@@ -1,10 +1,11 @@
-#include "Particles.h"
+#include "EvoEMD/ParticlesBase.h"
 
 #include <cmath>
 
 #include "gsl/gsl_sf_bessel.h"
 #include "gsl/gsl_sf_zeta.h"
 
+namespace EvoEMD {
 void Particle_Base::Register_Client(Particle_Client *pc) { Particle_Client_Set.insert(pc); }
 void Particle_Base::Register_Process(Process *proc) { Process_Set.insert(proc); }
 void Particle_Base::Notify_Client() {
@@ -86,3 +87,4 @@ REAL Boson::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
         return Get_Equilibrium_Yield_per_DOF_Maxwell(T);
     }
 }
+}  // namespace EvoEMD

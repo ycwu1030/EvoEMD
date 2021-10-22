@@ -4,9 +4,10 @@
 #include <map>
 #include <set>
 
-#include "Neutrino.h"
-#include "Particles.h"
+#include "EvoEMD/Neutrino.h"
+#include "EvoEMD/ParticlesBase.h"
 
+namespace EvoEMD {
 class Particle_Factory {
 public:
     typedef std::map<int, Pseudo_Particle *> Particle_List;
@@ -25,5 +26,5 @@ private:
     Particle_List PL;   // All Particle
     std::set<int> POI;  // Particle of Interested
 };
-
+}  // namespace EvoEMD
 #endif  //_PARTICLE_FACTORY_H_
