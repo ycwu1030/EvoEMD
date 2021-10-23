@@ -17,7 +17,7 @@ SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option")
 
 ## Collecting Source Files
-FILE(GLOB lib_SOURCES src/*.cpp)
+FILE(GLOB lib_SOURCES src/EvoEMD/*.cpp)
 
 
 # For .so/.dylib library
@@ -30,4 +30,5 @@ SET_TARGET_PROPERTIES(EVOEMD_shared PROPERTIES
 TARGET_LINK_LIBRARIES(EVOEMD_shared ${GSL_LIBRARIES} cuba)
 SET(EVOEMD_LIBRARY EVOEMD_shared)
 
-add_subdirectory(test)
+# add_subdirectory(src/Models)
+# add_subdirectory(test)

@@ -4,7 +4,6 @@
 #include <map>
 #include <set>
 
-#include "EvoEMD/Neutrino.h"
 #include "EvoEMD/ParticlesBase.h"
 
 namespace EvoEMD {

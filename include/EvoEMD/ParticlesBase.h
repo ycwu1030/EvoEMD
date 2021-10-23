@@ -3,6 +3,7 @@
 
 #include <set>
 
+#include "EvoEMD/PhysicsParameters.h"
 #include "EvoEMD/RealTypes.h"
 
 namespace EvoEMD {
@@ -48,7 +49,8 @@ protected:
     bool selfconjugate;
     bool massless;
     bool thermalized;
-    double mass;
+    Base_Parameter *p_mass;
+    Base_Parameter *p_width;
     int PID;
     int DOF;
     REAL Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const;
@@ -58,30 +60,24 @@ protected:
 
 public:
     /**
-     * @brief  Constructor for massless particle
+     * @brief
      * @note
-     * @param  PID: particle ID, unique and positive, the corresponding negative one is for the antiparticle
-     * @param  DOF: The internal dof of the particle, only for particle (antiparticle is not included)
-     * @param  selfconjugate: Self conjugate or not
+     * @param  PID: The PID for a particle
+     * @param  DOF: The degree of freedom of the particle, particle and antiparticle will be counted seperately
+     *              On the other hand, DOF is the one used to calculate the equilibrium number density which will be
+     *              used in Boltzmann equation. So be sure this DOF is consistent with the collision rate.
+     * @param  mass: Pointer to mass parameter, if nullptr (default), it is assumed the particle is massless
+     * @param  width: Pointer to width parameter, if nullptr (default), it is assumed the particle is stable
+     * @param  selfconjugate: Whether
      * @retval
      */
-    Pseudo_Particle(int PID, int DOF, bool selfconjugate = false);
-
-    /**
-     * @brief  Constructor for massive particle
-     * @note
-     * @param  mass: mass for the particle
-     * @param  PID: particle ID, unique and positive, the corresponding negative one is for the antiparticle
-     * @param  DOF: The internal dof of the particle, only for particle (antiparticle is not included)
-     * @param  selfconjugate: Self conjugate or not
-     * @retval
-     */
-    Pseudo_Particle(double mass, int PID, int DOF, bool selfconjugate = false);
+    Pseudo_Particle(int PID, int DOF, Base_Parameter *mass = nullptr, Base_Parameter *width = nullptr,
+                    bool selfconjugate = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
     int Get_DOF() const { return DOF; }
-    double Get_Mass() const { return mass; }
+    double Get_Mass() const { return p_mass->Get_Value(); }
     bool Is_Massless() const { return massless; }
     bool Is_Selfconjugate() const { return selfconjugate; }
 
@@ -101,8 +97,8 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Fermion(int PID, int DOF, bool selfconjugate = false);
-    Fermion(double mass, int PID, int DOF, bool selfconjugate = false);
+    Fermion(int PID, int DOF, Base_Parameter *mass = nullptr, Base_Parameter *width = nullptr,
+            bool selfconjugate = false);
     ~Fermion(){};
 };
 
@@ -112,8 +108,8 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Boson(int PID, int DOF, bool selfconjugate = false);
-    Boson(double mass, int PID, int DOF, bool selfconjugate = false);
+    Boson(int PID, int DOF, Base_Parameter *mass = nullptr, Base_Parameter *width = nullptr,
+          bool selfconjugate = false);
     ~Boson(){};
 };
 
