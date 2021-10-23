@@ -30,5 +30,5 @@ SET_TARGET_PROPERTIES(EVOEMD_shared PROPERTIES
 TARGET_LINK_LIBRARIES(EVOEMD_shared ${GSL_LIBRARIES} cuba)
 SET(EVOEMD_LIBRARY EVOEMD_shared)
 
-# add_subdirectory(src/Models)
+add_subdirectory(src/Models/SeesawFreezeIn)
 # add_subdirectory(test)

@@ -1,0 +1,11 @@
+#ifndef _SEESAW_FI_PARAMETERS_H_
+#define _SEESAW_FI_PARAMETERS_H_
+
+#include "EvoEMD/ParameterBase.h"
+using namespace EvoEMD;
+
+FREE_PARAMETER(MN1, 1005);
+FREE_PARAMETER(MN2, 1006);
+FREE_PARAMETER(MN3, 3000);
+
+#endif  //_SEESAW_FI_PARAMETERS_H_
