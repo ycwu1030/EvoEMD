@@ -1,4 +1,4 @@
-#include "EvoEMD/PhysicsParameters.h"
+#include "EvoEMD/ParameterBase.h"
 
 #include <iostream>
 
@@ -17,7 +17,7 @@ Parameter_Factory &Parameter_Factory::Get_Parameter_Factory() {
     return PF;
 }
 
-void Parameter_Factory::Register_Parameter(Base_Parameter *par) {
+void Parameter_Factory::Register_Parameter(Parameter_Base *par) {
     std::string name = par->Get_Name();
     Parameter_List::iterator iter = PL.find(name);
     if (iter == PL.end()) {

@@ -1,9 +1,10 @@
 #ifndef _PARTICLE_BASE_H_
 #define _PARTICLE_BASE_H_
 
+#include <map>
 #include <set>
 
-#include "EvoEMD/PhysicsParameters.h"
+#include "EvoEMD/ParameterBase.h"
 #include "EvoEMD/RealTypes.h"
 
 namespace EvoEMD {
@@ -49,8 +50,8 @@ protected:
     bool selfconjugate;
     bool massless;
     bool thermalized;
-    Base_Parameter *p_mass;
-    Base_Parameter *p_width;
+    Parameter_Base *p_mass;
+    Parameter_Base *p_width;
     int PID;
     int DOF;
     REAL Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const;
@@ -71,7 +72,7 @@ public:
      * @param  selfconjugate: Whether
      * @retval
      */
-    Pseudo_Particle(int PID, int DOF, Base_Parameter *mass = nullptr, Base_Parameter *width = nullptr,
+    Pseudo_Particle(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
                     bool selfconjugate = false);
     virtual ~Pseudo_Particle(){};
 
@@ -97,7 +98,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Fermion(int PID, int DOF, Base_Parameter *mass = nullptr, Base_Parameter *width = nullptr,
+    Fermion(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
             bool selfconjugate = false);
     ~Fermion(){};
 };
@@ -108,9 +109,28 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Boson(int PID, int DOF, Base_Parameter *mass = nullptr, Base_Parameter *width = nullptr,
+    Boson(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
           bool selfconjugate = false);
     ~Boson(){};
+};
+
+class Particle_Factory {
+public:
+    typedef std::map<int, Pseudo_Particle *> Particle_List;
+
+    static Particle_Factory &Get_Particle_Factory();
+
+    Pseudo_Particle *Get_Particle(int PID);
+    bool Register_Particle(Pseudo_Particle *);
+    bool Register_POI(int PID);
+    bool Set_Mass(int PID, double mass);
+
+private:
+    Particle_Factory();
+    ~Particle_Factory();
+
+    Particle_List PL;   // All Particle
+    std::set<int> POI;  // Particle of Interested
 };
 
 }  // namespace EvoEMD

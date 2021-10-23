@@ -1,4 +1,4 @@
-#include "EvoEMD/ParticlesBase.h"
+#include "EvoEMD/ParticleBase.h"
 
 #include <cmath>
 
@@ -15,7 +15,7 @@ void Particle_Base::Notify_Client() {
     }
 }
 
-Pseudo_Particle::Pseudo_Particle(int PID_in, int DOF_in, Base_Parameter *mass, Base_Parameter *width,
+Pseudo_Particle::Pseudo_Particle(int PID_in, int DOF_in, Parameter_Base *mass, Parameter_Base *width,
                                  bool selfconjugate_in)
     : DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), selfconjugate(selfconjugate_in) {
     if (p_mass) {
@@ -50,7 +50,7 @@ void Pseudo_Particle::Set_Mass(double mass) {
     }
 }
 
-Fermion::Fermion(int PID, int DOF, Base_Parameter *mass, Base_Parameter *width, bool selfconjugate)
+Fermion::Fermion(int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool selfconjugate)
     : Pseudo_Particle(PID, DOF, mass, width, selfconjugate) {}
 
 REAL Fermion::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
@@ -71,7 +71,7 @@ REAL Fermion::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
     }
 }
 
-Boson::Boson(int PID, int DOF, Base_Parameter *mass, Base_Parameter *width, bool selfconjugate)
+Boson::Boson(int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool selfconjugate)
     : Pseudo_Particle(PID, DOF, mass, width, selfconjugate) {}
 
 REAL Boson::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
@@ -91,4 +91,51 @@ REAL Boson::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
         return Get_Equilibrium_Yield_per_DOF_Maxwell(T);
     }
 }
+
+Particle_Factory::Particle_Factory() {}
+
+Particle_Factory::~Particle_Factory() {
+    Particle_List::iterator iter;
+    for (iter = PL.begin(); iter != PL.end(); ++iter) {
+        delete iter->second;
+    }
+}
+
+Particle_Factory &Particle_Factory::Get_Particle_Factory() {
+    static Particle_Factory PF;
+    return PF;
+}
+
+Pseudo_Particle *Particle_Factory::Get_Particle(int PID) {
+    Particle_List::iterator iter = PL.find(PID);
+    if (iter == PL.end()) {
+        std::cout << "Cannot find particle with PID = " << PID << std::endl;
+        return nullptr;
+    } else {
+        return iter->second;
+    }
+}
+
+bool Particle_Factory::Register_POI(int PID) {
+    Particle_List::iterator iter = PL.find(PID);
+    if (iter == PL.end()) {
+        std::cout << "Cannot find particle with PID = " << PID << std::endl;
+        return false;
+    } else {
+        POI.insert(PID);
+        return true;
+    }
+}
+
+bool Particle_Factory::Set_Mass(int PID, double mass) {
+    Particle_List::iterator iter = PL.find(PID);
+    if (iter == PL.end()) {
+        std::cout << "Cannot find particle with PID = " << PID << std::endl;
+        return false;
+    } else {
+        iter->second->Set_Mass(mass);
+        return true;
+    }
+}
+
 }  // namespace EvoEMD

@@ -1,5 +1,5 @@
-#ifndef _PHYSICS_PARAMETERS_H_
-#define _PHYSICS_PARAMETERS_H_
+#ifndef _PARAMETER_BASE_H_
+#define _PARAMETER_BASE_H_
 
 #include <map>
 #include <set>
@@ -9,22 +9,22 @@
 
 namespace EvoEMD {
 
-class Base_Parameter {
+class Parameter_Base {
 protected:
     std::string name;
     REAL value;
     bool updated;
-    std::set<Base_Parameter *> base_parameters;  // Parameter in this set depends on current parameter
+    std::set<Parameter_Base *> underlying_parameters;  // Parameter in this set depends on current parameter
 
 public:
-    Base_Parameter(std::string par_name) : name(par_name), value(0), updated(true){};
-    virtual ~Base_Parameter(){};
+    Parameter_Base(std::string par_name) : name(par_name), value(0), updated(true){};
+    virtual ~Parameter_Base(){};
 
-    bool Is_Independent() { return (base_parameters.size() == 0); }
-    void Claim_Dependence(Base_Parameter *par) { base_parameters.insert(par); }
+    bool Is_Independent() { return (underlying_parameters.size() == 0); }
+    void Claim_Dependence(Parameter_Base *par) { underlying_parameters.insert(par); }
     void Notify() {
         updated = false;
-        for (auto &&bp : base_parameters) {
+        for (auto &&bp : underlying_parameters) {
             bp->Notify();
         }
     }
@@ -48,9 +48,9 @@ public:
     std::string Get_Name() const { return name; }
 };
 
-class Free_Parameter : public Base_Parameter {
+class Free_Parameter : public Parameter_Base {
 public:
-    Free_Parameter(std::string name, REAL default_value = 0) : Base_Parameter(name) {
+    Free_Parameter(std::string name, REAL default_value = 0) : Parameter_Base(name) {
         value = default_value;
         updated = true;
     }
@@ -63,15 +63,15 @@ class Parameter_Factory {
 private:
     Parameter_Factory();
     ~Parameter_Factory();
-    typedef std::map<std::string, Base_Parameter *> Parameter_List;
+    typedef std::map<std::string, Parameter_Base *> Parameter_List;
     Parameter_List PL;
 
 public:
     static Parameter_Factory &Get_Parameter_Factory();
 
-    void Register_Parameter(Base_Parameter *par);
+    void Register_Parameter(Parameter_Base *par);
     bool Set_Parameter(std::string name, REAL value);
     REAL Get_Parameter_Value(std::string name, REAL default_value = 0);
 };
 }  // namespace EvoEMD
-#endif  //_PHYSICS_PARAMETERS_H_
+#endif  //_PARAMETER_BASE_H_
