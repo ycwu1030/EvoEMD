@@ -116,6 +116,20 @@ Pseudo_Particle *Particle_Factory::Get_Particle(int PID) {
     }
 }
 
+bool Particle_Factory::Register_Particle(Pseudo_Particle *part) {
+    if (!part) {
+        return false;
+    }
+    int PID = part->Get_PID();
+    Particle_List::iterator iter = PL.find(PID);
+    if (iter != PL.end()) {
+        std::cout << "There is another particle with PID = " << PID << std::endl;
+        return false;
+    }
+    PL[PID] = part;
+    return true;
+}
+
 bool Particle_Factory::Register_POI(int PID) {
     Particle_List::iterator iter = PL.find(PID);
     if (iter == PL.end()) {

@@ -27,7 +27,7 @@ void Parameter_Factory::Register_Parameter(Parameter_Base *par) {
     }
 }
 
-bool Parameter_Factory::Set_Parameter(std::string name, REAL value) {
+bool Parameter_Factory::Set_Parameter_Value(std::string name, REAL value) {
     Parameter_List::iterator iter = PL.find(name);
     if (iter == PL.end()) {
         return false;
@@ -44,6 +44,14 @@ REAL Parameter_Factory::Get_Parameter_Value(std::string name, REAL default_value
     }
     std::cout << "Parameter with name: " << name << " is not found" << std::endl;
     return 0;
+}
+
+Parameter_Base *Parameter_Factory::Get_Parameter(std::string name) {
+    Parameter_List::iterator iter_PL = PL.find(name);
+    if (iter_PL == PL.end()) {
+        return nullptr;
+    }
+    return iter_PL->second;
 }
 
 }  // namespace EvoEMD

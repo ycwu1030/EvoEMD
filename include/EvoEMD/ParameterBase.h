@@ -70,8 +70,9 @@ public:
     static Parameter_Factory &Get_Parameter_Factory();
 
     void Register_Parameter(Parameter_Base *par);
-    bool Set_Parameter(std::string name, REAL value);
+    bool Set_Parameter_Value(std::string name, REAL value);
     REAL Get_Parameter_Value(std::string name, REAL default_value = 0);
+    Parameter_Base *Get_Parameter(std::string name);
 };
 }  // namespace EvoEMD
 
@@ -82,12 +83,14 @@ public:
     };
 };
 
-#define REGISTER_PARAMETER(className) Register_Parameter g_register_parameter_##className(new className)
+#define REGISTER_PARAMETER(paramName) Register_Parameter g_register_parameter_##paramName(new paramName)
 #define FREE_PARAMETER(paramName, value)                       \
     class t_##paramName : public Free_Parameter {              \
     public:                                                    \
         t_##paramName() : Free_Parameter(#paramName, value){}; \
     };                                                         \
     REGISTER_PARAMETER(t_##paramName)
+
+#define RETRIVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
 
 #endif  //_PARAMETER_BASE_H_

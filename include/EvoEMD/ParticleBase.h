@@ -134,4 +134,21 @@ private:
 };
 
 }  // namespace EvoEMD
+
+class Register_Particle {
+public:
+    Register_Particle(EvoEMD::Pseudo_Particle *par) {
+        EvoEMD::Particle_Factory::Get_Particle_Factory().Register_Particle(par);
+    }
+};
+
+// #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
+
+#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C) \
+    class part_##partName : public className {                           \
+    public:                                                              \
+        part_##partName() : className(PID, DOF, MASS, WIDTH, C){};       \
+    };                                                                   \
+    Register_Particle g_register_particle_##partName(new part_##partName)
+
 #endif  //_PARTICLE_H_
