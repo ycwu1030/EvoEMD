@@ -4,21 +4,6 @@
 
 using namespace std;
 
-namespace EvoEMD {
-ROTATION_NUMBER &ROTATION_NUMBER::operator++() {
-    ++value;
-    value %= MAX_VERSION_ID;
-    return *this;
-}
-
-ROTATION_NUMBER ROTATION_NUMBER::operator++(int a) {
-    ROTATION_NUMBER previous = *this;
-    ++*this;
-    return previous;
-}
-
-bool ROTATION_NUMBER::operator==(const ROTATION_NUMBER &rh) { return this->value == rh.value; }
-
 VD fabs(const VD &input) {
     VD res;
     for (int i = 0; i < input.size(); ++i) {
@@ -120,4 +105,3 @@ std::ostream &operator<<(std::ostream &os, const VD &rhs) {
     os << rhs.back();
     return os;
 }
-}  // namespace EvoEMD

@@ -4,26 +4,9 @@
 #include <iostream>
 #include <vector>
 
-namespace EvoEMD {
-
 #define REAL double
 #define VD std::vector<REAL>
 #define VVD std::vector<VD>
-
-class ROTATION_NUMBER {
-private:
-    unsigned value;
-
-public:
-    static const unsigned MAX_VERSION_ID = 2048;
-    ROTATION_NUMBER() : value(0){};
-    ~ROTATION_NUMBER(){};
-
-    ROTATION_NUMBER &operator++();    // ++RN
-    ROTATION_NUMBER operator++(int);  // RN++
-
-    bool operator==(const ROTATION_NUMBER &rh);
-};
 
 // *
 VD fabs(const VD &input);
@@ -50,5 +33,4 @@ VD operator/(const VD &lhs, const REAL &s);
 
 std::ostream &operator<<(std::ostream &os, const VD &rhs);
 
-}  // namespace EvoEMD
 #endif  //__REALTYPES_H__
