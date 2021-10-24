@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "Particles.h"
+#include "EvoEMD/ParticlesBase.h"
 
 using namespace std;
-
+using namespace EvoEMD;
 int main(int argc, char const *argv[]) {
     Pseudo_Particle *const ptcl = new Fermion(100.1, 900001, 2);
     typedef set<Pseudo_Particle *const> PS;

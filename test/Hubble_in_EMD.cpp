@@ -1,14 +1,15 @@
-#include "RungeKutta.h"
-#include "EMD.h"
 #include <cmath>
 #include <iostream>
 
-using namespace std;
+#include "EvoEMD/EMD.h"
+#include "EvoEMD/RungeKutta.h"
 
-class HODE : public ODE_FUNCS
-{
+using namespace std;
+using namespace EvoEMD;
+class HODE : public ODE_FUNCS {
 public:
-    HODE() : ODE_FUNCS() //, X_BEGIN(log(1.1e-16)), X_END(log(1e8)), BOUNDARY_CONDITION(3)
+    HODE()
+        : ODE_FUNCS()  //, X_BEGIN(log(1.1e-16)), X_END(log(1e8)), BOUNDARY_CONDITION(3)
     {
         Set_DOF(3);
         c1 = sqrt(3) * 5.0 / 2.0 * M_PI * sqrt(106.5) / 3.0 / sqrt(10);
@@ -22,8 +23,7 @@ public:
     }
     ~HODE(){};
 
-    virtual VD dYdX(REAL x, VD y)
-    {
+    virtual VD dYdX(REAL x, VD y) {
         VD res(DOF);
         REAL A = exp(x);
         res[0] = -c1 * A * A * y[0] / sqrt(A * y[0] + y[1]);
@@ -37,8 +37,7 @@ private:
     REAL cs;
 };
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     HODE hub;
     RungeKutta solver(&hub);
     solver.Solve(0.01);
