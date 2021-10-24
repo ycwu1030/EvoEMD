@@ -4,9 +4,12 @@
 #include <Eigen/Dense>
 #include <complex>
 
-#include "Physics_Constants.h"
+#include "EvoEMD/ParticlesBase.h"
+#include "EvoEMD/Physics_Constants.h"
 
-class Nu_TypeI_SeeSaw {
+namespace EvoEMD {
+
+class Nu_TypeI_SeeSaw : public Particle_Client {
 public:
     typedef enum {
         NORMAL_ORDER = 0,
@@ -15,8 +18,11 @@ public:
         IO = 3   // * Alternative name for inverted order
     } MassOrdering;
     Nu_TypeI_SeeSaw();
-    Nu_TypeI_SeeSaw(MassOrdering od);
+    // Nu_TypeI_SeeSaw(MassOrdering od);
     ~Nu_TypeI_SeeSaw() = default;
+    static Nu_TypeI_SeeSaw& Get_Neutrino_Model();
+
+    virtual void Update_Particle_Info() override;
 
     /*
      * @brief set the mass ordering and then setup the PMNS matrix.
@@ -122,5 +128,5 @@ private:
      */
     void Set_Mixing_Matrix();
 };
-
+}  // namespace EvoEMD
 #endif  //__NEUTRINO_H__

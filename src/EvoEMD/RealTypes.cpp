@@ -1,4 +1,4 @@
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
 
 #include <cmath>
 
@@ -7,7 +7,7 @@ using namespace std;
 VD fabs(const VD &input) {
     VD res;
     for (int i = 0; i < input.size(); ++i) {
-        res.push_back(fabs(input[i]));
+        res.push_back(std::fabs(input[i]));
     }
     return res;
 }

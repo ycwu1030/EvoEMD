@@ -1,13 +1,14 @@
-#include "LeptogenesisBE.h"
+#include "EvoEMD/LeptogenesisBE.h"
 
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 
-#include "spdlog_wrapper.h"
+#include "EvoEMD/spdlog_wrapper.h"
 
 using namespace std;
 
+namespace EvoEMD {
 LeptogenesisBE::LeptogenesisBE() : ODE_FUNCS(), EMDEvo(1e14, 1e-1) {
     Set_DOF(R_Calculator.Get_DOF());  // Lepton Number, N1, N2, chi, S
     solver.Set_ODE(this);
@@ -214,3 +215,5 @@ void LeptogenesisBE::Dump_Solution(string filename) {
     }
     output.close();
 }
+
+}  // namespace EvoEMD

@@ -1,7 +1,9 @@
 #ifndef EMD_H
 #define EMD_H
 
-#include "RealTypes.h"
+#include "EvoEMD/RealTypes.h"
+
+namespace EvoEMD {
 
 class EMD {
 private:
@@ -136,5 +138,7 @@ REAL Entropy_Density(REAL T);
 REAL Yield_Eq(REAL T, REAL M, REAL g);
 REAL Yield_Eq_BE(REAL T, REAL g);
 REAL Yield_Eq_FD(REAL T, REAL g);
+
+}  // namespace EvoEMD
 
 #endif

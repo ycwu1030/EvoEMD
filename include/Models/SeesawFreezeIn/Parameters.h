@@ -1,0 +1,25 @@
+#ifndef _SEESAW_FI_PARAMETERS_H_
+#define _SEESAW_FI_PARAMETERS_H_
+
+#include "EvoEMD/Constants.h"
+#include "EvoEMD/ParameterBase.h"
+#include "Models/SeesawFreezeIn/SeesawTypeI.h"
+using namespace EvoEMD;
+
+DECLARE_FREE_PARAMETER(MN1, 1005);
+DECLARE_FREE_PARAMETER(MN2, 1006);
+DECLARE_FREE_PARAMETER(MN3, 3000);
+DECLARE_FREE_PARAMETER(Mnu1, 0.1 * eV);
+DECLARE_FREE_PARAMETER(rw12, 0);
+DECLARE_FREE_PARAMETER(iw12, 0);
+DECLARE_FREE_PARAMETER(rw23, 0);
+DECLARE_FREE_PARAMETER(iw23, 0);
+DECLARE_FREE_PARAMETER(rw13, 0);
+DECLARE_FREE_PARAMETER(iw13, 0);
+DECLARE_FREE_PARAMETER(nu_order, 1);  // positive normal order, negative inverse order for light neutrino mass
+
+DECLARE_FREE_PARAMETER(LamX, 0.1);
+
+REGISTER_PARAMETER(SeesawTypeI);
+
+#endif  //_SEESAW_FI_PARAMETERS_H_
