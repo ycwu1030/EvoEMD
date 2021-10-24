@@ -21,6 +21,7 @@ void Parameter_Factory::Register_Parameter(Parameter_Base *par) {
     std::string name = par->Get_Name();
     Parameter_List::iterator iter = PL.find(name);
     if (iter == PL.end()) {
+        std::cout << "Register parameter with name " << name << " from " << par << std::endl;
         PL[name] = par;
     } else {
         std::cout << "Duplicated name: [" << name << "] for parameter" << std::endl;
@@ -49,9 +50,17 @@ REAL Parameter_Factory::Get_Parameter_Value(std::string name, REAL default_value
 Parameter_Base *Parameter_Factory::Get_Parameter(std::string name) {
     Parameter_List::iterator iter_PL = PL.find(name);
     if (iter_PL == PL.end()) {
+        std::cout << "Parameter with name " << name << " not found!" << std::endl;
         return nullptr;
     }
     return iter_PL->second;
+}
+
+void Parameter_Factory::List_Parameters() {
+    Parameter_List::iterator iter_PL = PL.begin();
+    for (; iter_PL != PL.end(); iter_PL++) {
+        std::cout << iter_PL->first << " @ " << iter_PL->second << std::endl;
+    }
 }
 
 }  // namespace EvoEMD
