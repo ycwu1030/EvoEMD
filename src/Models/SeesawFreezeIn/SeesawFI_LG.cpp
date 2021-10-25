@@ -18,5 +18,7 @@ int main(int argc, char const *argv[]) {
     // pf.List_Parameters();
     Parameter_Base *pb = RETRIVE_PARAMETER(Seesaw_Parameters);
     cout << " YdagY(0,0) = " << ((SeesawTypeI *)pb)->Get_YdagYij(0, 0) << endl;
+    pf.Set_Parameter_Value("MN1", 3001.1);
+    cout << " YdagY(0,0) = " << ((SeesawTypeI *)pb)->Get_YdagYij(0, 0) << endl;
     return 0;
 }
