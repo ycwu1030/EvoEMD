@@ -10,6 +10,7 @@ BoltzmannEquation::BoltzmannEquation() : pf(EvoEMD::Particle_Factory::Get_Partic
         poi_pids.push_back(*iter);
         Pseudo_Particle *pp = pf.Get_Particle(*iter);
         poi_ptrs.push_back(pp);
+        poi_names.push_back(pp->Get_Name());
     }
 }
 

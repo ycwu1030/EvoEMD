@@ -18,7 +18,7 @@ private:
 
 public:
     BoltzmannEquation();
-    ~BoltzmannEquation();
+    ~BoltzmannEquation(){};
 
     virtual VD dYdX(REAL x, VD y) override;
 };

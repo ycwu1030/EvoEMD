@@ -47,6 +47,7 @@ class Pseudo_Particle : public Particle_Base {
     // * DOF: degree of freedom, (particle and antiparticle count seperately)
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
+    std::string name;
     bool selfconjugate;
     bool massless;
     bool thermalized;
@@ -72,12 +73,13 @@ public:
      * @param  selfconjugate: Whether
      * @retval
      */
-    Pseudo_Particle(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
                     bool selfconjugate = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
     int Get_DOF() const { return DOF; }
+    std::string Get_Name() const { return name; }
     double Get_Mass() const { return p_mass->Get_Value(); }
     bool Is_Massless() const { return massless; }
     bool Is_Selfconjugate() const { return selfconjugate; }
@@ -100,7 +102,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Fermion(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+    Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
             bool selfconjugate = false);
     ~Fermion(){};
 };
@@ -111,7 +113,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Boson(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+    Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
           bool selfconjugate = false);
     ~Boson(){};
 };
@@ -147,11 +149,11 @@ public:
 
 // #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
 
-#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C) \
-    class part_##partName : public className {                           \
-    public:                                                              \
-        part_##partName() : className(PID, DOF, MASS, WIDTH, C){};       \
-    };                                                                   \
+#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C)      \
+    class part_##partName : public className {                                \
+    public:                                                                   \
+        part_##partName() : className(#partName, PID, DOF, MASS, WIDTH, C){}; \
+    };                                                                        \
     Register_Particle g_register_particle_##partName(new part_##partName)
 
 class Register_POI {

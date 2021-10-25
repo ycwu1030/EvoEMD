@@ -15,9 +15,9 @@ void Particle_Base::Notify_Client() {
     }
 }
 
-Pseudo_Particle::Pseudo_Particle(int PID_in, int DOF_in, Parameter_Base *mass, Parameter_Base *width,
-                                 bool selfconjugate_in)
-    : DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), selfconjugate(selfconjugate_in) {
+Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass,
+                                 Parameter_Base *width, bool selfconjugate_in)
+    : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), selfconjugate(selfconjugate_in) {
     if (p_mass) {
         massless = true;
     } else {
@@ -50,8 +50,8 @@ void Pseudo_Particle::Set_Mass(double mass) {
     }
 }
 
-Fermion::Fermion(int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool selfconjugate)
-    : Pseudo_Particle(PID, DOF, mass, width, selfconjugate) {}
+Fermion::Fermion(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool selfconjugate)
+    : Pseudo_Particle(name, PID, DOF, mass, width, selfconjugate) {}
 
 REAL Fermion::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
@@ -71,8 +71,8 @@ REAL Fermion::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
     }
 }
 
-Boson::Boson(int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool selfconjugate)
-    : Pseudo_Particle(PID, DOF, mass, width, selfconjugate) {}
+Boson::Boson(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool selfconjugate)
+    : Pseudo_Particle(name, PID, DOF, mass, width, selfconjugate) {}
 
 REAL Boson::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
