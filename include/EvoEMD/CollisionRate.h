@@ -47,7 +47,7 @@ public:
         Update_Amp(sqrt_shat);
         return amp_res;
     };
-    virtual REAL Get_Coeff(REAL T) = 0;
+    virtual REAL Get_Coeff(REAL T, int PID) = 0;
 
     unsigned N_INITIAL;
     INITIAL_STATES INITIAL;
