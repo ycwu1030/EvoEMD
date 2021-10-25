@@ -87,8 +87,10 @@ public:
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
+    bool start_with_thermal;
     REAL Yield;
     REAL Numer_Density;
+
     void Set_Mass(double mass);
 };
 
@@ -124,6 +126,7 @@ public:
     bool Register_Particle(Pseudo_Particle *);
     bool Register_POI(int PID);
     bool Set_Mass(int PID, double mass);
+    std::set<int> Get_POI() const { return POI; }
 
 private:
     Particle_Factory();
@@ -150,5 +153,17 @@ public:
         part_##partName() : className(PID, DOF, MASS, WIDTH, C){};       \
     };                                                                   \
     Register_Particle g_register_particle_##partName(new part_##partName)
+
+class Register_POI {
+public:
+    Register_POI(int PID, bool start_with_thermal = true) {
+        EvoEMD::Particle_Factory &pf = EvoEMD::Particle_Factory::Get_Particle_Factory();
+        pf.Register_POI(PID);
+        EvoEMD::Pseudo_Particle *pp = pf.Get_Particle(PID);
+        pp->start_with_thermal = start_with_thermal;
+    }
+};
+
+#define REGISTER_POI(PID, THERMAL) Register_POI g_register_poi_##PID(PID, THERMAL)
 
 #endif  //_PARTICLE_H_
