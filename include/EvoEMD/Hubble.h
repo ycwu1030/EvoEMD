@@ -1,6 +1,7 @@
 #ifndef _HUBBLE_H_
 #define _HUBBLE_H_
 
+#include "EvoEMD/ParameterBase.h"
 #include "EvoEMD/RealTypes.h"
 
 namespace EvoEMD {
@@ -41,6 +42,7 @@ public:
     double Get_beta_T() const { return beta_T; }
     double Get_beta_s() const { return beta_s; }
     bool Is_Isentropic() const { return Isentropic; }
+    void Print() const;
 };
 
 class Hubble_RD : public Hubble_For_Single_Period {
@@ -74,7 +76,7 @@ public:
     virtual REAL Get_Hubble_at_T(const REAL T) override;
 };
 
-class Hubble_History {
+class Hubble_History : public Parameter_Base {
 private:
     std::vector<Hubble_For_Single_Period *> Periods;
     std::vector<REAL> Temperatures;
@@ -86,17 +88,21 @@ private:
 
     void Solve_Te();
 
-public:
-    Hubble_History(const REAL Ti, const REAL Tr);
+    Hubble_History();
     Hubble_History(const Hubble_History &HH);
+    Hubble_History &operator=(const Hubble_History &HH);
     ~Hubble_History();
 
-    Hubble_History &operator=(const Hubble_History &HH);
-
+public:
+    static Hubble_History &Get_Hubble_History();
     int Get_N_Period() const { return Periods.size(); }
-    int Get_Period_ID_at_T(const REAL T) const;
+    int Get_Period_ID_at_T(const REAL T);
     REAL Get_Hubble_at_T(const REAL T);
     Hubble_For_Single_Period *operator[](const int pid);
+    Hubble_For_Single_Period *at(const int pid);
+
+    virtual void Update_Value(REAL input) override;
+    void Print_History();
 };
 
 }  // namespace EvoEMD

@@ -34,7 +34,7 @@ public:
 
     std::complex<double> Get_Yij(int i, int j);
     std::complex<double> Get_YdagYij(int i, int j);
-    virtual void Update_Value(REAL input);
+    virtual void Update_Value(REAL input) override;
 };
 
 #endif  //_SEESAW_TYPE_I_H_

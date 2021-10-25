@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "EvoEMD/Hubble.h"
 #include "Models/SeesawFreezeIn/Parameters.h"
 #include "Models/SeesawFreezeIn/Particles.h"
 #include "Models/SeesawFreezeIn/SeesawTypeI.h"
@@ -20,5 +21,8 @@ int main(int argc, char const *argv[]) {
     cout << " YdagY(0,0) = " << ((SeesawTypeI *)pb)->Get_YdagYij(0, 0) << endl;
     pf.Set_Parameter_Value("MN1", 3001.1);
     cout << " YdagY(0,0) = " << ((SeesawTypeI *)pb)->Get_YdagYij(0, 0) << endl;
+    Hubble_History &hh = Hubble_History::Get_Hubble_History();
+    hh.Print_History();
+    cout << " H(T=30000) = " << hh.Get_Hubble_at_T(30000) << endl;
     return 0;
 }
