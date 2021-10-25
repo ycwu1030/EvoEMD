@@ -152,6 +152,13 @@ REAL Hubble_History::Get_Hubble_at_T(const REAL T) {
     return Periods[Get_Period_ID_at_T(T)]->Get_Hubble_at_T(T);
 }
 
+double Hubble_History::Get_beta_T_at_T(const REAL T) {
+    if (updated) {
+        Update_Value(0);
+    }
+    return Periods[Get_Period_ID_at_T(T)]->Get_beta_T();
+}
+
 Hubble_For_Single_Period *Hubble_History::at(const int pid) {
     if (!updated) {
         Update_Value(0);

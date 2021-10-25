@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "EvoEMD/Hubble.h"
 #include "EvoEMD/ParticleBase.h"
 #include "EvoEMD/RungeKutta.h"
 
@@ -17,6 +18,7 @@ private:
     std::vector<std::string> poi_names;
     std::vector<Pseudo_Particle *> poi_ptrs;
     Particle_Factory &pf;
+    Hubble_History &hh;
     void Setup_Scale();
 
 public:

@@ -98,6 +98,7 @@ public:
     int Get_N_Period() const { return Periods.size(); }
     int Get_Period_ID_at_T(const REAL T);
     REAL Get_Hubble_at_T(const REAL T);
+    double Get_beta_T_at_T(const REAL T);
     Hubble_For_Single_Period *operator[](const int pid);
     Hubble_For_Single_Period *at(const int pid);
 
