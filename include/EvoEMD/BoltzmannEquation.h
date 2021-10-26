@@ -26,6 +26,7 @@ public:
     ~BoltzmannEquation(){};
 
     virtual VD dYdX(REAL x, VD y) override;
+    virtual VD Yeq(REAL x) override;
 };
 
 }  // namespace EvoEMD

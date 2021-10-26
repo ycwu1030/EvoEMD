@@ -32,6 +32,7 @@ public:
     VD Get_BOUNDARY_CONDITION() const { return BOUNDARY_CONDITION; }
     VD operator()(REAL x, VD y) { return dYdX(x, y); }
     virtual VD dYdX(REAL x, VD y) = 0;
+    virtual VD Yeq(REAL x) = 0;
 };
 
 /*
@@ -83,6 +84,7 @@ private:
 
     VD _X;      // * The vector storing the points in x
     VVD _Y;     // * The vector storing the points in y, len(_Y) = len(_X) and the second dimension is DOF
+    VVD _Yeq;   // * The vector storing the equilibrium value of Y;
     VVD _dYdX;  // * Similar to _Y, but storing dy/dx
 
     VD BOUNDARY_AT_BEGIN;  // * The boundary condition at X_BEGIN
@@ -110,7 +112,7 @@ private:
      * @param step_size, step size, we would like to go forward
      * @param dy_next, the dy at next step (output)
      */
-    void RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next);
+    bool RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next);
 
     /**
      * @brief The Runge-Kutta method taking one step forward
