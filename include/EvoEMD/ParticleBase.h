@@ -37,6 +37,7 @@ public:
     void Register_Process(Process *);
 
     void Notify_Client();
+    std::set<Process *> Get_Process() const { return Process_Set; }
 };
 
 class Pseudo_Particle : public Particle_Base {
@@ -47,6 +48,7 @@ class Pseudo_Particle : public Particle_Base {
     // * DOF: degree of freedom, (particle and antiparticle count seperately)
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
+    std::string name;
     bool selfconjugate;
     bool massless;
     bool thermalized;
@@ -72,13 +74,20 @@ public:
      * @param  selfconjugate: Whether
      * @retval
      */
-    Pseudo_Particle(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
                     bool selfconjugate = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
     int Get_DOF() const { return DOF; }
-    double Get_Mass() const { return p_mass->Get_Value(); }
+    std::string Get_Name() const { return name; }
+    double Get_Mass() const {
+        if (massless) {
+            return 0;
+        } else {
+            return p_mass->Get_Value();
+        }
+    }
     bool Is_Massless() const { return massless; }
     bool Is_Selfconjugate() const { return selfconjugate; }
 
@@ -87,8 +96,10 @@ public:
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
+    bool start_with_thermal;
     REAL Yield;
     REAL Numer_Density;
+
     void Set_Mass(double mass);
 };
 
@@ -98,7 +109,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Fermion(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+    Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
             bool selfconjugate = false);
     ~Fermion(){};
 };
@@ -109,7 +120,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Boson(int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+    Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
           bool selfconjugate = false);
     ~Boson(){};
 };
@@ -124,6 +135,7 @@ public:
     bool Register_Particle(Pseudo_Particle *);
     bool Register_POI(int PID);
     bool Set_Mass(int PID, double mass);
+    std::set<int> Get_POI() const { return POI; }
 
 private:
     Particle_Factory();
@@ -144,11 +156,23 @@ public:
 
 // #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
 
-#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C) \
-    class part_##partName : public className {                           \
-    public:                                                              \
-        part_##partName() : className(PID, DOF, MASS, WIDTH, C){};       \
-    };                                                                   \
+#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C)      \
+    class part_##partName : public className {                                \
+    public:                                                                   \
+        part_##partName() : className(#partName, PID, DOF, MASS, WIDTH, C){}; \
+    };                                                                        \
     Register_Particle g_register_particle_##partName(new part_##partName)
+
+class Register_POI {
+public:
+    Register_POI(int PID, bool start_with_thermal = true) {
+        EvoEMD::Particle_Factory &pf = EvoEMD::Particle_Factory::Get_Particle_Factory();
+        pf.Register_POI(PID);
+        EvoEMD::Pseudo_Particle *pp = pf.Get_Particle(PID);
+        pp->start_with_thermal = start_with_thermal;
+    }
+};
+
+#define REGISTER_POI(PID, THERMAL) Register_POI g_register_poi_##PID(PID, THERMAL)
 
 #endif  //_PARTICLE_H_

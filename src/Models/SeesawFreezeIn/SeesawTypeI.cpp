@@ -129,7 +129,6 @@ void SeesawTypeI::Set_Mixing_Matrix() {
 }
 
 SeesawTypeI::SeesawTypeI() : EvoEMD::Parameter_Base("Seesaw_Parameters") {
-    Set_PMNS_Matrix();
     RETRIVE_PARAMETER(MN1)->Claim_Dependence(this);
     RETRIVE_PARAMETER(MN2)->Claim_Dependence(this);
     RETRIVE_PARAMETER(MN3)->Claim_Dependence(this);

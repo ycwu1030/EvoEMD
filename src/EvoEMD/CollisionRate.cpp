@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "EvoEMD/Constants.h"
 #include "EvoEMD/PhaseSpace.h"
 #include "cuba.h"
 #include "gsl/gsl_sf_bessel.h"
@@ -43,7 +44,7 @@ REAL Decay12_Rate::Get_Collision_Rate(REAL T) {
 
     REAL m1 = amp->INITIAL[0]->Get_Mass();
     REAL z = m1 / T;
-    REAL k1z = gsl_sf_bessel_K1(z);
+    REAL k1z = z > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(z);
     REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z;
     return RES;
 }
@@ -194,7 +195,7 @@ int Scatter22_Rate_Integrand(const int *ndim, const REAL x[], const int *ncomp, 
     REAL sqrt_Kallen_init = sqrt(Kallen_Lam(1.0, m1 * m1 / s, m2 * m2 / s));
     REAL sqrt_Kallen_final = sqrt(Kallen_Lam(1.0, m3 * m3 / s, m4 * m4 / s));
 
-    REAL k1z = gsl_sf_bessel_K1(sqrt_s / T);
+    REAL k1z = sqrt_s / T > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(sqrt_s / T);
     ff[0] = Jac_from_sqrt_s * s * k1z * sqrt_Kallen_init * sqrt_Kallen_final *
             par->ptr->Get_Amp_Integrate_over_Phase_Space(sqrt_s);
     return 0;

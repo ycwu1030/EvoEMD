@@ -63,4 +63,7 @@ void Parameter_Factory::List_Parameters() {
     }
 }
 
+DECLARE_FREE_PARAMETER(Ti, 1e14);
+DECLARE_FREE_PARAMETER(Tr, 10);
+
 }  // namespace EvoEMD

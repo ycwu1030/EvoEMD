@@ -24,6 +24,6 @@ Process::~Process() { delete CR_Calculator; }
 
 REAL Process::Get_Collision_Rate(REAL T) { return CR_Calculator->Get_Collision_Rate(T); }
 
-REAL Process::Get_Yield_Coeff(REAL T) { return amp->Get_Coeff(T); }
+REAL Process::Get_Yield_Coeff(REAL T, int PID) { return amp->Get_Coeff(T, PID); }
 
 }  // namespace EvoEMD
