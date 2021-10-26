@@ -16,8 +16,8 @@ int main(int argc, char const *argv[]) {
     Parameter_Base *mx = RETRIVE_PARAMETER(MX);
     BoltzmannEquation BE(mx);
     REAL scale = mx->Get_Value();
-    REAL T_BEGIN = 1 * scale;
-    REAL T_END = scale / 5.0;
+    REAL T_BEGIN = scale / 60.0;
+    REAL T_END = scale / 65.0;
     BE.Set_X_BEGIN(log(scale / T_BEGIN));
     BE.Set_X_END(log(scale / T_END));
     VD BD(1);
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
     cout << "Starting from: Y = " << BE.Get_BOUNDARY_CONDITION()[0] << endl;
     RungeKutta rk(&BE);
     cout << "System Built" << endl;
-    rk.Solve(1e-5);
+    rk.Solve(1e-2);
     rk.Dump_Solution("ToyDM_Result.txt");
     return 0;
 }
