@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "EvoEMD/Constants.h"
 #include "gsl/gsl_sf_bessel.h"
 #include "gsl/gsl_sf_zeta.h"
 
@@ -18,7 +19,7 @@ void Particle_Base::Notify_Client() {
 Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass,
                                  Parameter_Base *width, bool selfconjugate_in)
     : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), selfconjugate(selfconjugate_in) {
-    if (p_mass) {
+    if (!p_mass) {
         massless = true;
     } else {
         massless = false;
@@ -26,17 +27,17 @@ Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Pa
 }
 
 REAL Pseudo_Particle::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const {
-    REAL mass = p_mass->Get_Value();
+    REAL mass = Get_Mass();
     REAL z = mass / T;
-    REAL z2K2 = z * z * gsl_sf_bessel_Kn(2, z);
+    REAL z2K2 = z > BESSEL_Z_MAX ? 0 : z * z * gsl_sf_bessel_Kn(2, z);
     REAL neq = pow(T, 3) / 2 / M_PI / M_PI * z2K2;
     return neq;
 }
 
 REAL Pseudo_Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
-    REAL mass = p_mass->Get_Value();
+    REAL mass = Get_Mass();
     REAL z = mass / T;
-    REAL z2K2 = z * z * gsl_sf_bessel_Kn(2, z);
+    REAL z2K2 = z > BESSEL_Z_MAX ? 0 : z * z * gsl_sf_bessel_Kn(2, z);
     REAL Yeq = z2K2 / 2 / M_PI / M_PI;
     return Yeq;
 }

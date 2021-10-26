@@ -47,11 +47,15 @@ VD BoltzmannEquation::dYdX(REAL x, VD y) {
     double beta_T = hs->Get_beta_T();
     REAL HatT = hs->Get_Hubble_at_T(T);
     bool isentropic = hs->Is_Isentropic();
+    // hs->Print();
     VD res(DOF, 0);
     for (int i = 0; i < DOF; i++) {
         Pseudo_Particle *pp = poi_ptrs[i];
         std::set<Process *> sp = pp->Get_Process();
         for (auto &&proc_ptr : sp) {
+            // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
+            // std::cout << "Coefficient @ T=" << T << " is " << proc_ptr->Get_Yield_Coeff(T, pp->Get_PID()) <<
+            // std::endl;
             res[i] += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
         }
     }
@@ -63,6 +67,7 @@ VD BoltzmannEquation::dYdX(REAL x, VD y) {
             res[i] /= beta_T;
         }  // else beta_T == 1, no further action needed
     }
+    // std::cout << "RES = " << res << std::endl;
     return res;
 }
 

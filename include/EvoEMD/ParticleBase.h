@@ -81,7 +81,13 @@ public:
     int Get_PID() const { return PID; }
     int Get_DOF() const { return DOF; }
     std::string Get_Name() const { return name; }
-    double Get_Mass() const { return p_mass->Get_Value(); }
+    double Get_Mass() const {
+        if (massless) {
+            return 0;
+        } else {
+            return p_mass->Get_Value();
+        }
+    }
     bool Is_Massless() const { return massless; }
     bool Is_Selfconjugate() const { return selfconjugate; }
 

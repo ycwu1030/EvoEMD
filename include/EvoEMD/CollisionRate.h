@@ -11,7 +11,6 @@ struct Process_Amp {
     // * used to store how many squared diagrams we have for corresponding amplitude calculation
     unsigned n_diag;
 
-    // * bool determine whether the corresponding REAL is actually exactly zero
     typedef std::vector<REAL> CTH_RES_FULL;
     typedef CTH_RES_FULL NUMERATOR_STRUCTURE;
     typedef int Propagator_ID;
@@ -40,7 +39,7 @@ public:
     typedef std::vector<Pseudo_Particle *> INITIAL_STATES;
     typedef std::vector<Pseudo_Particle *> FINAL_STATES;
 
-    Amplitude();
+    Amplitude(){};
     virtual ~Amplitude(){};
     virtual void Update_Amp(REAL sqrt_shat) = 0;
     virtual const Process_Amp &Get_Amp(REAL sqrt_shat) {
