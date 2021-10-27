@@ -2,10 +2,18 @@
 
 A framework to evaluate the evolution w/ or w/o an early matter dominated (EMD) era.
 
-## Feature
+## Features
 
 - Global parameter system
 - Global particle system
 - Global process system
-- Automatically build up the Boltzmann equation according to the user's definition of particle and process (working in progress)
-- Solving the Boltzmann equation with RK to 5th order
+- Automatically build up the Boltzmann equation according to the user's definition of particle and process
+- Solving the Boltzmann equation using 4th order Runge-Kutta method with adaptive steps tailored to Cosmology application
+
+## Document
+
+In preparation...
+
+## Examples
+
+Simple examples can be found in corresponding folders under `Models`
