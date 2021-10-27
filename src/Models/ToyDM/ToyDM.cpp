@@ -16,8 +16,8 @@ int main(int argc, char const *argv[]) {
     Parameter_Base *mx = RETRIVE_PARAMETER(MX);
     BoltzmannEquation BE(mx);
     REAL scale = mx->Get_Value();
-    REAL T_BEGIN = scale / 40.0;
-    REAL T_END = scale / 100.0;
+    REAL T_BEGIN = scale;
+    REAL T_END = scale / 1000.0;
     BE.Set_X_BEGIN(log(scale / T_BEGIN));
     BE.Set_X_END(log(scale / T_END));
     VD BD(1);

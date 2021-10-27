@@ -128,7 +128,7 @@ private:
      * @param step_size_did, output: actual step size we take
      * @param step_size_further, output: based on what we did, the prospect step size for next step
      */
-    void RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
+    bool RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
                          REAL &step_size_did, REAL &step_size_further);
 };
 }  // namespace EvoEMD

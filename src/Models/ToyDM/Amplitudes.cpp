@@ -34,6 +34,7 @@ REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
         Pseudo_Particle *pp = Particle_Factory::Get_Particle_Factory().Get_Particle(900001);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
+        if (YeqT == 0) return 0;
         REAL res = (1.0 - pow(Y / YeqT, 2));
         return res;
     } else {

@@ -203,7 +203,7 @@ int Scatter22_Rate_Integrand(const int *ndim, const REAL x[], const int *ncomp, 
 
 // CUBA PARAMETERS:
 // COMMON VARIABLES
-#define MINEVAL 10000
+#define MINEVAL 5000
 #define MAXEVAL 100000
 #define EPSREL 1E-3
 #define EPSABS 0  // 1E-7 precision is about 1 ab, which is way small.
