@@ -20,10 +20,24 @@ Process::Process(Amplitude *amp) {
     }
 }
 
-Process::~Process() { delete CR_Calculator; }
+Process::~Process() {
+    delete CR_Calculator;
+    delete amp;
+}
 
 REAL Process::Get_Collision_Rate(REAL T) { return CR_Calculator->Get_Collision_Rate(T); }
 
 REAL Process::Get_Yield_Coeff(REAL T, int PID) { return amp->Get_Coeff(T, PID); }
+
+Process_Factory::~Process_Factory() {
+    for (auto &&proc : PL) {
+        delete proc;
+    }
+}
+
+Process_Factory &Process_Factory::Get_Process_Factory() {
+    static Process_Factory pf;
+    return pf;
+}
 
 }  // namespace EvoEMD
