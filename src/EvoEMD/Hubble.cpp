@@ -4,6 +4,7 @@
 
 #include "EvoEMD/Constants.h"
 #include "EvoEMD/EffDOF.h"
+#include "EvoEMD/ParameterBase.h"
 
 namespace EvoEMD {
 Hubble_For_Single_Period::Hubble_For_Single_Period(const REAL Ti, const REAL Tf, const bool Isentropic_in,
@@ -13,6 +14,11 @@ Hubble_For_Single_Period::Hubble_For_Single_Period(const REAL Ti, const REAL Tf,
 REAL Hubble_For_Single_Period::Get_Hubble_For_RD(const REAL T) {
     REAL geT = ge(T);
     return M_PI / 3.0 * sqrt(geT / 10.0) * T * T / PHY_MP / PHY_MP;
+}
+
+void Hubble_For_Single_Period::Print() const {
+    std::cout << "Temperature: [" << T_start << "," << T_end << "], beta_T = " << beta_T
+              << ", entropy conservation: " << Isentropic << std::endl;
 }
 
 Hubble_RD::Hubble_RD(const REAL T_start, const REAL T_end) : Hubble_For_Single_Period(T_start, T_end) {}
@@ -36,14 +42,21 @@ REAL Hubble_EP::Get_Hubble_at_T(const REAL T) {
     return HRD_at_T_end * geT / ge_at_T_end * pow(T / T_end, 4);
 }
 
-Hubble_History::Hubble_History(const REAL Ti_, const REAL Tr_) : Ti(Ti_), Tr(Tr_) {
+void Hubble_History::Update_Value(REAL input) {
+    Ti = RETRIVE_PARAMETER(Ti)->Get_Value();
+    Tr = RETRIVE_PARAMETER(Tr)->Get_Value();
     TRH = std::max(1e15, Ti * 10);
     Tf = std::min(1e-3, Tr / 10.0);
     Solve_Te();
+    for (int i = 0; i < Periods.size(); i++) {
+        delete Periods[i];
+    }
+    Periods.clear();
     Periods.push_back(new Hubble_RD(TRH, Ti));
     Periods.push_back(new Hubble_EMD(Ti, Te));
     Periods.push_back(new Hubble_EP(Te, Tr));
     Periods.push_back(new Hubble_RD(Tr, Tf));
+    Temperatures.clear();
     Temperatures.push_back(TRH);
     Temperatures.push_back(Ti);
     Temperatures.push_back(Te);
@@ -51,8 +64,14 @@ Hubble_History::Hubble_History(const REAL Ti_, const REAL Tr_) : Ti(Ti_), Tr(Tr_
     Temperatures.push_back(Tf);
 }
 
+Hubble_History::Hubble_History() : Parameter_Base("Hubble") {
+    RETRIVE_PARAMETER(Ti)->Claim_Dependence(this);
+    RETRIVE_PARAMETER(Tr)->Claim_Dependence(this);
+    Update_Value(0);
+}
+
 Hubble_History::Hubble_History(const Hubble_History &HH)
-    : TRH(HH.TRH), Ti(HH.Ti), Te(HH.Te), Tr(HH.Tr), Tf(HH.Tf), Temperatures(HH.Temperatures) {
+    : TRH(HH.TRH), Ti(HH.Ti), Te(HH.Te), Tr(HH.Tr), Tf(HH.Tf), Temperatures(HH.Temperatures), Parameter_Base("Hubble") {
     Periods.push_back(new Hubble_RD(TRH, Ti));
     Periods.push_back(new Hubble_EMD(Ti, Te));
     Periods.push_back(new Hubble_EP(Te, Tr));
@@ -107,7 +126,10 @@ void Hubble_History::Solve_Te() {
     Te = exp((x_max + x_min) / 2.0);
 }
 
-int Hubble_History::Get_Period_ID_at_T(const REAL T) const {
+int Hubble_History::Get_Period_ID_at_T(const REAL T) {
+    if (!updated) {
+        Update_Value(0);
+    }
     if (T > TRH || T <= Tf) return -1;
     int id_low = 0;
     int id_high = Temperatures.size() - 1;
@@ -123,8 +145,41 @@ int Hubble_History::Get_Period_ID_at_T(const REAL T) const {
     return id_low;
 }
 
-REAL Hubble_History::Get_Hubble_at_T(const REAL T) { return Periods[Get_Period_ID_at_T(T)]->Get_Hubble_at_T(T); }
+REAL Hubble_History::Get_Hubble_at_T(const REAL T) {
+    if (updated) {
+        Update_Value(0);
+    }
+    return Periods[Get_Period_ID_at_T(T)]->Get_Hubble_at_T(T);
+}
 
-Hubble_For_Single_Period *Hubble_History::operator[](const int pid) { return Periods[pid]; }
+double Hubble_History::Get_beta_T_at_T(const REAL T) {
+    if (updated) {
+        Update_Value(0);
+    }
+    return Periods[Get_Period_ID_at_T(T)]->Get_beta_T();
+}
+
+Hubble_For_Single_Period *Hubble_History::at(const int pid) {
+    if (!updated) {
+        Update_Value(0);
+    }
+    return Periods[pid];
+}
+
+Hubble_For_Single_Period *Hubble_History::operator[](const int pid) { return this->at(pid); }
+
+Hubble_History &Hubble_History::Get_Hubble_History() {
+    static Hubble_History hist;
+    return hist;
+}
+
+void Hubble_History::Print_History() {
+    if (!updated) {
+        Update_Value(0);
+    }
+    for (int i = 0; i < Periods.size(); i++) {
+        Periods[i]->Print();
+    }
+}
 
 }  // namespace EvoEMD

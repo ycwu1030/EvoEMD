@@ -18,11 +18,11 @@ RungeKutta::RungeKutta()
       SAFETY(0.9),
       POW_GROW(-0.2),
       POW_SHRINK(-0.25),
-      TINY_REL_THRESHOLD(1e-30),
+      TINY_REL_THRESHOLD(1e-60),
       MAXSTEPS(10000) {}
 
 RungeKutta::RungeKutta(ODE_FUNCS *ode)
-    : SOLVED(false), SAFETY(0.9), POW_GROW(-0.2), POW_SHRINK(-0.25), TINY_REL_THRESHOLD(1e-30), MAXSTEPS(10000) {
+    : SOLVED(false), SAFETY(0.9), POW_GROW(-0.2), POW_SHRINK(-0.25), TINY_REL_THRESHOLD(1e-60), MAXSTEPS(10000) {
     Set_ODE(ode);
 }
 
@@ -35,6 +35,7 @@ void RungeKutta::Clear() {
     SPDLOG_INFO_FILE("Clear X, Y and dYdX in RungeKutta Solver.");
     _X.clear();
     _Y.clear();
+    _Yeq.clear();
     _dYdX.clear();
 }
 
@@ -53,6 +54,7 @@ void RungeKutta::INIT() {
     // * Initialize the system at X_BEGIN:
     _X.push_back(X_BEGIN);
     _Y.push_back(BOUNDARY_AT_BEGIN);
+    _Yeq.push_back(derivs->Yeq(X_BEGIN));
     _dYdX.push_back((*derivs)(X_BEGIN, BOUNDARY_AT_BEGIN));
 
     SPDLOG_DEBUG_FILE("Initialize the RungeKutta with:");
@@ -65,7 +67,7 @@ void RungeKutta::INIT() {
     }
 }
 
-void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next) {
+bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next) {
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
     SPDLOG_INFO_FILE("Starting at: ");
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x_cur);
@@ -107,12 +109,21 @@ void RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
     SPDLOG_INFO_FILE("Ending at: ");
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x_cur + step_size);
+    VD Yeq = derivs->Yeq(x_cur + step_size);
+    bool comp = false;
     for (int i = 0; i < DOF; i++) {
         SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e};", i, y_next[i]);
+        if (y_next[i] < Yeq[i]) {
+            SPDLOG_INFO_FILE("    Y[{0}] = {1:+9.8e} < Yeq[{0}] = {2:+9.8e}", i, y_next[i], Yeq[i]);
+            SPDLOG_INFO_FILE("    Compensate back to Yeq");
+            comp = true;
+            y_next[i] = Yeq[i];
+        }
     }
+    return comp;
 }
 
-void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
+bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
                                  REAL &step_size_did, REAL &step_size_further) {
     SPDLOG_INFO_FILE("RKQC: ");
     SPDLOG_INFO_FILE("Starting with: ");
@@ -138,6 +149,9 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
     SPDLOG_DEBUG_FILE("Minimal allowed step size is {:+9.8e};", min_step_size);
     REAL max_step_size;
     int trials = 0;
+    bool comp_two_step;
+    bool comp_single_step;
+    bool comp;
     while (true) {
         ++trials;
         SPDLOG_DEBUG_FILE("{}-th Trial for RKQC with stepsize = {:+9.8e}", trials, step_size);
@@ -146,7 +160,7 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         RK4_SingleStep(x_cache, y_cache, dy_cache, half_step_size, y_temp);
         x = x_cache + half_step_size;
         dy = (*derivs)(x, y_temp);
-        RK4_SingleStep(x, y_temp, dy, half_step_size, y);
+        comp_two_step = RK4_SingleStep(x, y_temp, dy, half_step_size, y);
         SPDLOG_DEBUG_FILE("Take two half steps, reaching:");
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x + half_step_size);
         for (int i = 0; i < DOF; i++) {
@@ -159,7 +173,7 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         }
 
         // * Take one full step
-        RK4_SingleStep(x_cache, y_cache, dy_cache, step_size, y_temp);
+        comp_single_step = RK4_SingleStep(x_cache, y_cache, dy_cache, step_size, y_temp);
         x = x_cache + step_size;
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x);
@@ -171,7 +185,7 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
             }
             SPDLOG_DEBUG_FILE("  Y[{}] = {:+9.8e};", i, y_temp[i]);
         }
-
+        comp = comp_single_step && comp_two_step;
         // * Check the difference between above two methods
 
         Delta_y = y - y_temp;
@@ -184,12 +198,16 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         }
 
         SPDLOG_DEBUG_FILE("Error max: {:+9.8e};", error_max);
+        if (!comp_two_step && comp_single_step) {
+            step_size = 1e-3;
+            continue;
+        }
         if (error_max <= 1.0) {
             // * The error is acceptable, we will proceed, and even try to enlarge the step size
             step_size_did = step_size;
             step_size_temp = SAFETY * step_size * exp(POW_GROW * log(error_max + 1e-5));
             max_step_size = 4 * step_size_did;
-            step_size_further = min(step_size_temp, max_step_size);
+            step_size_further = (comp_single_step) ? 1.5 * step_size_did : min(step_size_temp, max_step_size);
             SPDLOG_DEBUG_FILE("Error is small, enlarge the step size to: {:+9.8e};", step_size_further);
             break;
         }
@@ -217,6 +235,7 @@ void RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
     for (int i = 0; i < DOF; i++) {
         SPDLOG_DEBUG_FILE(" Y[{0}] = {1:+9.8e}, dYdX = {2:+9.8e};", i, y[i], dy[i]);
     }
+    return comp;
 }
 
 RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
@@ -251,9 +270,27 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
         }
 
         // * One step forward
-        RKQC_SingleStep(x, y, dydx, step_size, eps, Y_Scale, step_size_did, step_size_next);
+        bool comp = RKQC_SingleStep(x, y, dydx, step_size, eps, Y_Scale, step_size_did, step_size_next);
+        // if (comp) {
+        //     // * If in above single step, we compensate to equilibrium value, then we want to check, if the step is
+        //     too
+        //     // large
+        //     double x_tmp = _X.back();
+        //     VD y_tmp = _Y.back();
+        //     VD dy_tmp = _dYdX.back();
+        //     double step_size_did_tmp, step_size_next_tmp;
+        //     comp = RKQC_SingleStep(x_tmp, y_tmp, dy_tmp, 1e-3, eps, Y_Scale, step_size_did_tmp, step_size_next_tmp);
+        //     if (!comp) {
+        //         x = x_tmp;
+        //         y = y_tmp;
+        //         dydx = dy_tmp;
+        //         step_size_did = step_size_did_tmp;
+        //         step_size_next = step_size_next_tmp;
+        //     }
+        // }
         _X.push_back(x);
         _Y.push_back(y);
+        _Yeq.push_back(derivs->Yeq(x));
         _dYdX.push_back(dydx);
 
         // * Check if we reach the end point
@@ -281,7 +318,8 @@ void RungeKutta::Dump_Solution(string filename) {
     ofstream output(filename.c_str());
     output << "x\t";
     for (size_t i = 0; i < DOF; i++) {
-        output << "y_" << i << "\t";
+        output << "y_" << i << "\t"
+               << "yeq_" << i << "\t";
     }
     for (size_t i = 0; i < DOF; i++) {
         output << "dydx_" << i << "\t";
@@ -293,7 +331,7 @@ void RungeKutta::Dump_Solution(string filename) {
     for (size_t i = 0; i < _X.size(); i++) {
         output << _X[i] << "\t";
         for (size_t j = 0; j < DOF; j++) {
-            output << _Y[i][j] << "\t";
+            output << _Y[i][j] << "\t" << _Yeq[i][j] << "\t";
         }
         for (size_t j = 0; j < DOF; j++) {
             output << _dYdX[i][j] << "\t";

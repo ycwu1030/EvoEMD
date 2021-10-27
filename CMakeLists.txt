@@ -4,7 +4,7 @@ if (POLICY CMP0042)
 endif ()
 PROJECT(EVOEMD CXX)
 
-SET(EVOEMD_VERSION "0.5.0")
+SET(EVOEMD_VERSION "0.6.0")
 
 FIND_PACKAGE(GSL 2.1 REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
@@ -31,4 +31,5 @@ TARGET_LINK_LIBRARIES(EVOEMD_shared ${GSL_LIBRARIES} cuba)
 SET(EVOEMD_LIBRARY EVOEMD_shared)
 
 add_subdirectory(src/Models/SeesawFreezeIn)
+add_subdirectory(src/Models/ToyDM)
 # add_subdirectory(test)

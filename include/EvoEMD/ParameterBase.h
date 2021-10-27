@@ -24,6 +24,7 @@ public:
     void Claim_Dependence(Parameter_Base *par) { underlying_parameters.insert(par); }
     void Notify() {
         updated = false;
+        // std::cout << "Parameter: " << name << " Need to be Updated" << std::endl;
         for (auto &&bp : underlying_parameters) {
             bp->Notify();
         }
@@ -36,6 +37,7 @@ public:
         Notify();
         Update_Value(input);
         updated = true;
+        // std::cout << "Parameter: " << name << " has been updated" << std::endl;
     }
     REAL Get_Value() {
         if (updated) {
@@ -84,7 +86,7 @@ public:
     };
 };
 
-#define REGISTER_PARAMETER(paramName) Register_Parameter g_register_parameter_##paramName(new paramName)
+#define REGISTER_PARAMETER(paramName) const Register_Parameter g_register_parameter_##paramName(new paramName)
 #define DECLARE_FREE_PARAMETER(paramName, value)                   \
     class param_##paramName : public Free_Parameter {              \
     public:                                                        \
