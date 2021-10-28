@@ -79,11 +79,7 @@ VD BoltzmannEquation::Yeq(REAL x) {
     for (int i = 0; i < DOF; i++) {
         Pseudo_Particle *pp = poi_ptrs[i];
         REAL yeq = pp->Get_Equilibrium_Yield_at_T(T);
-        if (pp->start_with_thermal) {
-            res[i] = yeq;
-        } else {
-            res[i] = -yeq;
-        }
+        res[i] = yeq;
     }
     return res;
 }

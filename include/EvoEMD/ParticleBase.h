@@ -49,9 +49,7 @@ class Pseudo_Particle : public Particle_Base {
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
     std::string name;
-    bool selfconjugate;
     bool massless;
-    bool thermalized;
     Parameter_Base *p_mass;
     Parameter_Base *p_width;
     int PID;
@@ -63,19 +61,19 @@ protected:
 
 public:
     /**
-     * @brief
+     * @brief  ctor for a Pseudo_Particle
      * @note
-     * @param  PID: The PID for a particle
+     * @param  name: The name for the particle
+     * @param  PID: The PID for a particle (should be unique for each particle)
      * @param  DOF: The degree of freedom of the particle, particle and antiparticle will be counted seperately
      *              On the other hand, DOF is the one used to calculate the equilibrium number density which will be
      *              used in Boltzmann equation. So be sure this DOF is consistent with the collision rate.
      * @param  mass: Pointer to mass parameter, if nullptr (default), it is assumed the particle is massless
      * @param  width: Pointer to width parameter, if nullptr (default), it is assumed the particle is stable
-     * @param  selfconjugate: Whether
      * @retval
      */
-    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-                    bool selfconjugate = false);
+    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr,
+                    Parameter_Base *width = nullptr);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
@@ -89,13 +87,13 @@ public:
         }
     }
     bool Is_Massless() const { return massless; }
-    bool Is_Selfconjugate() const { return selfconjugate; }
 
     REAL Get_Equilibrium_Number_Density_at_T(const REAL T) const {
         return DOF * Get_Equilibrium_Number_Density_per_DOF(T);
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
+    bool Never_Thermal;
     bool start_with_thermal;
     REAL Yield;
 
@@ -118,8 +116,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-            bool selfconjugate = false);
+    Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr);
     ~Fermion(){};
 };
 
@@ -129,8 +126,7 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-          bool selfconjugate = false);
+    Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr);
     ~Boson(){};
 };
 
@@ -165,11 +161,11 @@ public:
 
 // #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
 
-#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C)      \
-    class part_##partName : public className {                                \
-    public:                                                                   \
-        part_##partName() : className(#partName, PID, DOF, MASS, WIDTH, C){}; \
-    };                                                                        \
+#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH)      \
+    class part_##partName : public className {                             \
+    public:                                                                \
+        part_##partName() : className(#partName, PID, DOF, MASS, WIDTH){}; \
+    };                                                                     \
     Register_Particle g_register_particle_##partName(new part_##partName)
 
 #define RETRIVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)

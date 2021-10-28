@@ -169,7 +169,8 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
     SPDLOG_INFO_FILE("Guess step size: dx = {:+9.8e},", step_size_guess);
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x);
     for (int i = 0; i < DOF; i++) {
-        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e};", i, y[i], dydx[i]);
+        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, Yeq[{0}] = {3:+9.8e};", i, y[i], dydx[i],
+                         yeq[i]);
     }
     SPDLOG_INFO_FILE("  Guessed Step size dx = {:+9.8e}", step_size_guess);
     // * Cache the initial points
