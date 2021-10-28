@@ -10,20 +10,9 @@
 namespace EvoEMD {
 
 class Process;
-class Particle_Client {
-public:
-    Particle_Client(){};
-    virtual ~Particle_Client(){};
-
-    virtual void Update_Particle_Info() = 0;
-};
 
 class Particle_Base {
 protected:
-    // * Objects that use particle information
-    // * In any time, particle information is updated, the client should update their own properties
-    std::set<Particle_Client *> Particle_Client_Set;
-
     // * Processes that involve current particle
     // * The process calculates its value lazily, it will acquire particle's infor when it needs
     // * This set is used to keep aware what are the processes involving current particle
@@ -33,7 +22,6 @@ public:
     Particle_Base(){};
     virtual ~Particle_Base(){};
 
-    void Register_Client(Particle_Client *);
     void Register_Process(Process *);
 
     void Notify_Client();

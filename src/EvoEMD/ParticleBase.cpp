@@ -7,14 +7,7 @@
 #include "gsl/gsl_sf_zeta.h"
 
 namespace EvoEMD {
-void Particle_Base::Register_Client(Particle_Client *pc) { Particle_Client_Set.insert(pc); }
 void Particle_Base::Register_Process(Process *proc) { Process_Set.insert(proc); }
-void Particle_Base::Notify_Client() {
-    std::set<Particle_Client *>::iterator iter = Particle_Client_Set.begin();
-    for (; iter != Particle_Client_Set.end(); iter++) {
-        (*iter)->Update_Particle_Info();
-    }
-}
 
 Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass,
                                  Parameter_Base *width)
@@ -47,7 +40,6 @@ void Pseudo_Particle::Set_Mass(double mass) {
         std::cout << "Setting mass for a massless particle, the mass is ignored" << std::endl;
     } else {
         p_mass->Set_Value(mass);
-        Notify_Client();
     }
 }
 
