@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 
+#define VB std::vector<bool>
 #define REAL double
 #define VD std::vector<REAL>
 #define VVD std::vector<VD>
