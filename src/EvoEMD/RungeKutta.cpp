@@ -145,20 +145,54 @@ bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dyd
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
     SPDLOG_INFO_FILE("Ending at: ");
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x_cur + step_size);
-    std::vector<bool> status = derivs->Is_Start_with_Thermalization();
+    std::vector<bool> status = derivs->Is_Thermalized();
     bool comp = false;
     for (int i = 0; i < DOF; i++) {
         SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e};", i, y_next[i]);
         if (status[i] && y_next[i] < Yeq_full_step[i]) {
-            SPDLOG_INFO_FILE("    Y[{0}] = {1:+9.8e} < Yeq[{0}] = {2:+9.8e}", i, y_next[i], Yeq_full_step[i]);
-            SPDLOG_INFO_FILE("    Compensate back to Yeq");
-            comp = true;
-            y_next[i] = Yeq_full_step[i];
-            delta_y_ratio_next[i] = 0;
+            if (y_next[i] < Yeq_full_step[i]) {
+                SPDLOG_INFO_FILE("    From Y[{0}] = Yeq[{0}] = {1:+9.8e} to Y[{0}] = {2:+9.8e}", i, y_cur[i],
+                                 y_next[i]);
+                SPDLOG_INFO_FILE("    Y[{0}] = {1:+9.8e} < Yeq[{0}] = {2:+9.8e}", i, y_next[i], Yeq_full_step[i]);
+                SPDLOG_INFO_FILE("    Compensate back to Yeq");
+                comp = true;
+                y_next[i] = Yeq_full_step[i];
+                status[i] = true;
+                delta_y_ratio_next[i] = 0;
+            } else {
+                status[i] = false;
+                delta_y_ratio_next[i] = 1.0 - y_next[i] / Yeq_full_step[i];
+            }
         } else {
-            delta_y_ratio_next[i] = 1.0 - y_next[i] / Yeq_full_step[i];
+            // * Checking the situation at first order
+            if (delta_y_ratio_cur[i] > 0) {
+                SPDLOG_INFO_FILE("    Start from Y[{0}] = {1:+9.8e} < Yeq[{0}]", i, y_cur[i]);
+                if (y_cur[i] + dY_Step1[i] > Yeq_full_step[i]) {
+                    SPDLOG_INFO_FILE("    Changing too fast, compensate to Yeq.");
+                    comp = true;
+                    y_next[i] = Yeq_full_step[i];
+                    status[i] = true;
+                    delta_y_ratio_next[i] = 0;
+                } else {
+                    status[i] = false;
+                    delta_y_ratio_next[i] = 1.0 - y_next[i] / Yeq_full_step[i];
+                }
+            } else {
+                SPDLOG_INFO_FILE("    Start from Y[{0}] = {1:+9.8e} > Yeq[{0}]", i, y_cur[i]);
+                if (y_cur[i] + dY_Step1[i] < Yeq_full_step[i]) {
+                    SPDLOG_INFO_FILE("    Changing too fast, compensate to Yeq.");
+                    comp = true;
+                    y_next[i] = Yeq_full_step[i];
+                    status[i] = true;
+                    delta_y_ratio_next[i] = 0;
+                } else {
+                    status[i] = false;
+                    delta_y_ratio_next[i] = 1.0 - y_next[i] / Yeq_full_step[i];
+                }
+            }
         }
     }
+    derivs->Update_Thermal_Status(status);
     return comp;
 }
 
@@ -187,7 +221,7 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
     VD delta_y_ratio_temp(DOF, 0);
     VD Delta_y(DOF, 0);
     VD error_temp(DOF, 0);
-    std::vector<bool> status = derivs->Is_Start_with_Thermalization();
+    std::vector<bool> status = derivs->Is_Thermalized();
 
     REAL error_max = 0;
     REAL min_step_size = 1e-5 * step_size_guess;
@@ -202,6 +236,7 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
         SPDLOG_DEBUG_FILE("{}-th Trial for RKQC with stepsize = {:+9.8e}", trials, step_size);
         // * Take two half steps
         half_step_size = step_size / 2.0;
+        derivs->Update_Thermal_Status(status);
         RK4_SingleStep(x_cache, y_cache, dy_cache, delta_y_ratio_cache, half_step_size, y_temp, delta_y_ratio_temp);
         x = x_cache + half_step_size;
         dydx = (*derivs)(x, y_temp, delta_y_ratio_temp);
@@ -218,12 +253,13 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
         }
 
         // * Take one full step
+        derivs->Update_Thermal_Status(status);
         comp_single_step =
             RK4_SingleStep(x_cache, y_cache, dy_cache, delta_y_ratio_cache, step_size, y_temp, delta_y_ratio_temp);
         bool drop_slow = true;
         for (int i = 0; i < DOF; i++) {
             REAL slop = std::fabs(y_cache[i] / y_temp[i]);
-            drop_slow *= (slop > 0.2) && (slop < 5);
+            drop_slow *= (slop < 5);
         }
         x = x_cache + step_size;
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");

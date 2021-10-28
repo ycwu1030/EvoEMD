@@ -60,8 +60,8 @@ public:
      * @param  width: Pointer to width parameter, if nullptr (default), it is assumed the particle is stable
      * @retval
      */
-    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr,
-                    Parameter_Base *width = nullptr);
+    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+                    bool never_thermal = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
@@ -81,8 +81,8 @@ public:
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
-    bool Never_Thermal;
-    bool start_with_thermal;
+    const bool Never_Thermal;
+    bool Thermalized;
     REAL Yield;
 
     // * 1 - Yield/Yield_eq
@@ -104,7 +104,8 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr);
+    Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+            bool never_thermal = false);
     ~Fermion(){};
 };
 
@@ -114,7 +115,8 @@ protected:
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
 
 public:
-    Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr);
+    Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+          bool never_thermal = false);
     ~Boson(){};
 };
 
@@ -149,11 +151,11 @@ public:
 
 // #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
 
-#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH)      \
-    class part_##partName : public className {                             \
-    public:                                                                \
-        part_##partName() : className(#partName, PID, DOF, MASS, WIDTH){}; \
-    };                                                                     \
+#define REGISTER_PARTICLE(className, partName, ...)              \
+    class part_##partName : public className {                   \
+    public:                                                      \
+        part_##partName() : className(#partName, __VA_ARGS__){}; \
+    };                                                           \
     Register_Particle g_register_particle_##partName(new part_##partName)
 
 #define RETRIVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)
@@ -164,7 +166,7 @@ public:
         EvoEMD::Particle_Factory &pf = EvoEMD::Particle_Factory::Get_Particle_Factory();
         pf.Register_POI(PID);
         EvoEMD::Pseudo_Particle *pp = pf.Get_Particle(PID);
-        pp->start_with_thermal = start_with_thermal;
+        pp->Thermalized = start_with_thermal;
     }
 };
 

@@ -84,19 +84,25 @@ VD BoltzmannEquation::Yeq(REAL x) {
     return res;
 }
 
-std::vector<bool> BoltzmannEquation::Is_Start_with_Thermalization() {
+std::vector<bool> BoltzmannEquation::Is_Thermalized() {
     std::vector<bool> res(DOF);
     for (int i = 0; i < DOF; i++) {
-        res[i] = poi_ptrs[i]->start_with_thermal;
+        res[i] = poi_ptrs[i]->Thermalized * (!poi_ptrs[i]->Never_Thermal);
     }
     return res;
+}
+
+void BoltzmannEquation::Update_Thermal_Status(std::vector<bool> status) {
+    for (int i = 0; i < DOF; i++) {
+        poi_ptrs[i]->Thermalized = status[i] * (!poi_ptrs[i]->Never_Thermal);
+    }
 }
 
 void BoltzmannEquation::Set_X_Range(REAL X_BEGIN, REAL X_END) {
     this->X_BEGIN = X_BEGIN;
     this->X_END = X_END;
     Y_BEGIN = Yeq(X_BEGIN);
-    std::vector<bool> status = Is_Start_with_Thermalization();
+    std::vector<bool> status = Is_Thermalized();
     for (int i = 0; i < DOF; i++) {
         if (status[i]) {
             Delta_Y_Ratio_BEGIN[i] = 0.0;
