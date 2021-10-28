@@ -85,14 +85,14 @@ VD BoltzmannEquation::Yeq(REAL x) {
 }
 
 std::vector<bool> BoltzmannEquation::Is_Thermalized() {
-    std::vector<bool> res(DOF);
+    VB res(DOF);
     for (int i = 0; i < DOF; i++) {
         res[i] = poi_ptrs[i]->Thermalized * (!poi_ptrs[i]->Never_Thermal);
     }
     return res;
 }
 
-void BoltzmannEquation::Update_Thermal_Status(std::vector<bool> status) {
+void BoltzmannEquation::Update_Thermal_Status(VB status) {
     for (int i = 0; i < DOF; i++) {
         poi_ptrs[i]->Thermalized = status[i] * (!poi_ptrs[i]->Never_Thermal);
     }

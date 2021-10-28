@@ -28,8 +28,8 @@ public:
     void Set_X_Range(REAL X_BEGIN, REAL X_END);
     virtual VD dYdX(REAL x, VD y, VD delta_y_ratio) override;
     virtual VD Yeq(REAL x) override;
-    virtual std::vector<bool> Is_Thermalized() override;
-    virtual void Update_Thermal_Status(std::vector<bool> status) override;
+    virtual VB Is_Thermalized() override;
+    virtual void Update_Thermal_Status(VB status) override;
 };
 
 }  // namespace EvoEMD

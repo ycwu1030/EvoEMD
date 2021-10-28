@@ -37,8 +37,8 @@ public:
     VD operator()(REAL x, VD y, VD delta_y_ratio) { return dYdX(x, y, delta_y_ratio); }
     virtual VD dYdX(REAL x, VD y, VD delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
     virtual VD Yeq(REAL x) = 0;
-    virtual std::vector<bool> Is_Thermalized() = 0;  // Check whether the particle is starting in thermalization or not
-    virtual void Update_Thermal_Status(std::vector<bool>) = 0;
+    virtual VB Is_Thermalized() = 0;  // Check whether the particle is starting in thermalization or not
+    virtual void Update_Thermal_Status(VB status) = 0;
 };
 
 /*
