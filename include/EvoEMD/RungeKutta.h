@@ -15,24 +15,30 @@ protected:
     int DOF;
     REAL X_BEGIN;
     REAL X_END;
-    VD BOUNDARY_CONDITION;
+    VD Y_BEGIN;
+    VD Delta_Y_Ratio_BEGIN;
 
 public:
-    ODE_FUNCS(){};
+    ODE_FUNCS() : DOF(-1){};
     virtual ~ODE_FUNCS(){};
 
-    void Set_DOF(int dof) { DOF = dof; }
-    void Set_X_BEGIN(REAL xi) { X_BEGIN = xi; }
-    void Set_X_END(REAL xf) { X_END = xf; }
-    void Set_BOUNDARY_CONDITION(VD boundary) { BOUNDARY_CONDITION = boundary; }
+    void Set_DOF(int DOF) {
+        this->DOF = DOF;
+        Y_BEGIN = VD(DOF, 0);
+        Delta_Y_Ratio_BEGIN = VD(DOF, 0);
+    }
+    void Set_BOUNDARIES(REAL X_BEGIN, REAL X_END, VD boundary, bool relative_to_equilibrium = false);
 
     int Get_DOF() const { return DOF; }
     REAL Get_X_BEGIN() const { return X_BEGIN; }
     REAL Get_X_END() const { return X_END; }
-    VD Get_BOUNDARY_CONDITION() const { return BOUNDARY_CONDITION; }
-    VD operator()(REAL x, VD y) { return dYdX(x, y); }
-    virtual VD dYdX(REAL x, VD y) = 0;
+    VD Get_Y_BEGIN() const { return Y_BEGIN; }
+    VD Get_Delta_Y_Ratio_BEGIN() const { return Delta_Y_Ratio_BEGIN; }
+    VD operator()(REAL x, VD y, VD delta_y_ratio) { return dYdX(x, y, delta_y_ratio); }
+    virtual VD dYdX(REAL x, VD y, VD delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
     virtual VD Yeq(REAL x) = 0;
+    virtual std::vector<bool>
+    Is_Start_with_Thermalization() = 0;  // Check whether the particle is starting in thermalization or not
 };
 
 /*
@@ -77,18 +83,20 @@ private:
     REAL TINY_REL_THRESHOLD;
     int MAXSTEPS;
 
-    bool SOLVED;   // * Store the status whether the ODE functions is solved
-    int DOF;       // * The degree of freedon of the ODE functions
-    REAL X_BEGIN;  // * The starting point in x (the argument)
-    REAL X_END;    // * The ending point in x (the argument)
+    bool SOLVED;             // * Store the status whether the ODE functions is solved
+    int DOF;                 // * The degree of freedon of the ODE functions
+    REAL X_BEGIN;            // * The starting point in x (the argument)
+    REAL X_END;              // * The ending point in x (the argument)
+    VD Y_BEGIN;              // * The starting point of y
+    VD Delta_Y_Ratio_BEGIN;  // * 1-y/yeq at the begin;
 
-    VD _X;      // * The vector storing the points in x
-    VVD _Y;     // * The vector storing the points in y, len(_Y) = len(_X) and the second dimension is DOF
-    VVD _Yeq;   // * The vector storing the equilibrium value of Y;
-    VVD _dYdX;  // * Similar to _Y, but storing dy/dx
+    VD _X;               // * The vector storing the points in x
+    VVD _Y;              // * The vector storing the points in y, len(_Y) = len(_X) and the second dimension is DOF
+    VVD _Delta_Y_Ratio;  // * The vector storing the value 1 - y/yeq
+    VVD _Yeq;            // * The vector storing the equilibrium value of Y;
+    VVD _dYdX;           // * Similar to _Y, but storing dy/dx
 
-    VD BOUNDARY_AT_BEGIN;  // * The boundary condition at X_BEGIN
-    VD ZERO_THRESHOLD;     // * The threshold to treat the corresponding value as 0;
+    VD ZERO_THRESHOLD;  // * The threshold to treat the corresponding value as 0;
 
     ODE_FUNCS *
         derivs;  // * The ODE function, dy/dx = derivs(x,y,xxxx), we don't own it, we just have one pointer pointing it.
@@ -108,11 +116,14 @@ private:
      * @brief The 4th order Runge-Kutta method taking one step forward
      * @param x_cur, current x value
      * @param y_cur, current y value
-     * @param dy_cur, current dy/dx value
+     * @param dydx_cur, current dy/dx value
+     * @param delta_y_ratiro_cur, current 1-Y/Yeq
      * @param step_size, step size, we would like to go forward
-     * @param dy_next, the dy at next step (output)
+     * @param y_next, the dy at next step (output)
+     * @param delta_y_ratiro_next, 1-Y/Yeq at next step (output)
      */
-    bool RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next);
+    bool RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dydx_cur, const VD &delta_y_ratio_cur,
+                        const REAL step_size, VD &y_next, VD &delta_y_ratio_next);
 
     /**
      * @brief The Runge-Kutta method taking one step forward
@@ -120,7 +131,9 @@ private:
      *        such that we can kind of achieve 5th order accuracy
      * @param x, input: current value of x, output: next value of x
      * @param y, input: current value of y, output: next value of y
-     * @param dy, input: current value of dy, output: next value of dy
+     * @param yeq, input: current value of yeq, output: next value of yeq
+     * @param dydx, input: current value of dy/dx, output: next value of dy/dx
+     * @param delta_y_ratio, input: current value of 1-y/yeq, output: next value of 1-y/yeq
      * @param step_size_guess, input: initial guess of current step size
      * @param eps, input: tolerance
      * @param Y_Scale, input: the scale in y to set the error (it is possible in different direction of y, the scale is
@@ -128,8 +141,8 @@ private:
      * @param step_size_did, output: actual step size we take
      * @param step_size_further, output: based on what we did, the prospect step size for next step
      */
-    bool RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
-                         REAL &step_size_did, REAL &step_size_further);
+    bool RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, const REAL step_size_guess,
+                         const REAL eps, const VD &Y_Scale, REAL &step_size_did, REAL &step_size_further);
 };
 }  // namespace EvoEMD
 #endif  //__RUNGEKUTTA_H__

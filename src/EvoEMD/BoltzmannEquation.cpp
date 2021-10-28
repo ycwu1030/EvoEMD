@@ -11,7 +11,7 @@ BoltzmannEquation::BoltzmannEquation(Parameter_Base *ptr_scale_)
       hh(EvoEMD::Hubble_History::Get_Hubble_History()),
       ptr_scale(ptr_scale_) {
     std::set<int> POI = pf.Get_POI();
-    DOF = POI.size();
+    Set_DOF(POI.size());
     std::set<int>::iterator iter = POI.begin();
     for (; iter != POI.end(); iter++) {
         poi_pids.push_back(*iter);
@@ -30,7 +30,7 @@ void BoltzmannEquation::Setup_Scale() {
     }
 }
 
-VD BoltzmannEquation::dYdX(REAL x, VD y) {
+VD BoltzmannEquation::dYdX(REAL x, VD y, VD delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
     // * T^3H(beta_T dY/dx + 3(1-beta_T)Y) = CollisionRate
@@ -38,6 +38,7 @@ VD BoltzmannEquation::dYdX(REAL x, VD y) {
 
     for (int i = 0; i < DOF; i++) {
         poi_ptrs[i]->Yield = y[i];
+        poi_ptrs[i]->Delta_Yield_Ratio = delta_y_ratio[i];
     }
 
     REAL z = exp(x);
@@ -54,7 +55,8 @@ VD BoltzmannEquation::dYdX(REAL x, VD y) {
         std::set<Process *> sp = pp->Get_Process();
         for (auto &&proc_ptr : sp) {
             // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
-            // std::cout << "Coefficient @ T=" << T << " is " << proc_ptr->Get_Yield_Coeff(T, pp->Get_PID()) << std::endl;
+            // std::cout << "Coefficient @ T=" << T << " is " << proc_ptr->Get_Yield_Coeff(T, pp->Get_PID()) <<
+            // std::endl;
             res[i] += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
         }
     }
@@ -76,9 +78,37 @@ VD BoltzmannEquation::Yeq(REAL x) {
     VD res(DOF, 0);
     for (int i = 0; i < DOF; i++) {
         Pseudo_Particle *pp = poi_ptrs[i];
-        res[i] = pp->Get_Equilibrium_Yield_at_T(T);
+        REAL yeq = pp->Get_Equilibrium_Yield_at_T(T);
+        if (pp->start_with_thermal) {
+            res[i] = yeq;
+        } else {
+            res[i] = -yeq;
+        }
     }
     return res;
+}
+
+std::vector<bool> BoltzmannEquation::Is_Start_with_Thermalization() {
+    std::vector<bool> res(DOF);
+    for (int i = 0; i < DOF; i++) {
+        res[i] = poi_ptrs[i]->start_with_thermal;
+    }
+    return res;
+}
+
+void BoltzmannEquation::Set_X_Range(REAL X_BEGIN, REAL X_END) {
+    this->X_BEGIN = X_BEGIN;
+    this->X_END = X_END;
+    Y_BEGIN = Yeq(X_BEGIN);
+    std::vector<bool> status = Is_Start_with_Thermalization();
+    for (int i = 0; i < DOF; i++) {
+        if (status[i]) {
+            Delta_Y_Ratio_BEGIN[i] = 0.0;
+        } else {
+            Y_BEGIN[i] = 0;
+            Delta_Y_Ratio_BEGIN[i] = 1.0;
+        }
+    }
 }
 
 }  // namespace EvoEMD

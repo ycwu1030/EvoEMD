@@ -98,6 +98,15 @@ public:
 
     bool start_with_thermal;
     REAL Yield;
+
+    // * 1 - Yield/Yield_eq
+    // * At sufficient high temperature, particle might be in thermal equilibrium
+    // * In that case, this value is actually 0. But due to numerical issue, it can be a small number
+    // * However, in calculating collision rate, it might be multiplied by a extremely large number,
+    // * thus leads to numerical issue.
+    // * So we will keep this number, especially when it is zero to avoid numerical issue.
+    // * User can set their own threshold when to use this Delta_Yield_Ratio
+    REAL Delta_Yield_Ratio;
     REAL Numer_Density;
 
     void Set_Mass(double mass);
