@@ -154,6 +154,9 @@ bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dyd
             SPDLOG_INFO_FILE("    Compensate back to Yeq");
             comp = true;
             y_next[i] = Yeq_full_step[i];
+            delta_y_ratio_next[i] = 0;
+        } else {
+            delta_y_ratio_next[i] = 1.0 - y_next[i] / Yeq_full_step[i];
         }
     }
     return comp;
@@ -179,10 +182,10 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
     REAL step_size_temp;
     REAL half_step_size;
 
-    VD y_temp;
-    VD delta_y_ratio_temp;
-    VD Delta_y;
-    VD error_temp;
+    VD y_temp(DOF, 0);
+    VD delta_y_ratio_temp(DOF, 0);
+    VD Delta_y(DOF, 0);
+    VD error_temp(DOF, 0);
     std::vector<bool> status = derivs->Is_Start_with_Thermalization();
 
     REAL error_max = 0;
@@ -201,7 +204,7 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
         RK4_SingleStep(x_cache, y_cache, dy_cache, delta_y_ratio_cache, half_step_size, y_temp, delta_y_ratio_temp);
         x = x_cache + half_step_size;
         dydx = (*derivs)(x, y_temp, delta_y_ratio_temp);
-        comp_two_step = RK4_SingleStep(x, y_temp, dydx, delta_y_ratio_cache, half_step_size, y, delta_y_ratio);
+        comp_two_step = RK4_SingleStep(x, y_temp, dydx, delta_y_ratio_temp, half_step_size, y, delta_y_ratio);
         SPDLOG_DEBUG_FILE("Take two half steps, reaching:");
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x + half_step_size);
         for (int i = 0; i < DOF; i++) {
