@@ -220,6 +220,11 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
         // * Take one full step
         comp_single_step =
             RK4_SingleStep(x_cache, y_cache, dy_cache, delta_y_ratio_cache, step_size, y_temp, delta_y_ratio_temp);
+        bool drop_slow = true;
+        for (int i = 0; i < DOF; i++) {
+            REAL slop = std::fabs(y_cache[i] / y_temp[i]);
+            drop_slow *= (slop > 0.2) && (slop < 5);
+        }
         x = x_cache + step_size;
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x);
@@ -234,6 +239,17 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
         comp = comp_single_step && comp_two_step;
         // * Check the difference between above two methods
 
+        if (comp && !drop_slow) {
+            // * We compensate to the Equilibrium, and the yeq drops too fast
+            // * In order not to miss the freeze-out point, we have to shrink the stepsize;
+            step_size_temp = step_size;
+            step_size = step_size_temp / 2.0;
+            SPDLOG_WARN_FILE(
+                "  We compensate to Equilibrium Value, but it drops too fast, we need to shrink the step size to be "
+                "safe:  {:+9.8e} -> {:+9.8e}",
+                step_size_temp, step_size);
+            continue;
+        }
         Delta_y = y - y_temp;
         error_temp = fabs(Delta_y / Y_Scale);
         error_max = *max_element(error_temp.begin(), error_temp.end());
@@ -245,7 +261,12 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_
 
         SPDLOG_DEBUG_FILE("Error max: {:+9.8e};", error_max);
         if (!comp_two_step && comp_single_step) {
-            step_size = 1e-3;
+            step_size_temp = step_size;
+            step_size = step_size_temp / 2.0;
+            SPDLOG_INFO_FILE(
+                "We are crossing the critical point, need to shrink the stepsize in order to probe it: {:+9.8e} -> "
+                "{:+9.8e}",
+                step_size_temp, step_size);
             continue;
         }
         if (error_max <= 1.0) {
