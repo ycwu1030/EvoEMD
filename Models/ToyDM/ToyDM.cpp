@@ -1,12 +1,9 @@
+#include "ToyDM.h"
+
 #include <cmath>
 #include <iostream>
 
-#include "EvoEMD/BoltzmannEquation.h"
-#include "EvoEMD/RungeKutta.h"
-#include "Models/ToyDM/Parameters.h"
-#include "Models/ToyDM/Particles.h"
-#include "Models/ToyDM/Processes.h"
-#include "gsl/gsl_sf_bessel.h"
+#include "EvoEMD/EvoEMD.h"
 
 using namespace EvoEMD;
 using namespace std;

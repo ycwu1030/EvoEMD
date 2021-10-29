@@ -1,8 +1,8 @@
-#include "Models/ToyDM/Amplitudes.h"
+#include "Amplitudes.h"
 
 #include <cmath>
 
-#include "EvoEMD/ParticleBase.h"
+#include "EvoEMD/EvoEMD.h"
 
 using namespace EvoEMD;
 
