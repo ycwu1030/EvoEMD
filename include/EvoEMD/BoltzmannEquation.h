@@ -30,6 +30,7 @@ public:
     virtual VD Yeq(REAL x) override;
     virtual VB Is_Thermalized() override;
     virtual void Update_Thermal_Status(VB status) override;
+    virtual VB Can_be_Thermalized() override;
 };
 
 }  // namespace EvoEMD

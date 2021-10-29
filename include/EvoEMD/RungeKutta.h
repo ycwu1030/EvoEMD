@@ -39,6 +39,7 @@ public:
     virtual VD Yeq(REAL x) = 0;
     virtual VB Is_Thermalized() = 0;  // Check whether the particle is starting in thermalization or not
     virtual void Update_Thermal_Status(VB status) = 0;
+    virtual VB Can_be_Thermalized() = 0;
 };
 
 /*
@@ -118,12 +119,15 @@ private:
      * @param y_cur, current y value
      * @param dydx_cur, current dy/dx value
      * @param delta_y_ratiro_cur, current 1-Y/Yeq
+     * @param thermal_status_cur, current thermalization status
      * @param step_size, step size, we would like to go forward
      * @param y_next, the dy at next step (output)
      * @param delta_y_ratiro_next, 1-Y/Yeq at next step (output)
+     * @param thermal_status_next, thermalization status at next step (output)
      */
     bool RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dydx_cur, const VD &delta_y_ratio_cur,
-                        const REAL step_size, VD &y_next, VD &delta_y_ratio_next);
+                        const VB &thermal_status_cur, const REAL step_size, VD &y_next, VD &delta_y_ratio_next,
+                        VB &thermal_status_next);
 
     /**
      * @brief The Runge-Kutta method taking one step forward
@@ -134,6 +138,7 @@ private:
      * @param yeq, input: current value of yeq, output: next value of yeq
      * @param dydx, input: current value of dy/dx, output: next value of dy/dx
      * @param delta_y_ratio, input: current value of 1-y/yeq, output: next value of 1-y/yeq
+     * @param thermal_status, input: current status of thermalization, output: next status of thermalization
      * @param step_size_guess, input: initial guess of current step size
      * @param eps, input: tolerance
      * @param Y_Scale, input: the scale in y to set the error (it is possible in different direction of y, the scale is
@@ -141,8 +146,9 @@ private:
      * @param step_size_did, output: actual step size we take
      * @param step_size_further, output: based on what we did, the prospect step size for next step
      */
-    bool RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, const REAL step_size_guess,
-                         const REAL eps, const VD &Y_Scale, REAL &step_size_did, REAL &step_size_further);
+    bool RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, VB &thermal_status,
+                         const REAL step_size_guess, const REAL eps, const VD &Y_Scale, REAL &step_size_did,
+                         REAL &step_size_further);
 };
 }  // namespace EvoEMD
 #endif  //__RUNGEKUTTA_H__
