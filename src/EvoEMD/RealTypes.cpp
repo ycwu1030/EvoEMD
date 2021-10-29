@@ -20,7 +20,7 @@ VD operator+(const VD &lhs, const VD &rhs) {
     return res;
 }
 
-VD operator+(const VD &lhs, const double &cons) {
+VD operator+(const VD &lhs, const REAL &cons) {
     VD res;
     for (int i = 0; i < lhs.size(); i++) {
         res.push_back(lhs[i] + cons);
@@ -28,7 +28,7 @@ VD operator+(const VD &lhs, const double &cons) {
     return res;
 }
 
-VD operator+(const double &cons, const VD &rhs) {
+VD operator+(const REAL &cons, const VD &rhs) {
     VD res;
     for (int i = 0; i < rhs.size(); i++) {
         res.push_back(cons + rhs[i]);
@@ -43,14 +43,14 @@ VD operator-(const VD &lhs, const VD &rhs) {
     }
     return res;
 }
-VD operator-(const VD &lhs, const double &rhs) {
+VD operator-(const VD &lhs, const REAL &rhs) {
     VD res;
     for (size_t i = 0; i < lhs.size(); i++) {
         res.push_back(lhs[i] - rhs);
     }
     return res;
 }
-VD operator-(const double &lhs, const VD &rhs) {
+VD operator-(const REAL &lhs, const VD &rhs) {
     VD res;
     for (size_t i = 0; i < rhs.size(); i++) {
         res.push_back(lhs - rhs[i]);
@@ -59,7 +59,7 @@ VD operator-(const double &lhs, const VD &rhs) {
 }
 VD operator-(const VD &rhs) { return 0 - rhs; }
 
-VD operator*(const VD &lhs, const double &s) {
+VD operator*(const VD &lhs, const REAL &s) {
     VD res;
     for (int i = 0; i < lhs.size(); i++) {
         res.push_back(lhs[i] * s);
@@ -67,7 +67,7 @@ VD operator*(const VD &lhs, const double &s) {
     return res;
 }
 
-VD operator*(const double &s, const VD &rhs) {
+VD operator*(const REAL &s, const VD &rhs) {
     VD res;
     for (int i = 0; i < rhs.size(); i++) {
         res.push_back(rhs[i] * s);
@@ -75,14 +75,14 @@ VD operator*(const double &s, const VD &rhs) {
     return res;
 }
 
-double operator*(const VD &lhs, const VD &rhs) {
-    double res = 0;
+REAL operator*(const VD &lhs, const VD &rhs) {
+    REAL res = 0;
     for (int i = 0; i < lhs.size(); i++) {
         res += lhs[i] * rhs[i];
     }
     return res;
 }
-VD operator/(const VD &lhs, const double &s) {
+VD operator/(const VD &lhs, const REAL &s) {
     VD res;
     for (int i = 0; i < lhs.size(); ++i) {
         res.push_back(lhs[i] / s);

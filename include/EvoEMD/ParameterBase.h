@@ -86,14 +86,16 @@ public:
     };
 };
 
-#define REGISTER_PARAMETER(paramName) const Register_Parameter g_register_parameter_##paramName(new paramName)
+#define REGISTER_PARAMETER(paramName)
 #define DECLARE_FREE_PARAMETER(paramName, value)                   \
     class param_##paramName : public Free_Parameter {              \
     public:                                                        \
         param_##paramName() : Free_Parameter(#paramName, value){}; \
     };                                                             \
-    REGISTER_PARAMETER(param_##paramName)
+    const Register_Parameter g_register_parameter_##paramName(new param_##paramName)
 
 #define RETRIVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
+
+#define GET_PARAM_VALUE(paramName) RETRIVE_PARAMETER(paramName)->Get_Value()
 
 #endif  //_PARAMETER_BASE_H_

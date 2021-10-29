@@ -26,7 +26,7 @@ XX_SS_Amp::XX_SS_Amp() : Amplitude() {
 
 void XX_SS_Amp::Update_Amp(REAL sqrt_shat) {
     REAL lam = RETRIVE_PARAMETER(Lam)->Get_Value();
-    amp_res.amps_numerator[0][0] = lam * lam;
+    amp_res.amps_numerator[0][0] = lam * lam * lam * lam;
 }
 
 REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
@@ -36,6 +36,10 @@ REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
         REAL res = (1.0 - pow(Y / YeqT, 2));
+        if (res < 1e-5) {
+            res = 2 * pp->Delta_Yield_Ratio;
+        }
+
         return res;
     } else {
         return 0;

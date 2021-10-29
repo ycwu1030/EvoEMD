@@ -10,20 +10,9 @@
 namespace EvoEMD {
 
 class Process;
-class Particle_Client {
-public:
-    Particle_Client(){};
-    virtual ~Particle_Client(){};
-
-    virtual void Update_Particle_Info() = 0;
-};
 
 class Particle_Base {
 protected:
-    // * Objects that use particle information
-    // * In any time, particle information is updated, the client should update their own properties
-    std::set<Particle_Client *> Particle_Client_Set;
-
     // * Processes that involve current particle
     // * The process calculates its value lazily, it will acquire particle's infor when it needs
     // * This set is used to keep aware what are the processes involving current particle
@@ -33,7 +22,6 @@ public:
     Particle_Base(){};
     virtual ~Particle_Base(){};
 
-    void Register_Client(Particle_Client *);
     void Register_Process(Process *);
 
     void Notify_Client();
@@ -49,9 +37,7 @@ class Pseudo_Particle : public Particle_Base {
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
     std::string name;
-    bool selfconjugate;
     bool massless;
-    bool thermalized;
     Parameter_Base *p_mass;
     Parameter_Base *p_width;
     int PID;
@@ -63,19 +49,19 @@ protected:
 
 public:
     /**
-     * @brief
+     * @brief  ctor for a Pseudo_Particle
      * @note
-     * @param  PID: The PID for a particle
+     * @param  name: The name for the particle
+     * @param  PID: The PID for a particle (should be unique for each particle)
      * @param  DOF: The degree of freedom of the particle, particle and antiparticle will be counted seperately
      *              On the other hand, DOF is the one used to calculate the equilibrium number density which will be
      *              used in Boltzmann equation. So be sure this DOF is consistent with the collision rate.
      * @param  mass: Pointer to mass parameter, if nullptr (default), it is assumed the particle is massless
      * @param  width: Pointer to width parameter, if nullptr (default), it is assumed the particle is stable
-     * @param  selfconjugate: Whether
      * @retval
      */
     Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-                    bool selfconjugate = false);
+                    bool never_thermal = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
@@ -89,15 +75,24 @@ public:
         }
     }
     bool Is_Massless() const { return massless; }
-    bool Is_Selfconjugate() const { return selfconjugate; }
 
     REAL Get_Equilibrium_Number_Density_at_T(const REAL T) const {
         return DOF * Get_Equilibrium_Number_Density_per_DOF(T);
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
-    bool start_with_thermal;
+    const bool Never_Thermal;
+    bool Thermalized;
     REAL Yield;
+
+    // * 1 - Yield/Yield_eq
+    // * At sufficient high temperature, particle might be in thermal equilibrium
+    // * In that case, this value is actually 0. But due to numerical issue, it can be a small number
+    // * However, in calculating collision rate, it might be multiplied by a extremely large number,
+    // * thus leads to numerical issue.
+    // * So we will keep this number, especially when it is zero to avoid numerical issue.
+    // * User can set their own threshold when to use this Delta_Yield_Ratio
+    REAL Delta_Yield_Ratio;
     REAL Numer_Density;
 
     void Set_Mass(double mass);
@@ -110,7 +105,7 @@ protected:
 
 public:
     Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-            bool selfconjugate = false);
+            bool never_thermal = false);
     ~Fermion(){};
 };
 
@@ -121,7 +116,7 @@ protected:
 
 public:
     Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-          bool selfconjugate = false);
+          bool never_thermal = false);
     ~Boson(){};
 };
 
@@ -156,11 +151,11 @@ public:
 
 // #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
 
-#define REGISTER_PARTICLE(className, partName, PID, DOF, MASS, WIDTH, C)      \
-    class part_##partName : public className {                                \
-    public:                                                                   \
-        part_##partName() : className(#partName, PID, DOF, MASS, WIDTH, C){}; \
-    };                                                                        \
+#define REGISTER_PARTICLE(className, partName, ...)              \
+    class part_##partName : public className {                   \
+    public:                                                      \
+        part_##partName() : className(#partName, __VA_ARGS__){}; \
+    };                                                           \
     Register_Particle g_register_particle_##partName(new part_##partName)
 
 #define RETRIVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)
@@ -171,7 +166,7 @@ public:
         EvoEMD::Particle_Factory &pf = EvoEMD::Particle_Factory::Get_Particle_Factory();
         pf.Register_POI(PID);
         EvoEMD::Pseudo_Particle *pp = pf.Get_Particle(PID);
-        pp->start_with_thermal = start_with_thermal;
+        pp->Thermalized = start_with_thermal;
     }
 };
 
