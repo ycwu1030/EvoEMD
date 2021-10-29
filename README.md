@@ -14,6 +14,12 @@ A framework to evaluate the evolution w/ or w/o an early matter dominated (EMD) 
 
 In preparation...
 
+## Dependencies
+
+- GSL
+- Eigen3
+- Cuba
+
 ## Examples
 
 Simple examples can be found in corresponding folders under `Models`

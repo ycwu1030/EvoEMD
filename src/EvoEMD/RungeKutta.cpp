@@ -11,6 +11,32 @@
 using namespace std;
 
 namespace EvoEMD {
+void ODE_FUNCS::Set_BOUNDARIES(REAL X_BEGIN, REAL X_END, VD boundary, bool relative_to_equilibrium) {
+    this->X_BEGIN = X_BEGIN;
+    this->X_END = X_END;
+    VD YEQ = Yeq(X_BEGIN);
+    if (DOF < 0) {
+        std::cout << "You forgot to set DOF first, but we guess you want to use: boundary.size() = " << boundary.size()
+                  << std::endl;
+        Set_DOF(boundary.size());
+    }
+    if (boundary.size() != DOF) {
+        std::cout << "WRONG dimension in boundary: " << boundary.size() << "!=" << DOF << std::endl;
+        return;
+    }
+    if (!relative_to_equilibrium) {
+        for (int i = 0; i < DOF; i++) {
+            Y_BEGIN[i] = boundary[i];
+            Delta_Y_Ratio_BEGIN[i] = 1.0 - Y_BEGIN[i] / YEQ[i];
+        }
+    } else {
+        for (int i = 0; i < DOF; i++) {
+            Y_BEGIN[i] = boundary[i] * YEQ[i];
+            Delta_Y_Ratio_BEGIN[i] = 1.0 - boundary[i];
+        }
+    }
+}
+
 RungeKutta::RungeKutta()
     : DOF(0),
       derivs(nullptr),
@@ -35,6 +61,7 @@ void RungeKutta::Clear() {
     SPDLOG_INFO_FILE("Clear X, Y and dYdX in RungeKutta Solver.");
     _X.clear();
     _Y.clear();
+    _Delta_Y_Ratio.clear();
     _Yeq.clear();
     _dYdX.clear();
 }
@@ -48,57 +75,67 @@ void RungeKutta::INIT() {
     DOF = derivs->Get_DOF();
     X_BEGIN = derivs->Get_X_BEGIN();
     X_END = derivs->Get_X_END();
-    BOUNDARY_AT_BEGIN = derivs->Get_BOUNDARY_CONDITION();
-    ZERO_THRESHOLD = BOUNDARY_AT_BEGIN * TINY_REL_THRESHOLD;
+    Y_BEGIN = derivs->Get_Y_BEGIN();
+    Delta_Y_Ratio_BEGIN = derivs->Get_Delta_Y_Ratio_BEGIN();
+    ZERO_THRESHOLD = Y_BEGIN * TINY_REL_THRESHOLD;
 
     // * Initialize the system at X_BEGIN:
     _X.push_back(X_BEGIN);
-    _Y.push_back(BOUNDARY_AT_BEGIN);
     _Yeq.push_back(derivs->Yeq(X_BEGIN));
-    _dYdX.push_back((*derivs)(X_BEGIN, BOUNDARY_AT_BEGIN));
+    _Y.push_back(Y_BEGIN);
+    _Delta_Y_Ratio.push_back(Delta_Y_Ratio_BEGIN);
+
+    _dYdX.push_back((*derivs)(_X[0], _Y[0], _Delta_Y_Ratio[0]));
 
     SPDLOG_DEBUG_FILE("Initialize the RungeKutta with:");
     SPDLOG_DEBUG_FILE("DOF: {}.", DOF);
     SPDLOG_DEBUG_FILE("ODE Range: [{:+9.8e}, {:+9.8e}].", X_BEGIN, X_END);
     SPDLOG_DEBUG_FILE("Boundary Condition at x = {:+9.8e}:", X_BEGIN);
     for (int i = 0; i < DOF; i++) {
-        SPDLOG_DEBUG_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, ZERO_THRESHOLD[{0}] = {3:+9.8e};", i,
-                          BOUNDARY_AT_BEGIN[i], _dYdX[0][i], ZERO_THRESHOLD[i]);
+        SPDLOG_DEBUG_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, ZERO_THRESHOLD[{0}] = {3:+9.8e};", i, _Y[0][i],
+                          _dYdX[0][i], ZERO_THRESHOLD[i]);
     }
 }
 
-bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_cur, const REAL step_size, VD &y_next) {
+bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dydx_cur, const VD &delta_y_ratio_cur,
+                                const VB &thermal_status_cur, const REAL step_size, VD &y_next, VD &delta_y_ratio_next,
+                                VB &thermal_status_next) {
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
     SPDLOG_INFO_FILE("Starting at: ");
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x_cur);
     for (int i = 0; i < DOF; i++) {
-        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e};", i, y_cur[i], dy_cur[i]);
+        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e};", i, y_cur[i], dydx_cur[i]);
     }
     REAL half_step = step_size / 2.0;
 
     // * 1. Using dx*dy/dx
-    VD dY_Step1 = step_size * dy_cur;
+    VD dY_Step1 = step_size * dydx_cur;
     SPDLOG_DEBUG_FILE("  4th Order RK Step-1:");
     for (int i = 0; i < DOF; i++) {
         SPDLOG_DEBUG_FILE("    dY1[{}] = {:+9.8e};", i, dY_Step1[i]);
     }
 
     // * 2. Using dx/2 and dY_Step1/2
-    VD dY_Step2 = step_size * (*derivs)(x_cur + half_step, y_cur + dY_Step1 / 2.0);
+    VD Yeq_half_step = derivs->Yeq(x_cur + half_step);
+    VD delta_y_ratio_step2 = 1.0 - (y_cur + dY_Step1 / 2.0) / Yeq_half_step;
+    VD dY_Step2 = step_size * (*derivs)(x_cur + half_step, y_cur + dY_Step1 / 2.0, delta_y_ratio_step2);
     SPDLOG_DEBUG_FILE("  4th Order RK Step-2:");
     for (int i = 0; i < DOF; i++) {
         SPDLOG_DEBUG_FILE("    dY2[{}] = {:+9.8e};", i, dY_Step2[i]);
     }
 
     // * 3. Using dx/2 and dY_Step2/2
-    VD dY_Step3 = step_size * (*derivs)(x_cur + half_step, y_cur + dY_Step2 / 2.0);
+    VD delta_y_ratio_step3 = 1.0 - (y_cur + dY_Step2 / 2.0) / Yeq_half_step;
+    VD dY_Step3 = step_size * (*derivs)(x_cur + half_step, y_cur + dY_Step2 / 2.0, delta_y_ratio_step3);
     SPDLOG_DEBUG_FILE("  4th Order RK Step-3:");
     for (int i = 0; i < DOF; i++) {
         SPDLOG_DEBUG_FILE("    dY3[{}] = {:+9.8e};", i, dY_Step3[i]);
     }
 
     // * 4. Using dx and dY_Step3
-    VD dY_Step4 = step_size * (*derivs)(x_cur + step_size, y_cur + dY_Step3);
+    VD Yeq_full_step = derivs->Yeq(x_cur + step_size);
+    VD delta_y_ratio_step4 = 1.0 - (y_cur + dY_Step3) / Yeq_full_step;
+    VD dY_Step4 = step_size * (*derivs)(x_cur + step_size, y_cur + dY_Step3, delta_y_ratio_step4);
     SPDLOG_DEBUG_FILE("  4th Order RK Step-4:");
     for (int i = 0; i < DOF; i++) {
         SPDLOG_DEBUG_FILE("    dY4[{}] = {:+9.8e};", i, dY_Step4[i]);
@@ -109,40 +146,76 @@ bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dy_
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
     SPDLOG_INFO_FILE("Ending at: ");
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x_cur + step_size);
-    VD Yeq = derivs->Yeq(x_cur + step_size);
     bool comp = false;
+    VB can_be_thermal = derivs->Can_be_Thermalized();
     for (int i = 0; i < DOF; i++) {
+        bool need_to_be_compensate_to_eq = false;
         SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e};", i, y_next[i]);
-        if (y_next[i] < Yeq[i]) {
-            SPDLOG_INFO_FILE("    Y[{0}] = {1:+9.8e} < Yeq[{0}] = {2:+9.8e}", i, y_next[i], Yeq[i]);
-            SPDLOG_INFO_FILE("    Compensate back to Yeq");
+        if (can_be_thermal[i]) {
+            if (thermal_status_cur[i] && y_next[i] < Yeq_full_step[i]) {
+                if (y_next[i] < Yeq_full_step[i]) {
+                    SPDLOG_INFO_FILE("    Start from Y[{0}] = Yeq[{0}] = {1:+9.8e} to Y[{0}] = {2:+9.8e}", i, y_cur[i],
+                                     y_next[i]);
+                    SPDLOG_INFO_FILE("    Y[{0}] = {1:+9.8e} < Yeq[{0}] = {2:+9.8e}", i, y_next[i], Yeq_full_step[i]);
+                    need_to_be_compensate_to_eq = true;
+                }
+            } else {
+                // * Checking the situation at first order
+                if (delta_y_ratio_cur[i] > 0) {
+                    SPDLOG_INFO_FILE("    Start from Y[{0}] = {1:+9.8e} < Yeq[{0}]", i, y_cur[i]);
+                    if (y_cur[i] + dY_Step1[i] > Yeq_full_step[i]) {
+                        need_to_be_compensate_to_eq = true;
+                    }
+                } else {
+                    SPDLOG_INFO_FILE("    Start from Y[{0}] = {1:+9.8e} > Yeq[{0}]", i, y_cur[i]);
+                    if (y_cur[i] + dY_Step1[i] < Yeq_full_step[i]) {
+                        need_to_be_compensate_to_eq = true;
+                    }
+                }
+            }
+        }
+        if (need_to_be_compensate_to_eq) {
+            SPDLOG_INFO_FILE("    Compensate back to Yeq = {:+9.8e}", Yeq_full_step[i]);
+            y_next[i] = Yeq_full_step[i];
+            thermal_status_next[i] = true;
+            delta_y_ratio_next[i] = 0;
             comp = true;
-            y_next[i] = Yeq[i];
+        } else {
+            thermal_status_next[i] = false;
+            delta_y_ratio_next[i] = 1.0 - y_next[i] / Yeq_full_step[i];
         }
     }
     return comp;
 }
 
-bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_guess, const REAL eps, const VD &Y_Scale,
-                                 REAL &step_size_did, REAL &step_size_further) {
+bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, VB &thermal_status,
+                                 const REAL step_size_guess, const REAL eps, const VD &Y_Scale, REAL &step_size_did,
+                                 REAL &step_size_further) {
     SPDLOG_INFO_FILE("RKQC: ");
     SPDLOG_INFO_FILE("Starting with: ");
     SPDLOG_INFO_FILE("Guess step size: dx = {:+9.8e},", step_size_guess);
     SPDLOG_INFO_FILE("  X = {:+9.8e}.", x);
     for (int i = 0; i < DOF; i++) {
-        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e};", i, y[i], dy[i]);
+        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, Yeq[{0}] = {3:+9.8e};", i, y[i], dydx[i],
+                         yeq[i]);
     }
+    SPDLOG_INFO_FILE("  Guessed Step size dx = {:+9.8e}", step_size_guess);
     // * Cache the initial points
     REAL x_cache = x;
     VD y_cache = y;
-    VD dy_cache = dy;
+    VD yeq_cache = yeq;
+    VD dy_cache = dydx;
+    VD delta_y_ratio_cache = delta_y_ratio;
+    VB status_cache = thermal_status;
     REAL step_size = step_size_guess;
     REAL step_size_temp;
     REAL half_step_size;
 
-    VD y_temp;
-    VD Delta_y;
-    VD error_temp;
+    VD y_temp(DOF, 0);
+    VD delta_y_ratio_temp(DOF, 0);
+    VB status_temp(DOF, true);
+    VD Delta_y(DOF, 0);
+    VD error_temp(DOF, 0);
 
     REAL error_max = 0;
     REAL min_step_size = 1e-5 * step_size_guess;
@@ -157,14 +230,16 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         SPDLOG_DEBUG_FILE("{}-th Trial for RKQC with stepsize = {:+9.8e}", trials, step_size);
         // * Take two half steps
         half_step_size = step_size / 2.0;
-        RK4_SingleStep(x_cache, y_cache, dy_cache, half_step_size, y_temp);
+        RK4_SingleStep(x_cache, y_cache, dy_cache, delta_y_ratio_cache, status_cache, half_step_size, y_temp,
+                       delta_y_ratio_temp, status_temp);
         x = x_cache + half_step_size;
-        dy = (*derivs)(x, y_temp);
-        comp_two_step = RK4_SingleStep(x, y_temp, dy, half_step_size, y);
+        dydx = (*derivs)(x, y_temp, delta_y_ratio_temp);
+        comp_two_step = RK4_SingleStep(x, y_temp, dydx, delta_y_ratio_temp, status_temp, half_step_size, y,
+                                       delta_y_ratio, thermal_status);
         SPDLOG_DEBUG_FILE("Take two half steps, reaching:");
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x + half_step_size);
         for (int i = 0; i < DOF; i++) {
-            if (y[i] < ZERO_THRESHOLD[i]) {
+            if (status_cache[i] && y[i] < ZERO_THRESHOLD[i]) {
                 SPDLOG_WARN_FILE("  REACH ZERO THRESHOLD AS Y[{0}] = {1:+9.8e} < {2:+9.8e};", i, y[i],
                                  ZERO_THRESHOLD[i]);
                 y[i] = 0;
@@ -173,12 +248,18 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         }
 
         // * Take one full step
-        comp_single_step = RK4_SingleStep(x_cache, y_cache, dy_cache, step_size, y_temp);
+        comp_single_step = RK4_SingleStep(x_cache, y_cache, dy_cache, delta_y_ratio_cache, status_cache, step_size,
+                                          y_temp, delta_y_ratio_temp, status_temp);
+        bool drop_slow = true;
+        for (int i = 0; i < DOF; i++) {
+            REAL slop = std::fabs(y_cache[i] / y_temp[i]);
+            drop_slow *= (slop < 5);
+        }
         x = x_cache + step_size;
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");
         SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x);
         for (int i = 0; i < DOF; i++) {
-            if (y_temp[i] < ZERO_THRESHOLD[i]) {
+            if (status_cache[i] && y_temp[i] < ZERO_THRESHOLD[i]) {
                 SPDLOG_WARN_FILE("  REACH ZERO THRESHOLD AS Y[{0}] = {1:+9.8e} < {2:+9.8e};", i, y_temp[i],
                                  ZERO_THRESHOLD[i]);
                 y_temp[i] = 0;
@@ -188,6 +269,17 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         comp = comp_single_step && comp_two_step;
         // * Check the difference between above two methods
 
+        if (comp && !drop_slow) {
+            // * We compensate to the Equilibrium, and the yeq drops too fast
+            // * In order not to miss the freeze-out point, we have to shrink the stepsize;
+            step_size_temp = step_size;
+            step_size = step_size_temp / 2.0;
+            SPDLOG_WARN_FILE(
+                "  We compensate to Equilibrium Value, but it drops too fast, we need to shrink the step size to be "
+                "safe:  {:+9.8e} -> {:+9.8e}",
+                step_size_temp, step_size);
+            continue;
+        }
         Delta_y = y - y_temp;
         error_temp = fabs(Delta_y / Y_Scale);
         error_max = *max_element(error_temp.begin(), error_temp.end());
@@ -199,7 +291,12 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
 
         SPDLOG_DEBUG_FILE("Error max: {:+9.8e};", error_max);
         if (!comp_two_step && comp_single_step) {
-            step_size = 1e-3;
+            step_size_temp = step_size;
+            step_size = step_size_temp / 2.0;
+            SPDLOG_INFO_FILE(
+                "We are crossing the critical point, need to shrink the stepsize in order to probe it: {:+9.8e} -> "
+                "{:+9.8e}",
+                step_size_temp, step_size);
             continue;
         }
         if (error_max <= 1.0) {
@@ -228,12 +325,20 @@ bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &dy, const REAL step_size_gu
         step_size = step_size_temp;  // * Change the step size, do the RK4 again.
     }
     y = y + Delta_y / 15;
-    dy = (*derivs)(x, y);
+    yeq = derivs->Yeq(x);
+    for (int i = 0; i < DOF; i++) {
+        if (thermal_status[i]) {
+            delta_y_ratio[i] = 0;
+        } else {
+            delta_y_ratio[i] = 1.0 - y[i] / yeq[i];
+        }
+    }
+    dydx = (*derivs)(x, y, delta_y_ratio);
     SPDLOG_DEBUG_FILE("RKQC reaching: ");
     SPDLOG_DEBUG_FILE("  X = {:+9.8e};", x);
     SPDLOG_DEBUG_FILE("  dx = {:+9.8e};", step_size_did);
     for (int i = 0; i < DOF; i++) {
-        SPDLOG_DEBUG_FILE(" Y[{0}] = {1:+9.8e}, dYdX = {2:+9.8e};", i, y[i], dy[i]);
+        SPDLOG_DEBUG_FILE(" Y[{0}] = {1:+9.8e}, dYdX = {2:+9.8e};", i, y[i], dydx[i]);
     }
     return comp;
 }
@@ -246,7 +351,10 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
     // * The initial point
     double x = _X[0];
     VD y = _Y[0];
+    VD yeq = _Yeq[0];
     VD dydx = _dYdX[0];
+    VD delta_y_ratio = _Delta_Y_Ratio[0];
+    VB thermal_status = derivs->Is_Thermalized();
     VD Y_Scale(DOF);
 
     double step_size = (X_END > X_BEGIN) ? std::fabs(step_start) : -std::fabs(step_start);
@@ -270,28 +378,16 @@ RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
         }
 
         // * One step forward
-        bool comp = RKQC_SingleStep(x, y, dydx, step_size, eps, Y_Scale, step_size_did, step_size_next);
-        // if (comp) {
-        //     // * If in above single step, we compensate to equilibrium value, then we want to check, if the step is
-        //     too
-        //     // large
-        //     double x_tmp = _X.back();
-        //     VD y_tmp = _Y.back();
-        //     VD dy_tmp = _dYdX.back();
-        //     double step_size_did_tmp, step_size_next_tmp;
-        //     comp = RKQC_SingleStep(x_tmp, y_tmp, dy_tmp, 1e-3, eps, Y_Scale, step_size_did_tmp, step_size_next_tmp);
-        //     if (!comp) {
-        //         x = x_tmp;
-        //         y = y_tmp;
-        //         dydx = dy_tmp;
-        //         step_size_did = step_size_did_tmp;
-        //         step_size_next = step_size_next_tmp;
-        //     }
-        // }
+        thermal_status = derivs->Is_Thermalized();
+        bool comp = RKQC_SingleStep(x, y, yeq, dydx, delta_y_ratio, thermal_status, step_size, eps, Y_Scale,
+                                    step_size_did, step_size_next);
+
         _X.push_back(x);
         _Y.push_back(y);
-        _Yeq.push_back(derivs->Yeq(x));
+        _Yeq.push_back(yeq);
         _dYdX.push_back(dydx);
+        _Delta_Y_Ratio.push_back(delta_y_ratio);
+        derivs->Update_Thermal_Status(thermal_status);
 
         // * Check if we reach the end point
         if ((x - X_END) * (X_END - X_BEGIN) >= 0) {
