@@ -65,8 +65,8 @@ void Hubble_History::Update_Value(REAL input) {
 }
 
 Hubble_History::Hubble_History() : Parameter_Base("Hubble") {
-    RETRIVE_PARAMETER(Ti)->Claim_Dependence(this);
-    RETRIVE_PARAMETER(Tr)->Claim_Dependence(this);
+    RETRIVE_PARAMETER(Ti)->Register_Offspring_Parameter(this);
+    RETRIVE_PARAMETER(Tr)->Register_Offspring_Parameter(this);
     Update_Value(0);
 }
 

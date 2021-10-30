@@ -14,18 +14,19 @@ protected:
     std::string name;
     REAL value;
     bool updated;
-    std::set<Parameter_Base *> underlying_parameters;  // Parameter in this set depends on current parameter
+    std::set<Parameter_Base *> offspring_parameters;  // Parameter in this set depends on current parameter
+    std::set<Parameter_Base *> parent_parameters;
 
 public:
     Parameter_Base(std::string par_name) : name(par_name), value(0), updated(true){};
     virtual ~Parameter_Base(){};
 
-    bool Is_Independent() { return (underlying_parameters.size() == 0); }
-    void Claim_Dependence(Parameter_Base *par) { underlying_parameters.insert(par); }
+    bool Is_Independent() { return (parent_parameters.size() == 0); }
+    void Register_Offspring_Parameter(Parameter_Base *par) { offspring_parameters.insert(par); }
     void Notify() {
         updated = false;
         // std::cout << "Parameter: " << name << " Need to be Updated" << std::endl;
-        for (auto &&bp : underlying_parameters) {
+        for (auto &&bp : offspring_parameters) {
             bp->Notify();
         }
     }
@@ -86,7 +87,7 @@ public:
     };
 };
 
-#define REGISTER_PARAMETER(paramName)
+#define REGISTER_PARAMETER(className) Register_Parameter g_register_parameter_##className(new className)
 #define DECLARE_FREE_PARAMETER(paramName, value)                   \
     class param_##paramName : public Free_Parameter {              \
     public:                                                        \
@@ -96,6 +97,6 @@ public:
 
 #define RETRIVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
 
-#define GET_PARAM_VALUE(paramName) RETRIVE_PARAMETER(paramName)->Get_Value()
+#define GET_PARAMETER_VALUE(paramName) RETRIVE_PARAMETER(paramName)->Get_Value()
 
 #endif  //_PARAMETER_BASE_H_

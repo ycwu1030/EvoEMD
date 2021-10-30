@@ -1,8 +1,8 @@
-#include "Models/ToyDM/Amplitudes.h"
+#include "Amplitudes.h"
 
 #include <cmath>
 
-#include "EvoEMD/ParticleBase.h"
+#include "EvoEMD/EvoEMD.h"
 
 using namespace EvoEMD;
 
@@ -36,7 +36,7 @@ REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
         REAL res = (1.0 - pow(Y / YeqT, 2));
-        if (res < 1e-5) {
+        if (fabs(res) < 1e-5) {
             res = 2 * pp->Delta_Yield_Ratio;
         }
 

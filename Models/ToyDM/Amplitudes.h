@@ -1,7 +1,7 @@
 #ifndef _TOY_DM_PROCESSES_H
 #define _TOY_DM_PROCESSES_H
 
-#include "EvoEMD/CollisionRate.h"
+#include "EvoEMD/EvoEMD.h"
 
 class XX_SS_Amp : public EvoEMD::Amplitude {
 public:

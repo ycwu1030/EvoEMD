@@ -103,6 +103,7 @@ VB BoltzmannEquation::Can_be_Thermalized() {
     for (int i = 0; i < DOF; i++) {
         res[i] = (!poi_ptrs[i]->Never_Thermal);
     }
+    return res;
 }
 
 void BoltzmannEquation::Set_X_Range(REAL X_BEGIN, REAL X_END) {

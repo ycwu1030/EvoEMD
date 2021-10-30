@@ -153,6 +153,7 @@ bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dyd
         SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e};", i, y_next[i]);
         if (can_be_thermal[i]) {
             if (thermal_status_cur[i] && y_next[i] < Yeq_full_step[i]) {
+                // * Freeze-Out like case
                 if (y_next[i] < Yeq_full_step[i]) {
                     SPDLOG_INFO_FILE("    Start from Y[{0}] = Yeq[{0}] = {1:+9.8e} to Y[{0}] = {2:+9.8e}", i, y_cur[i],
                                      y_next[i]);
@@ -160,10 +161,12 @@ bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dyd
                     need_to_be_compensate_to_eq = true;
                 }
             } else {
+                // * Freeze-In like case, but maybe due to large collision rate, it can concert into FO case
                 // * Checking the situation at first order
                 if (delta_y_ratio_cur[i] > 0) {
                     SPDLOG_INFO_FILE("    Start from Y[{0}] = {1:+9.8e} < Yeq[{0}]", i, y_cur[i]);
-                    if (y_cur[i] + dY_Step1[i] > Yeq_full_step[i]) {
+                    if (y_cur[i] + dY_Step1[i] > Yeq_full_step[i] && signbit(dY_Step1[i] / dY_Step2[i]) &&
+                        signbit(dY_Step2[i] / dY_Step3[i]) && signbit(dY_Step3[i] / dY_Step4[i])) {
                         need_to_be_compensate_to_eq = true;
                     }
                 } else {

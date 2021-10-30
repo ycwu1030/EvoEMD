@@ -8,28 +8,25 @@ namespace EvoEMD {
 constexpr auto LOGGER_NAME = "log";
 constexpr auto LOGGER_SAVE_PATH = "logs/rotating.log";
 
-class FILE_LOGGER {
+class SPDLOGGER {
 public:
-    FILE_LOGGER()  //: file_logger(spdlog::rotating_logger_mt(LOGGER_NAME, LOGGER_SAVE_PATH, 1048576 * 10, 5))
-    {
+    static SPDLOGGER &Get_Logger() {
+        static SPDLOGGER log;
+        return log;
+    }
+    std::shared_ptr<spdlog::logger> file_logger;
+
+private:
+    SPDLOGGER() {
         spdlog::set_pattern("[%Y/%m/%d %H:%M:%S][%l][%s:%#:%!] %v");
         file_logger = spdlog::rotating_logger_mt(LOGGER_NAME, LOGGER_SAVE_PATH, 1048576 * 10, 5);
         file_logger->set_level(spdlog::level::debug);
-    }
-    ~FILE_LOGGER(){};
-    std::shared_ptr<spdlog::logger> file_logger;
-};
-
-class SPDLOGGER {
-public:
-    static FILE_LOGGER Get_Logger() {
-        static FILE_LOGGER log;
-        return log;
-    }
-
-private:
-    SPDLOGGER() = default;
+    };
     ~SPDLOGGER() = default;
+    SPDLOGGER(const SPDLOGGER &) = delete;
+    SPDLOGGER(SPDLOGGER &&) = delete;
+    SPDLOGGER &operator=(const SPDLOGGER &) = delete;
+    SPDLOGGER &operator=(SPDLOGGER &&) = delete;
 };
 
 // * Refs https://zhuanlan.zhihu.com/p/337877916
