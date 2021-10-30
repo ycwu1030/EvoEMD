@@ -32,4 +32,5 @@ SET(EVOEMD_LIBRARY EVOEMD_shared)
 
 # add_subdirectory(src/Models/SeesawFreezeIn)
 add_subdirectory(Models/ToyDM)
+add_subdirectory(Models/ToyLeptogenesis)
 # add_subdirectory(test)
