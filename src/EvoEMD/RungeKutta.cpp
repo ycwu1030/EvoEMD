@@ -319,13 +319,11 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
     SPDLOG_DEBUG_FILE("Minimal allowed step size is {:+9.8e};", min_step_size);
     REAL max_step_size;
     int trials = 0;
-    bool comp_two_step;
-    bool comp_single_step;
-    bool comp;
     VB should_follow_equilibrium(DOF, false);
     VB follow_equilibrium_two_step_first(DOF, false);
     VB follow_equilibrium_two_step_second(DOF, false);
     VB follow_equilibrium_single_step(DOF, false);
+    bool follow_equilibrium_any;
     bool new_component_thermalized;
     while (true) {
         ++trials;
@@ -383,9 +381,11 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
 
         // * Checking if there is any component is following equilibrium, and if that component drops too fast;
         // * Also checking if we are crossing the critical point
+        follow_equilibrium_any = false;
         bool drop_fast_or_crossing_critical = false;
         for (int i = 0; i < DOF; i++) {
             if (follow_equilibrium_two_step_second[i] && follow_equilibrium_single_step[i]) {
+                follow_equilibrium_any = true;
                 // * This component follows equilibrium
                 REAL drop_slop = p_next.Y[i] / p_cache.Y[i];
                 if (drop_slop < 0.2) {
@@ -432,7 +432,7 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
             step_size_did = step_size;
             step_size_temp = SAFETY * step_size * exp(POW_GROW * log(error_max + 1e-5));
             max_step_size = 4 * step_size_did;
-            step_size_further = (comp_single_step) ? 1.5 * step_size_did : min(step_size_temp, max_step_size);
+            step_size_further = (follow_equilibrium_any) ? 1.5 * step_size_did : min(step_size_temp, max_step_size);
             SPDLOG_DEBUG_FILE("Error is small, enlarge the step size to: {:+9.8e};", step_size_further);
             break;
         }
@@ -465,7 +465,7 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
     p_next.dYdX = (*derivs)(p_next.X, p_next.Y, p_next.Delta_Y_Ratio);
     SPDLOG_DEBUG_FILE("RKQC reaching: ");
     LOGGING_RK_POINT(p_next);
-    return comp;
+    return follow_equilibrium_any;
 }
 
 RungeKutta::STATUS RungeKutta::Solve(REAL step_start, REAL eps) {
