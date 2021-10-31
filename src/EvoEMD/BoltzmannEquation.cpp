@@ -30,7 +30,7 @@ void BoltzmannEquation::Setup_Scale() {
     }
 }
 
-VD BoltzmannEquation::dYdX(REAL x, VD y, VD delta_y_ratio) {
+VD BoltzmannEquation::dYdX(REAL x, VD &y, VD &delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
     // * T^3H(beta_T dY/dx + 3(1-beta_T)Y) = CollisionRate
@@ -90,12 +90,6 @@ VB BoltzmannEquation::Is_Thermalized() {
         res[i] = poi_ptrs[i]->Thermalized * (!poi_ptrs[i]->Never_Thermal);
     }
     return res;
-}
-
-void BoltzmannEquation::Update_Thermal_Status(VB status) {
-    for (int i = 0; i < DOF; i++) {
-        poi_ptrs[i]->Thermalized = status[i] * (!poi_ptrs[i]->Never_Thermal);
-    }
 }
 
 VB BoltzmannEquation::Can_be_Thermalized() {
