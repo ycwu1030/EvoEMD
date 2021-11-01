@@ -29,6 +29,7 @@ public:
     virtual VD dYdX(REAL x, VD &y, VD &delta_y_ratio) override;
     virtual VD Yeq(REAL x) override;
     virtual VB Is_Thermalized() override;
+    virtual VB Can_be_Negative() override;
 };
 
 }  // namespace EvoEMD

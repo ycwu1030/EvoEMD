@@ -87,7 +87,16 @@ VD BoltzmannEquation::Yeq(REAL x) {
 VB BoltzmannEquation::Is_Thermalized() {
     VB res(DOF);
     for (int i = 0; i < DOF; i++) {
-        res[i] = poi_ptrs[i]->Thermalized * (!poi_ptrs[i]->Never_Thermal);
+        res[i] = poi_ptrs[i]->Thermalized;
+    }
+    return res;
+}
+
+VB BoltzmannEquation::Can_be_Negative() {
+    VB res(DOF);
+    for (int i = 0; i < DOF; i++) {
+        // * If it is pseudo, then the number density/Yield can be negative.
+        res[i] = poi_ptrs[i]->pseudo;
     }
     return res;
 }

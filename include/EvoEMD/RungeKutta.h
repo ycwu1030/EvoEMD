@@ -38,6 +38,7 @@ public:
     virtual VD dYdX(REAL x, VD &y, VD &delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
     virtual VD Yeq(REAL x) = 0;
     virtual VB Is_Thermalized() = 0;  // Check whether the particle is starting in thermalization or not
+    virtual VB Can_be_Negative() = 0;
 };
 
 struct RK_Point {

@@ -57,10 +57,13 @@ public:
      *              used in Boltzmann equation. So be sure this DOF is consistent with the collision rate.
      * @param  mass: Pointer to mass parameter, if nullptr (default), it is assumed the particle is massless
      * @param  width: Pointer to width parameter, if nullptr (default), it is assumed the particle is stable
+     * @param  pseudo: whether the particle is pseudo or not. If it is pseudo, then its equilibrium is not at Yeq, and
+     * the density of it can be negative. If it is not pseudo, it is some basic particles, its equilibrium is just Yeq,
+     * and the density can not be negative.
      * @retval
      */
     Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-                    bool never_thermal = false);
+                    bool pseudo = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
@@ -80,7 +83,7 @@ public:
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
-    const bool Never_Thermal;
+    const bool pseudo;
     bool Thermalized;
     REAL Yield;
 
@@ -104,7 +107,7 @@ protected:
 
 public:
     Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-            bool never_thermal = false);
+            bool pseudo = false);
     ~Fermion(){};
 };
 
@@ -115,7 +118,7 @@ protected:
 
 public:
     Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-          bool never_thermal = false);
+          bool pseudo = false);
     ~Boson(){};
 };
 
