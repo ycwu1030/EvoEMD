@@ -24,12 +24,11 @@ public:
 
     void Register_Process(Process *);
 
-    void Notify_Client();
     std::set<Process *> Get_Process() const { return Process_Set; }
 };
 
 class Pseudo_Particle : public Particle_Base {
-    // * Pseudo-Particle: not really a particle
+    // * Pseudo-Particle:
     // * Stored Pseudo-Particle information:
     // * Masses, whether Massless
     // * PID: particle id;

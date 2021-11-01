@@ -97,12 +97,12 @@ void RungeKutta::INIT() {
     }
 }
 
-#define LOGGING_RK_POINT(rkp)                                                                                        \
-    SPDLOG_INFO_FILE("  X = {:+9.8e}", rkp.X);                                                                       \
-    for (int irkp = 0; irkp < rkp.DOF; ++irkp) {                                                                     \
-        SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}", irkp, rkp.Y[irkp], rkp.dYdX[irkp]);          \
-        SPDLOG_INFO_FILE("      Yeq[{0}] = {1:+9.8e}, dR[{0}] = {2:+9.8e}, Thermal[{0}] = {3}", irkp, rkp.Yeq[irkp], \
-                         rkp.Delta_Y_Ratio[irkp], rkp.Thermal_Status[irkp]);                                         \
+#define LOGGING_RK_POINT(rkp)                                                                                         \
+    SPDLOG_DEBUG_FILE("  X = {:+9.8e}", rkp.X);                                                                       \
+    for (int irkp = 0; irkp < rkp.DOF; ++irkp) {                                                                      \
+        SPDLOG_DEBUG_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}", irkp, rkp.Y[irkp], rkp.dYdX[irkp]);          \
+        SPDLOG_DEBUG_FILE("      Yeq[{0}] = {1:+9.8e}, dR[{0}] = {2:+9.8e}, Thermal[{0}] = {3}", irkp, rkp.Yeq[irkp], \
+                          rkp.Delta_Y_Ratio[irkp], rkp.Thermal_Status[irkp]);                                         \
     }
 
 struct RK_INTER {
@@ -134,6 +134,14 @@ struct RK_INTER {
           Yeq_Mid(dof, 0),
           Yeq_End(dof, 0) {}
 };
+
+#define LOGGING_RK_INTER(rki)                                                                           \
+    SPDLOG_DEBUG_FILE("The intermediate status: ");                                                     \
+    for (int irki = 0; irki < rki.dY_Step1.size(); irki++) {                                            \
+        SPDLOG_DEBUG_FILE("For Component-{}", irki);                                                    \
+        SPDLOG_DEBUG_FILE("dY1={:+9.8e}, dY2={:+9.8e}, dY3={:+9.8e}, dY4={:+9.8e}", rki.dY_Step1[irki], \
+                          rki.dY_Step2[irki], rki.dY_Step3[irki], rki.dY_Step4[irki]);                  \
+    }
 
 /**
  * @brief  Checking whether the component is thermalized during this step.
@@ -255,6 +263,7 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     // * 4. Using dx and dY_Step3
     inter.dY_Step4 = dx * (*derivs)(x2, inter.Y3, inter.dYR3);
 
+    LOGGING_RK_INTER(inter);
     // * Combine above 4 steps:
     p_next.DOF = DOF;
     p_next.X = x2;
@@ -270,11 +279,15 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
         }
     }
     bool comp = false;
-    VB can_be_thermal = derivs->Can_be_Thermalized();
     VB need_to_be_compensate_to_eq = WHETHER_THERMALIZED(p_cur, inter, should_follow_equilibrium);
+    SPDLOG_DEBUG_FILE("Need to compensate to eq?");
+    for (int i = 0; i < DOF; i++) {
+        SPDLOG_DEBUG_FILE("Y[{}] = {}", i, need_to_be_compensate_to_eq[i]);
+    }
+
     follow_equilibrium = should_follow_equilibrium;
     for (int i = 0; i < DOF; i++) {
-        if (need_to_be_compensate_to_eq[i] && can_be_thermal[i]) {
+        if (need_to_be_compensate_to_eq[i]) {
             p_next.Y[i] = p_next.Yeq[i];
             p_next.Thermal_Status[i] = true;
             p_next.Delta_Y_Ratio[i] = 0;
