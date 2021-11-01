@@ -165,7 +165,11 @@ VB WHETHER_THERMALIZED(const RK_Point &p_cur, const RK_INTER &p_inter, const VB 
                 // * So we start checking from dY_Step2
                 if (signbit(p_inter.dY_Step2[i] / p_inter.dY_Step3[i]) &&
                     signbit(p_inter.dY_Step3[i] / p_inter.dY_Step4[i])) {
-                    res[i] = true;
+                    REAL Y_temp = p_cur.Y[i] + p_inter.dY_Step1[i] / 6.0 + p_inter.dY_Step2[i] / 3.0 +
+                                  p_inter.dY_Step3[i] / 3.0 + p_inter.dY_Step4[i] / 6.0;
+                    if (Y_temp < p_inter.Yeq_End[i]) {
+                        res[i] = true;
+                    }
                 }
             } else {
                 // * Freeze-in like case;
@@ -195,7 +199,7 @@ VB WHETHER_THERMALIZED(const RK_Point &p_cur, const RK_INTER &p_inter, const VB 
 // const VB &thermal_status_cur, const REAL step_size, VD &y_next, VD &delta_y_ratio_next,
 // VB &thermal_status_next) {
 bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const REAL step_size,
-                                const VB &should_follow_equilibrium, VB &follow_equilibrium) {
+                                VB &should_follow_equilibrium, VB &follow_equilibrium) {
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
     SPDLOG_INFO_FILE("Starting at: ");
     LOGGING_RK_POINT(p_cur);
@@ -222,6 +226,8 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     inter.Yeq_Mid = derivs->Yeq(x1);
     inter.Yeq_End = derivs->Yeq(x2);
 
+    VB can_be_negative = derivs->Can_be_Negative();
+    REAL Y_temp;
     // * 1. Using dx*dy/dx
     inter.dY_Step1 = dx * p_cur.dYdX;
     for (int i = 0; i < DOF; i++) {
@@ -230,7 +236,8 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
             inter.Y1[i] = inter.Yeq_Mid[i];
             inter.dYR1[i] = 0;
         } else {
-            inter.Y1[i] = p_cur.Y[i] + inter.dY_Step1[i] / 2.0;
+            Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 2.0;
+            inter.Y1[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
             inter.dYR1[i] = 1.0 - inter.Y1[i] / inter.Yeq_Mid[i];
         }
     }
@@ -243,7 +250,8 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
             inter.Y2[i] = inter.Yeq_Mid[i];
             inter.dYR2[i] = 0;
         } else {
-            inter.Y2[i] = p_cur.Y[i] + inter.dY_Step2[i] / 2.0;
+            Y_temp = p_cur.Y[i] + inter.dY_Step2[i] / 2.0;
+            inter.Y2[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
             inter.dYR2[i] = 1.0 - inter.Y2[i] / inter.Yeq_Mid[i];
         }
     }
@@ -255,7 +263,8 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
             inter.Y3[i] = inter.Yeq_End[i];
             inter.dYR3[i] = 0;
         } else {
-            inter.Y3[i] = p_cur.Y[i] + inter.dY_Step3[i];
+            Y_temp = p_cur.Y[i] + inter.dY_Step3[i];
+            inter.Y3[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
             inter.dYR3[i] = 1.0 - inter.Y3[i] / inter.Yeq_End[i];
         }
     }
@@ -273,8 +282,9 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
             p_next.Y[i] = p_next.Yeq[i];
             p_next.Delta_Y_Ratio[i] = 0;
         } else {
-            p_next.Y[i] = p_cur.Y[i] + inter.dY_Step1[i] / 6.0 + inter.dY_Step2[i] / 3.0 + inter.dY_Step3[i] / 3.0 +
-                          inter.dY_Step4[i] / 6.0;
+            Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 6.0 + inter.dY_Step2[i] / 3.0 + inter.dY_Step3[i] / 3.0 +
+                     inter.dY_Step4[i] / 6.0;
+            p_next.Y[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
             p_next.Delta_Y_Ratio[i] = 1.0 - p_next.Y[i] / p_next.Yeq[i];
         }
     }
@@ -289,14 +299,14 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     for (int i = 0; i < DOF; i++) {
         if (need_to_be_compensate_to_eq[i]) {
             p_next.Y[i] = p_next.Yeq[i];
-            p_next.Thermal_Status[i] = true;
             p_next.Delta_Y_Ratio[i] = 0;
             comp = true;
             follow_equilibrium[i] = true;
-        } else {
-            p_next.Thermal_Status[i] = false;
         }
+        p_next.Thermal_Status[i] = need_to_be_compensate_to_eq[i] || should_follow_equilibrium[i];
     }
+    p_next.dYdX = derivs->dYdX(p_next.X, p_next.Y, p_next.Delta_Y_Ratio);
+    should_follow_equilibrium = follow_equilibrium;
     return comp;
 }
 
@@ -417,6 +427,7 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
                 "Either when following the equilibrium, it drops too fast, or we probably cross the critical point, we "
                 "need to shrink the step size to be safe: {:+9.8e} -> {:+9.8e}",
                 step_size_temp, step_size);
+            continue;
         }
 
         // * If we don't have drop too fast and crossing critical point problem, then we have to check the error

@@ -21,7 +21,7 @@ int main(int argc, char const *argv[]) {
     cout << "Starting from: Y = " << BE.Get_Y_BEGIN() << endl;
     RungeKutta rk(&BE);
     // cout << "System Built" << endl;
-    rk.Solve(1e-4);
+    rk.Solve(1e-3, 1e-3);
     rk.Dump_Solution("ToyLG_Result.txt");
     return 0;
 }

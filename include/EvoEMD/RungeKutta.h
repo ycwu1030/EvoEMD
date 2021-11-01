@@ -133,8 +133,8 @@ private:
      * @param  &follow_equilibrium: whether the component is following equilibrium in this step
      * @retval whether any component that is not true in should_follow_equilibrium becomes equilibrium
      */
-    bool RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const REAL step_size,
-                        const VB &should_follow_equilibrium, VB &follow_equilibrium);
+    bool RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const REAL step_size, VB &should_follow_equilibrium,
+                        VB &follow_equilibrium);
 
     /**
      * @brief The Runge-Kutta method taking one step forward

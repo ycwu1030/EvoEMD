@@ -6,7 +6,7 @@
 using namespace EvoEMD;
 
 // * Free Parameters
-DECLARE_FREE_PARAMETER(Lam, 0.8);
+DECLARE_FREE_PARAMETER(Lam, 0.4);
 DECLARE_FREE_PARAMETER(MX, 100);
 
 // * All Particles
