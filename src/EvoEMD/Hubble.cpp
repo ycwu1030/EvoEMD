@@ -13,7 +13,7 @@ Hubble_For_Single_Period::Hubble_For_Single_Period(const REAL Ti, const REAL Tf,
 
 REAL Hubble_For_Single_Period::Get_Hubble_For_RD(const REAL T) {
     REAL geT = ge(T);
-    return M_PI / 3.0 * sqrt(geT / 10.0) * T * T / PHY_MP / PHY_MP;
+    return M_PI / 3.0 * sqrt(geT / 10.0) * T * T / PHY_MP;
 }
 
 void Hubble_For_Single_Period::Print() const {
@@ -65,8 +65,8 @@ void Hubble_History::Update_Value(REAL input) {
 }
 
 Hubble_History::Hubble_History() : Parameter_Base("Hubble") {
-    RETRIVE_PARAMETER(Ti)->Claim_Dependence(this);
-    RETRIVE_PARAMETER(Tr)->Claim_Dependence(this);
+    RETRIVE_PARAMETER(Ti)->Register_Offspring_Parameter(this);
+    RETRIVE_PARAMETER(Tr)->Register_Offspring_Parameter(this);
     Update_Value(0);
 }
 

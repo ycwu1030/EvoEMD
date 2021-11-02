@@ -14,6 +14,7 @@ public:
     Process(Amplitude *amp);
     ~Process();
 
+    std::string Get_Process_Name() const;
     REAL Get_Collision_Rate(REAL T);
     REAL Get_Yield_Coeff(REAL T, int PID);
 

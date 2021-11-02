@@ -34,14 +34,25 @@ public:
     REAL Get_X_END() const { return X_END; }
     VD Get_Y_BEGIN() const { return Y_BEGIN; }
     VD Get_Delta_Y_Ratio_BEGIN() const { return Delta_Y_Ratio_BEGIN; }
-    VD operator()(REAL x, VD y, VD delta_y_ratio) { return dYdX(x, y, delta_y_ratio); }
-    virtual VD dYdX(REAL x, VD y, VD delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
+    VD operator()(REAL x, const VD &y, const VD &delta_y_ratio) { return dYdX(x, y, delta_y_ratio); }
+    virtual VD dYdX(REAL x, const VD &y, const VD &delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
     virtual VD Yeq(REAL x) = 0;
     virtual VB Is_Thermalized() = 0;  // Check whether the particle is starting in thermalization or not
-    virtual void Update_Thermal_Status(VB status) = 0;
-    virtual VB Can_be_Thermalized() = 0;
+    virtual VB Can_be_Negative() = 0;
+    virtual VB Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) = 0;
 };
 
+struct RK_Point {
+    int DOF;
+    REAL X;
+    VD Y;
+    VD dYdX;
+    VD Yeq;             // Equilibrium value of Y
+    VD Delta_Y_Ratio;   // 1 - Y/Yeq;
+    VB Thermal_Status;  // Whether Y is following Yeq;
+    RK_Point(int dof)
+        : DOF(dof), Y(dof, 0), dYdX(dof, 0), Yeq(dof, 0), Delta_Y_Ratio(dof, 0), Thermal_Status(dof, false) {}
+};
 /*
  * RungeKutta method solving ODE:
  *  dY_i/dx = ODE_i(x,Y_j,...)
@@ -74,6 +85,8 @@ public:
 
     VD Get_Solution_X() const { return _X; }
     VVD Get_Solution_Y() const { return _Y; }
+    VVD Get_Solution_dYdX() const { return _dYdX; }
+    VVD Get_Solution_Yeq() const { return _Yeq; }
     VD Get_Solution_Y_END() const { return _Y.back(); }
 
 private:
@@ -114,20 +127,17 @@ private:
     void INIT();
 
     /**
-     * @brief The 4th order Runge-Kutta method taking one step forward
-     * @param x_cur, current x value
-     * @param y_cur, current y value
-     * @param dydx_cur, current dy/dx value
-     * @param delta_y_ratiro_cur, current 1-Y/Yeq
-     * @param thermal_status_cur, current thermalization status
-     * @param step_size, step size, we would like to go forward
-     * @param y_next, the dy at next step (output)
-     * @param delta_y_ratiro_next, 1-Y/Yeq at next step (output)
-     * @param thermal_status_next, thermalization status at next step (output)
+     * @brief  4th-order RungeKutta Method
+     * @note
+     * @param  &p_cur: starting point
+     * @param  &p_next: ending point
+     * @param  step_size: used step size
+     * @param  &should_follow_equilibrium: whether any component should be treated as following equilibrium
+     * @param  &follow_equilibrium: whether the component is following equilibrium in this step
+     * @retval whether any component that is not true in should_follow_equilibrium becomes equilibrium
      */
-    bool RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dydx_cur, const VD &delta_y_ratio_cur,
-                        const VB &thermal_status_cur, const REAL step_size, VD &y_next, VD &delta_y_ratio_next,
-                        VB &thermal_status_next);
+    bool RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const REAL step_size, VB &should_follow_equilibrium,
+                        VB &follow_equilibrium);
 
     /**
      * @brief The Runge-Kutta method taking one step forward
@@ -141,14 +151,16 @@ private:
      * @param thermal_status, input: current status of thermalization, output: next status of thermalization
      * @param step_size_guess, input: initial guess of current step size
      * @param eps, input: tolerance
-     * @param Y_Scale, input: the scale in y to set the error (it is possible in different direction of y, the scale is
-     * quite different)
+     * @param Y_Scale, input: the scale in y to set the error (it is possible in different direction of y, the scale
+     * is quite different)
      * @param step_size_did, output: actual step size we take
      * @param step_size_further, output: based on what we did, the prospect step size for next step
      */
     bool RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, VB &thermal_status,
                          const REAL step_size_guess, const REAL eps, const VD &Y_Scale, REAL &step_size_did,
                          REAL &step_size_further);
+    bool RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_guess, const REAL eps, RK_Point &p_next,
+                         REAL &step_size_did, REAL &step_size_further);
 };
 }  // namespace EvoEMD
 #endif  //__RUNGEKUTTA_H__

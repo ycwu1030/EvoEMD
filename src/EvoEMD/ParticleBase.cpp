@@ -10,8 +10,8 @@ namespace EvoEMD {
 void Particle_Base::Register_Process(Process *proc) { Process_Set.insert(proc); }
 
 Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass,
-                                 Parameter_Base *width, bool never_thermal)
-    : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), Never_Thermal(never_thermal) {
+                                 Parameter_Base *width, bool pseudo_)
+    : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), pseudo(pseudo_), Thermalized(true) {
     if (!p_mass) {
         massless = true;
     } else {
@@ -43,8 +43,8 @@ void Pseudo_Particle::Set_Mass(double mass) {
     }
 }
 
-Fermion::Fermion(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool never_thermal)
-    : Pseudo_Particle(name, PID, DOF, mass, width, never_thermal) {}
+Fermion::Fermion(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool pseudo)
+    : Pseudo_Particle(name, PID, DOF, mass, width, pseudo) {}
 
 REAL Fermion::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
@@ -64,8 +64,8 @@ REAL Fermion::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
     }
 }
 
-Boson::Boson(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool never_thermal)
-    : Pseudo_Particle(name, PID, DOF, mass, width, never_thermal) {}
+Boson::Boson(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool pseudo)
+    : Pseudo_Particle(name, PID, DOF, mass, width, pseudo) {}
 
 REAL Boson::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
