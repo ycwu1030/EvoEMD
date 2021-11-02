@@ -8,8 +8,8 @@
 using namespace EvoEMD;
 using namespace std;
 int main(int argc, char const *argv[]) {
-    Parameter_Base *tr = RETRIVE_PARAMETER(Tr);
-    tr->Set_Value(1e6);
+    Parameter_Base *ti = RETRIVE_PARAMETER(Ti);
+    ti->Set_Value(15);
     Parameter_Base *mn1 = RETRIVE_PARAMETER(MN1);
     BoltzmannEquation BE(mn1);
     REAL scale = mn1->Get_Value();

@@ -7,8 +7,8 @@
 using namespace EvoEMD;
 
 // * Free Parameters
-DECLARE_FREE_PARAMETER(MN1, 1e9);
-DECLARE_FREE_PARAMETER(Lam, 1e-2);
+DECLARE_FREE_PARAMETER(MN1, 1e13);
+DECLARE_FREE_PARAMETER(Lam, 4e-3);
 DECLARE_FREE_PARAMETER(Eps, 1e-6);
 
 // * Parameters that depend on free parameter
