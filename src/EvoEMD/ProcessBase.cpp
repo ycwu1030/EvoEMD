@@ -1,5 +1,7 @@
 #include "EvoEMD/ProcessBase.h"
 
+#include "EvoEMD/spdlog_wrapper.h"
+
 namespace EvoEMD {
 
 Process::Process(Amplitude *amp) {
@@ -23,6 +25,20 @@ Process::Process(Amplitude *amp) {
 Process::~Process() {
     delete CR_Calculator;
     delete amp;
+}
+
+std::string Process::Get_Process_Name() const {
+    std::string res = "";
+    for (int i = 0; i < amp->N_INITIAL; i++) {
+        res += amp->INITIAL[i]->Get_Name();
+        res += " ";
+    }
+    res += "-> ";
+    for (int i = 0; i < amp->N_FINAL; i++) {
+        res += amp->FINAL[i]->Get_Name();
+        res += " ";
+    }
+    return res;
 }
 
 REAL Process::Get_Collision_Rate(REAL T) { return CR_Calculator->Get_Collision_Rate(T); }

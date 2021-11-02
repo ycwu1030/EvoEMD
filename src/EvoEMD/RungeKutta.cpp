@@ -204,6 +204,7 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     SPDLOG_INFO_FILE("Starting at: ");
     LOGGING_RK_POINT(p_cur);
     RK_INTER inter(DOF);
+    bool comp;
     VB should_be_thermalized = derivs->Should_be_Thermalized(p_cur.X, p_cur.Y, p_cur.Delta_Y_Ratio);
 
     // * 4th order RK proceeds as:
@@ -229,85 +230,102 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
 
     VB can_be_negative = derivs->Can_be_Negative();
     REAL Y_temp;
-    // * 1. Using dx*dy/dx
-    inter.dY_Step1 = dx * p_cur.dYdX;
-    for (int i = 0; i < DOF; i++) {
-        if (should_follow_equilibrium[i]) {
-            // * This component will follow the thermal equilibrium during current step
-            inter.Y1[i] = inter.Yeq_Mid[i];
-            inter.dYR1[i] = 0;
-        } else {
-            Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 2.0;
-            inter.Y1[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
-            inter.dYR1[i] = 1.0 - inter.Y1[i] / inter.Yeq_Mid[i];
+    while (true) {
+        for (int i = 0; i < DOF; i++) {
+            SPDLOG_DEBUG_FILE("Component-{}, should be thermalized? {}", i, should_be_thermalized[i]);
         }
-    }
-
-    // * 2. Using dx/2 and dY_Step1/2
-    inter.dY_Step2 = dx * (*derivs)(x1, inter.Y1, inter.dYR1);
-    for (int i = 0; i < DOF; i++) {
-        if (should_follow_equilibrium[i]) {
-            // * This component will follow the thermal equilibrium during current step
-            inter.Y2[i] = inter.Yeq_Mid[i];
-            inter.dYR2[i] = 0;
-        } else {
-            Y_temp = p_cur.Y[i] + inter.dY_Step2[i] / 2.0;
-            inter.Y2[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
-            inter.dYR2[i] = 1.0 - inter.Y2[i] / inter.Yeq_Mid[i];
+        // * 1. Using dx*dy/dx
+        inter.dY_Step1 = dx * p_cur.dYdX;
+        for (int i = 0; i < DOF; i++) {
+            if (should_be_thermalized[i]) {
+                // * This component will follow the thermal equilibrium during current step
+                inter.Y1[i] = inter.Yeq_Mid[i];
+                inter.dYR1[i] = 0;
+            } else {
+                Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 2.0;
+                inter.Y1[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
+                inter.dYR1[i] = 1.0 - inter.Y1[i] / inter.Yeq_Mid[i];
+            }
         }
-    }
 
-    // * 3. Using dx/2 and dY_Step2/2
-    inter.dY_Step3 = dx * (*derivs)(x1, inter.Y2, inter.dYR2);
-    for (int i = 0; i < DOF; i++) {
-        if (should_follow_equilibrium[i]) {
-            inter.Y3[i] = inter.Yeq_End[i];
-            inter.dYR3[i] = 0;
-        } else {
-            Y_temp = p_cur.Y[i] + inter.dY_Step3[i];
-            inter.Y3[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
-            inter.dYR3[i] = 1.0 - inter.Y3[i] / inter.Yeq_End[i];
+        // * 2. Using dx/2 and dY_Step1/2
+        inter.dY_Step2 = dx * (*derivs)(x1, inter.Y1, inter.dYR1);
+        for (int i = 0; i < DOF; i++) {
+            if (should_be_thermalized[i]) {
+                // * This component will follow the thermal equilibrium during current step
+                inter.Y2[i] = inter.Yeq_Mid[i];
+                inter.dYR2[i] = 0;
+            } else {
+                Y_temp = p_cur.Y[i] + inter.dY_Step2[i] / 2.0;
+                inter.Y2[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
+                inter.dYR2[i] = 1.0 - inter.Y2[i] / inter.Yeq_Mid[i];
+            }
         }
-    }
 
-    // * 4. Using dx and dY_Step3
-    inter.dY_Step4 = dx * (*derivs)(x2, inter.Y3, inter.dYR3);
-
-    LOGGING_RK_INTER(inter);
-    // * Combine above 4 steps:
-    p_next.DOF = DOF;
-    p_next.X = x2;
-    p_next.Yeq = inter.Yeq_End;
-    for (int i = 0; i < DOF; i++) {
-        if (should_follow_equilibrium[i]) {
-            p_next.Y[i] = p_next.Yeq[i];
-            p_next.Delta_Y_Ratio[i] = 0;
-        } else {
-            Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 6.0 + inter.dY_Step2[i] / 3.0 + inter.dY_Step3[i] / 3.0 +
-                     inter.dY_Step4[i] / 6.0;
-            p_next.Y[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
-            p_next.Delta_Y_Ratio[i] = 1.0 - p_next.Y[i] / p_next.Yeq[i];
+        // * 3. Using dx/2 and dY_Step2/2
+        inter.dY_Step3 = dx * (*derivs)(x1, inter.Y2, inter.dYR2);
+        for (int i = 0; i < DOF; i++) {
+            if (should_be_thermalized[i]) {
+                inter.Y3[i] = inter.Yeq_End[i];
+                inter.dYR3[i] = 0;
+            } else {
+                Y_temp = p_cur.Y[i] + inter.dY_Step3[i];
+                inter.Y3[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
+                inter.dYR3[i] = 1.0 - inter.Y3[i] / inter.Yeq_End[i];
+            }
         }
-    }
-    bool comp = false;
-    VB need_to_be_compensate_to_eq = WHETHER_THERMALIZED(p_cur, inter, should_follow_equilibrium);
-    SPDLOG_DEBUG_FILE("Need to compensate to eq?");
-    for (int i = 0; i < DOF; i++) {
-        SPDLOG_DEBUG_FILE("Y[{}] = {}", i, need_to_be_compensate_to_eq[i]);
-    }
 
-    follow_equilibrium = should_follow_equilibrium;
-    for (int i = 0; i < DOF; i++) {
-        if (need_to_be_compensate_to_eq[i]) {
-            p_next.Y[i] = p_next.Yeq[i];
-            p_next.Delta_Y_Ratio[i] = 0;
-            comp = true;
-            follow_equilibrium[i] = true;
+        // * 4. Using dx and dY_Step3
+        inter.dY_Step4 = dx * (*derivs)(x2, inter.Y3, inter.dYR3);
+
+        LOGGING_RK_INTER(inter);
+        // * Combine above 4 steps:
+        bool match_thermal = true;
+        p_next.DOF = DOF;
+        p_next.X = x2;
+        p_next.Yeq = inter.Yeq_End;
+        for (int i = 0; i < DOF; i++) {
+            if (should_be_thermalized[i]) {
+                p_next.Y[i] = p_next.Yeq[i];
+                p_next.Delta_Y_Ratio[i] = 0;
+                p_next.Thermal_Status[i] = true;
+                comp = true;
+            } else {
+                Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 6.0 + inter.dY_Step2[i] / 3.0 + inter.dY_Step3[i] / 3.0 +
+                         inter.dY_Step4[i] / 6.0;
+                if (p_cur.Thermal_Status[i]) {
+                    if (Y_temp < p_next.Yeq[i]) {
+                        match_thermal = false;
+                        should_be_thermalized[i] = true;
+                    }
+                }
+                p_next.Y[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
+                p_next.Delta_Y_Ratio[i] = 1.0 - p_next.Y[i] / p_next.Yeq[i];
+                p_next.Thermal_Status[i] = false;
+            }
         }
-        p_next.Thermal_Status[i] = need_to_be_compensate_to_eq[i] || should_follow_equilibrium[i];
+        if (match_thermal) break;
     }
+    // bool comp = false;
+    // VB need_to_be_compensate_to_eq = WHETHER_THERMALIZED(p_cur, inter, should_follow_equilibrium);
+    // SPDLOG_DEBUG_FILE("Need to compensate to eq?");
+    // for (int i = 0; i < DOF; i++) {
+    //     SPDLOG_DEBUG_FILE("Y[{}] = {}", i, need_to_be_compensate_to_eq[i]);
+    // }
+
+    // follow_equilibrium = should_follow_equilibrium;
+    // for (int i = 0; i < DOF; i++) {
+    //     if (need_to_be_compensate_to_eq[i]) {
+    //         p_next.Y[i] = p_next.Yeq[i];
+    //         p_next.Delta_Y_Ratio[i] = 0;
+    //         comp = true;
+    //         follow_equilibrium[i] = true;
+    //     }
+    //     p_next.Thermal_Status[i] = need_to_be_compensate_to_eq[i] || should_follow_equilibrium[i];
+    // }
     p_next.dYdX = derivs->dYdX(p_next.X, p_next.Y, p_next.Delta_Y_Ratio);
-    should_follow_equilibrium = follow_equilibrium;
+    // should_follow_equilibrium = follow_equilibrium;
+    follow_equilibrium = should_be_thermalized;
     return comp;
 }
 
@@ -354,24 +372,24 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         SPDLOG_DEBUG_FILE("{}-th Trial for RKQC with stepsize = {:+9.8e}", trials, step_size);
         // * Take two half steps
         half_step_size = step_size / 2.0;
-        while (true) {
-            new_component_thermalized = RK4_SingleStep(p_cache, p_temp, half_step_size, should_follow_equilibrium,
-                                                       follow_equilibrium_two_step_first);
-            if (!new_component_thermalized) {
-                // * Once, no new component is thermalized, we finish current step
-                // * But we know nothing about next step, so setting should_follow_equilibrium to false
-                should_follow_equilibrium = VB(DOF, false);
-                break;
-            }
-        }
-        while (true) {
-            new_component_thermalized = RK4_SingleStep(p_temp, p_end, half_step_size, should_follow_equilibrium,
-                                                       follow_equilibrium_two_step_second);
-            if (!new_component_thermalized) {
-                should_follow_equilibrium = VB(DOF, false);
-                break;
-            }
-        }
+        // while (true) {
+        new_component_thermalized = RK4_SingleStep(p_cache, p_temp, half_step_size, should_follow_equilibrium,
+                                                   follow_equilibrium_two_step_first);
+        //     if (!new_component_thermalized) {
+        //         // * Once, no new component is thermalized, we finish current step
+        //         // * But we know nothing about next step, so setting should_follow_equilibrium to false
+        //         should_follow_equilibrium = VB(DOF, false);
+        //         break;
+        //     }
+        // }
+        // while (true) {
+        new_component_thermalized = RK4_SingleStep(p_temp, p_end, half_step_size, should_follow_equilibrium,
+                                                   follow_equilibrium_two_step_second);
+        //     if (!new_component_thermalized) {
+        //         should_follow_equilibrium = VB(DOF, false);
+        //         break;
+        //     }
+        // }
 
         SPDLOG_DEBUG_FILE("Take two half steps, reaching:");
         LOGGING_RK_POINT(p_end);
@@ -384,14 +402,14 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         }
 
         // * Take one full step
-        while (true) {
-            new_component_thermalized =
-                RK4_SingleStep(p_cache, p_next, step_size, should_follow_equilibrium, follow_equilibrium_single_step);
-            if (!new_component_thermalized) {
-                should_follow_equilibrium = VB(DOF, false);
-                break;
-            }
-        }
+        // while (true) {
+        new_component_thermalized =
+            RK4_SingleStep(p_cache, p_next, step_size, should_follow_equilibrium, follow_equilibrium_single_step);
+        //     if (!new_component_thermalized) {
+        //         should_follow_equilibrium = VB(DOF, false);
+        //         break;
+        //     }
+        // }
 
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");
         LOGGING_RK_POINT(p_next);

@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "EvoEMD/ProcessBase.h"
+#include "EvoEMD/spdlog_wrapper.h"
 
 namespace EvoEMD {
 
@@ -48,6 +49,8 @@ VB BoltzmannEquation::Should_be_Thermalized(REAL x, const VD &y, const VD &delta
             y_test[i] = (1.0 - 1e-3) * yeq[i];
             delta_y_ratio_test[i] = 1e-3;
             REAL dydx_down = dYidX(i, x, y_test, delta_y_ratio_test);
+            SPDLOG_DEBUG_FILE("Component-{}, dydx_up = {:+9.8e}, dydx_down = {:+9.8e}, yeq = {:+9.8e}", i, dydx_up,
+                              dydx_down, yeq[i]);
             if (dydx_up < 0 && fabs(dydx_up) * 1e-4 > 1e-3 * yeq[i] && dydx_down > 0 &&
                 dydx_down * 1e-4 > 1e-3 * yeq[i]) {
                 res[i] = true;
@@ -128,7 +131,10 @@ VD BoltzmannEquation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
             // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
             // std::cout << "Coefficient @ T=" << T << " is " << proc_ptr->Get_Yield_Coeff(T, pp->Get_PID()) <<
             // std::endl;
-            res[i] += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
+            REAL cr = proc_ptr->Get_Collision_Rate(T);
+            REAL coef = proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
+            SPDLOG_DEBUG_FILE("COMPONENT-{}, Rate: {:+9.8e}, COEF: {:+9.8e}", i, cr, coef);
+            res[i] += cr * coef;
         }
     }
     for (int i = 0; i < DOF; i++) {

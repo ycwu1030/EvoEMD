@@ -4,6 +4,7 @@
 
 #include "EvoEMD/Constants.h"
 #include "EvoEMD/PhaseSpace.h"
+#include "EvoEMD/spdlog_wrapper.h"
 #include "cuba.h"
 #include "gsl/gsl_sf_bessel.h"
 
@@ -45,7 +46,7 @@ REAL Decay12_Rate::Get_Collision_Rate(REAL T) {
     REAL m1 = amp->INITIAL[0]->Get_Mass();
     REAL z = m1 / T;
     REAL k1z = z > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(z);
-    REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z;
+    REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z * AMP_WITH_PS;
     return RES;
 }
 
