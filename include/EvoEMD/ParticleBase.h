@@ -33,6 +33,11 @@ class Pseudo_Particle : public Particle_Base {
     // * Masses, whether Massless
     // * PID: particle id;
     // * DOF: degree of freedom, (particle and antiparticle count seperately)
+    // * pseudo: whether this particle is pseudo or not
+    // *    By pseudo, we mean, it is not a realistic particle, but e.g. difference between particle and anti-particle
+    // *    So for pseudo, its number density/Yield can be negative.
+    // * Thermalized: whether this particle is thermalized or not at the beginning of the evolution.
+    // *    By default: it is assumed that all particle is in thermalization.
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
     std::string name;
@@ -41,6 +46,8 @@ protected:
     Parameter_Base *p_width;
     int PID;
     int DOF;
+    const bool pseudo;
+    bool Thermalized;
     REAL Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const;
     REAL Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const;
     virtual REAL Get_Equilibrium_Number_Density_per_DOF(const REAL T) const = 0;
@@ -57,10 +64,13 @@ public:
      *              used in Boltzmann equation. So be sure this DOF is consistent with the collision rate.
      * @param  mass: Pointer to mass parameter, if nullptr (default), it is assumed the particle is massless
      * @param  width: Pointer to width parameter, if nullptr (default), it is assumed the particle is stable
+     * @param  pseudo: whether the particle is pseudo or not. If it is pseudo, then its equilibrium is not at Yeq, and
+     * the density of it can be negative. If it is not pseudo, it is some basic particles, its equilibrium is just Yeq,
+     * and the density can not be negative.
      * @retval
      */
     Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-                    bool never_thermal = false);
+                    bool pseudo = false);
     virtual ~Pseudo_Particle(){};
 
     int Get_PID() const { return PID; }
@@ -74,14 +84,15 @@ public:
         }
     }
     bool Is_Massless() const { return massless; }
+    bool Is_Pseudo() const { return pseudo; }
+    bool Get_Init_Thermal_Status() const { return Thermalized; }
+    void Set_Init_Thermal_Status(bool thermal = true) { Thermalized = thermal; }
 
     REAL Get_Equilibrium_Number_Density_at_T(const REAL T) const {
         return DOF * Get_Equilibrium_Number_Density_per_DOF(T);
     }
     REAL Get_Equilibrium_Yield_at_T(const REAL T) const { return DOF * Get_Equilibrium_Yield_per_DOF(T); };
 
-    const bool Never_Thermal;
-    bool Thermalized;
     REAL Yield;
 
     // * 1 - Yield/Yield_eq
@@ -104,7 +115,7 @@ protected:
 
 public:
     Fermion(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-            bool never_thermal = false);
+            bool pseudo = false);
     ~Fermion(){};
 };
 
@@ -115,7 +126,7 @@ protected:
 
 public:
     Boson(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-          bool never_thermal = false);
+          bool pseudo = false);
     ~Boson(){};
 };
 
@@ -165,7 +176,7 @@ public:
         EvoEMD::Particle_Factory &pf = EvoEMD::Particle_Factory::Get_Particle_Factory();
         pf.Register_POI(PID);
         EvoEMD::Pseudo_Particle *pp = pf.Get_Particle(PID);
-        pp->Thermalized = start_with_thermal;
+        pp->Set_Init_Thermal_Status(start_with_thermal);
     }
 };
 
