@@ -16,20 +16,21 @@ int main(int argc, char const *argv[]) {
     ti->Set_Value(15);
     tr->Set_Value(10);
 
-    // *
+    // * Any particle can be accessed
     Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
-    pp->Set_Init_Thermal_Status(false);
+
     BoltzmannEquation BE(mn1);
     REAL scale = mn1->Get_Value();
     REAL T_BEGIN = 100 * scale;
     REAL T_END = scale / 1000.0;
-    BE.Set_X_Range(log(scale / T_BEGIN), log(scale / T_END));
-    cout << "Solving for [" << BE.Get_X_BEGIN() << "," << BE.Get_X_END() << "]" << endl;
-    cout << "DOF = " << BE.Get_DOF() << endl;
-    cout << "Starting from: Y = " << BE.Get_Y_BEGIN() << endl;
-    RungeKutta rkFI(&BE);
-    // cout << "System Built" << endl;
-    rkFI.Solve(1e-3, 1e-3);
-    rkFI.Dump_Solution("ToyLG_FI_Result.txt");
+    BE.Set_T_Range(T_BEGIN, T_END);
+    pp->Set_Init_Thermal_Status(true);
+    BE.Solve(1e-3, 1e-3);
+    BE.Dump_Solution("ToyLG_FO_Result.txt");
+
+    pp->Set_Init_Thermal_Status(false);
+    BE.Solve(1e-3, 1e-3);
+    BE.Dump_Solution("ToyLG_FI_Result.txt");
+
     return 0;
 }

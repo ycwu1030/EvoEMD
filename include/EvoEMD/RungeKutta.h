@@ -85,6 +85,8 @@ public:
 
     VD Get_Solution_X() const { return _X; }
     VVD Get_Solution_Y() const { return _Y; }
+    VVD Get_Solution_dYdX() const { return _dYdX; }
+    VVD Get_Solution_Yeq() const { return _Yeq; }
     VD Get_Solution_Y_END() const { return _Y.back(); }
 
 private:

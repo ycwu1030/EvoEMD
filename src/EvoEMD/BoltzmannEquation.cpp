@@ -1,6 +1,8 @@
 #include "EvoEMD/BoltzmannEquation.h"
 
 #include <cmath>
+#include <fstream>
+#include <iomanip>
 
 #include "EvoEMD/ProcessBase.h"
 #include "EvoEMD/spdlog_wrapper.h"
@@ -10,7 +12,8 @@ namespace EvoEMD {
 BoltzmannEquation::BoltzmannEquation(Parameter_Base *ptr_scale_)
     : pf(EvoEMD::Particle_Factory::Get_Particle_Factory()),
       hh(EvoEMD::Hubble_History::Get_Hubble_History()),
-      ptr_scale(ptr_scale_) {
+      ptr_scale(ptr_scale_),
+      rk(this) {
     std::set<int> POI = pf.Get_POI();
     Set_DOF(POI.size());
     std::set<int>::iterator iter = POI.begin();
@@ -191,6 +194,63 @@ void BoltzmannEquation::Set_X_Range(REAL X_BEGIN, REAL X_END) {
             Delta_Y_Ratio_BEGIN[i] = 1.0;
         }
     }
+}
+
+void BoltzmannEquation::Set_T_Range(REAL T_BEGIN, REAL T_END) {
+    this->T_BEGIN = T_BEGIN;
+    this->T_END = T_END;
+}
+
+void BoltzmannEquation::Set_Z_Range(REAL Z_BEGIN, REAL Z_END) {
+    Setup_Scale();
+    SPDLOG_INFO_FILE("Setting Z range with scale = {:+9.8e}", scale);
+    T_BEGIN = scale / Z_BEGIN;
+    T_END = scale / Z_END;
+}
+
+RungeKutta::STATUS BoltzmannEquation::Solve(REAL step_size, REAL eps_rel) {
+    Setup_Scale();
+    REAL x_begin = log(scale / T_BEGIN);
+    REAL x_end = log(scale / T_END);
+    Set_X_Range(x_begin, x_end);
+    return rk.Solve(step_size, eps_rel);
+}
+
+void BoltzmannEquation::Dump_Solution(std::string filename) {
+    std::ofstream output(filename.c_str());
+    VD X = rk.Get_Solution_X();
+    VVD Y = rk.Get_Solution_Y();
+    VVD dYdX = rk.Get_Solution_dYdX();
+    VVD Yeq = rk.Get_Solution_Yeq();
+    output << "z\t";
+    for (size_t i = 0; i < DOF; i++) {
+        output << "y_" << i << "\t";
+    }
+    for (size_t i = 0; i < DOF; i++) {
+        output << "yeq_" << i << "\t";
+    }
+    for (size_t i = 0; i < DOF; i++) {
+        output << "dydz_" << i << "\t";
+    }
+    output << "scale" << std::endl;
+    output << std::scientific;
+    output << std::showpos;
+    output << std::setprecision(8);
+    for (size_t i = 0; i < X.size(); i++) {
+        REAL z = exp(X[i]);
+        output << z << "\t";
+        for (size_t j = 0; j < DOF; j++) {
+            output << Y[i][j] << "\t";
+        }
+        for (size_t j = 0; j < DOF; j++) {
+            output << Yeq[i][j] << "\t";
+        }
+        for (size_t j = 0; j < DOF; j++) {
+            output << dYdX[i][j] / z << "\t";  // * from dY/dX -> dY/dZ
+        }
+        output << scale << std::endl;
+    }
+    output.close();
 }
 
 }  // namespace EvoEMD

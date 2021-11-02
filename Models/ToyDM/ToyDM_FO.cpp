@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
     REAL scale = mx->Get_Value();
     REAL T_BEGIN = scale;
     REAL T_END = scale / 1000.0;
-    BE.Set_X_Range(log(scale / T_BEGIN), log(scale / T_END));
+    BE.Set_T_Range(T_BEGIN, T_END);
     // BE.Set_X_BEGIN(log(scale / T_BEGIN) + 1e-6);
     cout << "Solving for [" << BE.Get_X_BEGIN() << "," << BE.Get_X_END() << "]" << endl;
     cout << "DOF = " << BE.Get_DOF() << endl;
