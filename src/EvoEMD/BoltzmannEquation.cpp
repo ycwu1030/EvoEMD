@@ -36,7 +36,7 @@ VB BoltzmannEquation::Should_be_Thermalized(REAL x, const VD &y, const VD &delta
     VD yeq = Yeq(x);
     for (int i = 0; i < DOF; i++) {
         Pseudo_Particle *pp = poi_ptrs[i];
-        bool pseudo = pp->pseudo;
+        bool pseudo = pp->Is_Pseudo();
         if (!pseudo && fabs(delta_y_ratio[i]) < 1e-3) {
             // * If this component is a basic particle, and it is close to its equilibrium number density
             // * We use 1e-4 step size to test whether it is possible to thermalized it
@@ -164,7 +164,7 @@ VD BoltzmannEquation::Yeq(REAL x) {
 VB BoltzmannEquation::Is_Thermalized() {
     VB res(DOF);
     for (int i = 0; i < DOF; i++) {
-        res[i] = poi_ptrs[i]->Thermalized;
+        res[i] = poi_ptrs[i]->Get_Init_Thermal_Status();
     }
     return res;
 }
@@ -173,7 +173,7 @@ VB BoltzmannEquation::Can_be_Negative() {
     VB res(DOF);
     for (int i = 0; i < DOF; i++) {
         // * If it is pseudo, then the number density/Yield can be negative.
-        res[i] = poi_ptrs[i]->pseudo;
+        res[i] = poi_ptrs[i]->Is_Pseudo();
     }
     return res;
 }

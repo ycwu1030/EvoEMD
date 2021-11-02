@@ -8,9 +8,17 @@
 using namespace EvoEMD;
 using namespace std;
 int main(int argc, char const *argv[]) {
+    // * Free Parameter can be modified accordingly
+    // * Any other parameters that depend on these free parameters will update their value when their value is acquired
     Parameter_Base *ti = RETRIVE_PARAMETER(Ti);
-    ti->Set_Value(15);
+    Parameter_Base *tr = RETRIVE_PARAMETER(Tr);
     Parameter_Base *mn1 = RETRIVE_PARAMETER(MN1);
+    ti->Set_Value(15);
+    tr->Set_Value(10);
+
+    // *
+    Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+    pp->Set_Init_Thermal_Status(false);
     BoltzmannEquation BE(mn1);
     REAL scale = mn1->Get_Value();
     REAL T_BEGIN = 100 * scale;
@@ -19,9 +27,9 @@ int main(int argc, char const *argv[]) {
     cout << "Solving for [" << BE.Get_X_BEGIN() << "," << BE.Get_X_END() << "]" << endl;
     cout << "DOF = " << BE.Get_DOF() << endl;
     cout << "Starting from: Y = " << BE.Get_Y_BEGIN() << endl;
-    RungeKutta rk(&BE);
+    RungeKutta rkFI(&BE);
     // cout << "System Built" << endl;
-    rk.Solve(1e-3, 1e-3);
-    rk.Dump_Solution("ToyLG_Result.txt");
+    rkFI.Solve(1e-3, 1e-3);
+    rkFI.Dump_Solution("ToyLG_FI_Result.txt");
     return 0;
 }

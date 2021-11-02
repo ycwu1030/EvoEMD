@@ -11,7 +11,7 @@ void Particle_Base::Register_Process(Process *proc) { Process_Set.insert(proc); 
 
 Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass,
                                  Parameter_Base *width, bool pseudo_)
-    : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), pseudo(pseudo_) {
+    : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), pseudo(pseudo_), Thermalized(true) {
     if (!p_mass) {
         massless = true;
     } else {
