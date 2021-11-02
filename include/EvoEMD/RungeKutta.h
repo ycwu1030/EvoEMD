@@ -34,11 +34,12 @@ public:
     REAL Get_X_END() const { return X_END; }
     VD Get_Y_BEGIN() const { return Y_BEGIN; }
     VD Get_Delta_Y_Ratio_BEGIN() const { return Delta_Y_Ratio_BEGIN; }
-    VD operator()(REAL x, VD &y, VD &delta_y_ratio) { return dYdX(x, y, delta_y_ratio); }
-    virtual VD dYdX(REAL x, VD &y, VD &delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
+    VD operator()(REAL x, const VD &y, const VD &delta_y_ratio) { return dYdX(x, y, delta_y_ratio); }
+    virtual VD dYdX(REAL x, const VD &y, const VD &delta_y_ratio) = 0;  // delta_y_ratio = 1 - Y/Yeq;
     virtual VD Yeq(REAL x) = 0;
     virtual VB Is_Thermalized() = 0;  // Check whether the particle is starting in thermalization or not
     virtual VB Can_be_Negative() = 0;
+    virtual VB Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) = 0;
 };
 
 struct RK_Point {

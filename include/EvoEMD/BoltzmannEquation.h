@@ -20,16 +20,18 @@ private:
     Particle_Factory &pf;
     Hubble_History &hh;
     void Setup_Scale();
+    REAL dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio);
 
 public:
     BoltzmannEquation(Parameter_Base *scale = nullptr);
     ~BoltzmannEquation(){};
 
     void Set_X_Range(REAL X_BEGIN, REAL X_END);
-    virtual VD dYdX(REAL x, VD &y, VD &delta_y_ratio) override;
+    virtual VD dYdX(REAL x, const VD &y, const VD &delta_y_ratio) override;
     virtual VD Yeq(REAL x) override;
     virtual VB Is_Thermalized() override;
     virtual VB Can_be_Negative() override;
+    virtual VB Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) override;
 };
 
 }  // namespace EvoEMD

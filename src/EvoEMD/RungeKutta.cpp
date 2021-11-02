@@ -204,6 +204,7 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     SPDLOG_INFO_FILE("Starting at: ");
     LOGGING_RK_POINT(p_cur);
     RK_INTER inter(DOF);
+    VB should_be_thermalized = derivs->Should_be_Thermalized(p_cur.X, p_cur.Y, p_cur.Delta_Y_Ratio);
 
     // * 4th order RK proceeds as:
     // * x0 -> x1 -> x2
