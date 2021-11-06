@@ -2,6 +2,8 @@
 add_executable(Hubble_rho Hubble_rho_in_EMD.cpp)
 target_link_libraries(Hubble_rho ${GSL_LIBRARIES} ${EVOEMD_LIBRARY})
 
+add_executable(Cache_Index Cache_index_test.cpp)
+target_link_libraries(Cache_Index ${GSL_LIBRARIES} ${EVOEMD_LIBRARY})
 # add_executable(RK_Test RungeKutta_Test.cpp)
 # target_link_libraries(RK_Test ${GSL_LIBRARIES} ${EVOEMD_LIBRARY})
 
