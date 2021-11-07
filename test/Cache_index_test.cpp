@@ -12,11 +12,13 @@ int main(int argc, char const *argv[]) {
     cout << ind_ori << " " << bitset<sizeof(INDEX) * 8>(ind_ori) << endl;
     cout << ind_masked << " " << bitset<sizeof(INDEX) * 8>(ind_masked) << endl;
 
-    Make_Cache(T, 1.101);
-    Make_Cache(T, 2.01023);
+    CACHE cc;
+    INDEX idT = OBTAIN_KEY(T);
+    cc.Insert(idT, 2.01023);
     REAL T1 = 2.3945829384589279834e-3;
-    Make_Cache(T1, 3.10495);
-    CACHE::Get_Cache().Print_Cache();
+    INDEX idT1 = OBTAIN_KEY(T1);
+    cc.Insert(idT1, 3.10495);
+    cc.Print_Cache();
 
     return 0;
 }

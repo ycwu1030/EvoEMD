@@ -16,11 +16,6 @@ INDEX OBTAIN_KEY(REAL T, int bit_to_be_compare) {
     return res;
 }
 
-CACHE &CACHE::Get_Cache() {
-    static CACHE cache;
-    return cache;
-}
-
 void CACHE::Insert(INDEX ind, REAL res) { cache_data[ind] = res; }
 
 bool CACHE::Get(INDEX ind, REAL &res) {
