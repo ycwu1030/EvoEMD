@@ -6,6 +6,7 @@
 
 #define VB std::vector<bool>
 #define REAL double
+#define INDEX int64_t
 #define VD std::vector<REAL>
 #define VVD std::vector<VD>
 

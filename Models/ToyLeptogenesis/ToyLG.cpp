@@ -19,6 +19,11 @@ int main(int argc, char const *argv[]) {
     // * Any particle can be accessed
     Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
 
+    auto pl = Process_Factory::Get_Process_Factory().Get_Process_List();
+    for (auto &&pc : pl) {
+        cout << "PID: " << pc->Get_Process_ID() << " " << pc->Get_Process_Name() << endl;
+    }
+
     BoltzmannEquation BE(mn1);
     REAL scale = mn1->Get_Value();
     REAL T_BEGIN = 100 * scale;

@@ -1,8 +1,11 @@
 #include "EvoEMD/ProcessBase.h"
 
+#include "EvoEMD/Cache.h"
 #include "EvoEMD/spdlog_wrapper.h"
 
 namespace EvoEMD {
+
+int Process::NProcess = 0;
 
 Process::Process(Amplitude *amp) {
     this->amp = amp;
@@ -20,6 +23,7 @@ Process::Process(Amplitude *amp) {
     for (int i = 0; i < FINAL.size(); i++) {
         FINAL[i]->Register_Process(this);
     }
+    process_id = NProcess++;
 }
 
 Process::~Process() {
@@ -41,7 +45,16 @@ std::string Process::Get_Process_Name() const {
     return res;
 }
 
-REAL Process::Get_Collision_Rate(REAL T) { return CR_Calculator->Get_Collision_Rate(T); }
+REAL Process::Get_Collision_Rate(REAL T) {
+    REAL res;
+    INDEX ind = OBTAIN_KEY(T);
+    bool exist = cr_cache.Get(ind, res);
+    if (!exist) {
+        res = CR_Calculator->Get_Collision_Rate(T);
+        cr_cache.Insert(ind, res);
+    }
+    return res;
+}
 
 REAL Process::Get_Yield_Coeff(REAL T, int PID) { return amp->Get_Coeff(T, PID); }
 
@@ -54,6 +67,13 @@ Process_Factory::~Process_Factory() {
 Process_Factory &Process_Factory::Get_Process_Factory() {
     static Process_Factory pf;
     return pf;
+}
+
+void Process_Factory::Clean_Cache() {
+    Process_List pl = Get_Process_Factory().Get_Process_List();
+    for (auto &&prc : pl) {
+        prc->Clean_Cache();
+    }
 }
 
 }  // namespace EvoEMD
