@@ -3,6 +3,7 @@
 
 #include <set>
 
+#include "EvoEMD/Cache.h"
 #include "EvoEMD/CollisionRate.h"
 
 namespace EvoEMD {
@@ -11,18 +12,23 @@ public:
     using INITIAL_STATES = Amplitude::INITIAL_STATES;
     using FINAL_STATES = Amplitude::FINAL_STATES;
 
+    static int NProcess;
     Process(Amplitude *amp);
     ~Process();
 
     std::string Get_Process_Name() const;
+    int Get_Process_ID() const { return process_id; }
     REAL Get_Collision_Rate(REAL T);
     REAL Get_Yield_Coeff(REAL T, int PID);
+    void Clean_Cache() { cr_cache.Clean_Cache(); }
 
 protected:
     INITIAL_STATES INIT;
     FINAL_STATES FINAL;
+    int process_id;
     Amplitude *amp;
     Collision_Rate *CR_Calculator;
+    CACHE cr_cache;
 };
 
 class Process_Factory {
@@ -33,6 +39,7 @@ class Process_Factory {
 public:
     typedef std::set<Process *> Process_List;
     static Process_Factory &Get_Process_Factory();
+    static void Clean_Cache();
     void Register_Process(Process *proc) { PL.insert(proc); };
     Process_List Get_Process_List() { return PL; }
 

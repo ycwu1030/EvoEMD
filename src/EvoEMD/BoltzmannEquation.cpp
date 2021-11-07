@@ -213,7 +213,9 @@ RungeKutta::STATUS BoltzmannEquation::Solve(REAL step_size, REAL eps_rel) {
     REAL x_begin = log(scale / T_BEGIN);
     REAL x_end = log(scale / T_END);
     Set_X_Range(x_begin, x_end);
-    return rk.Solve(step_size, eps_rel);
+    RungeKutta::STATUS st = rk.Solve(step_size, eps_rel);
+    Process_Factory::Clean_Cache();
+    return st;
 }
 
 void BoltzmannEquation::Dump_Solution(std::string filename) {
