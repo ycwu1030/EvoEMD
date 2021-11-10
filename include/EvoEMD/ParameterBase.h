@@ -14,7 +14,7 @@ protected:
     std::string name;
     REAL value;
     bool updated;
-    std::set<Parameter_Base *> offspring_parameters;  // Parameter in this set depends on current parameter
+    std::set<Parameter_Base *> descendent_parameters;  // Parameter in this set depends on current parameter
     std::set<Parameter_Base *> parent_parameters;
 
 public:
@@ -22,11 +22,11 @@ public:
     virtual ~Parameter_Base(){};
 
     bool Is_Independent() { return (parent_parameters.size() == 0); }
-    void Register_Offspring_Parameter(Parameter_Base *par) { offspring_parameters.insert(par); }
+    void Register_Descendent_Parameter(Parameter_Base *par) { descendent_parameters.insert(par); }
     void Notify() {
         updated = false;
         // std::cout << "Parameter: " << name << " Need to be Updated" << std::endl;
-        for (auto &&bp : offspring_parameters) {
+        for (auto &&bp : descendent_parameters) {
             bp->Notify();
         }
     }
