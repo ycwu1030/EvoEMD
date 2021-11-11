@@ -43,8 +43,8 @@ REAL Hubble_EP::Get_Hubble_at_T(const REAL T) {
 }
 
 void Hubble_History::Update_Value(REAL input) {
-    Ti = RETRIVE_PARAMETER(Ti)->Get_Value();
-    Tr = RETRIVE_PARAMETER(Tr)->Get_Value();
+    Ti = RETRIEVE_PARAMETER(Ti)->Get_Value();
+    Tr = RETRIEVE_PARAMETER(Tr)->Get_Value();
     TRH = std::max(1e15, Ti * 10);
     Tf = std::min(1e-3, Tr / 10.0);
     Solve_Te();
@@ -65,8 +65,9 @@ void Hubble_History::Update_Value(REAL input) {
 }
 
 Hubble_History::Hubble_History() : Parameter_Base("Hubble") {
-    RETRIVE_PARAMETER(Ti)->Register_Offspring_Parameter(this);
-    RETRIVE_PARAMETER(Tr)->Register_Offspring_Parameter(this);
+    Parameter_Base *ti = RETRIEVE_PARAMETER(Ti);
+    Parameter_Base *tr = RETRIEVE_PARAMETER(Tr);
+    Register_Dependencies(ti, tr);
     Update_Value(0);
 }
 

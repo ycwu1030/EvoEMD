@@ -9,7 +9,7 @@
 
 namespace EvoEMD {
 
-BoltzmannEquation::BoltzmannEquation(Parameter_Base *ptr_scale_)
+Boltzmann_Equation::Boltzmann_Equation(Parameter_Base *ptr_scale_)
     : pf(EvoEMD::Particle_Factory::Get_Particle_Factory()),
       hh(EvoEMD::Hubble_History::Get_Hubble_History()),
       ptr_scale(ptr_scale_),
@@ -26,7 +26,7 @@ BoltzmannEquation::BoltzmannEquation(Parameter_Base *ptr_scale_)
     Setup_Scale();
 }
 
-void BoltzmannEquation::Setup_Scale() {
+void Boltzmann_Equation::Setup_Scale() {
     if (!ptr_scale) {
         scale = 1000.0;
     } else {
@@ -34,7 +34,7 @@ void BoltzmannEquation::Setup_Scale() {
     }
 }
 
-VB BoltzmannEquation::Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) {
+VB Boltzmann_Equation::Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) {
     VB res(DOF, false);
     VD yeq = Yeq(x);
     for (int i = 0; i < DOF; i++) {
@@ -70,7 +70,7 @@ VB BoltzmannEquation::Should_be_Thermalized(REAL x, const VD &y, const VD &delta
     return res;
 }
 
-REAL BoltzmannEquation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio) {
+REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
     // * T^3H(beta_T dY/dx + 3(1-beta_T)Y) = CollisionRate
@@ -107,7 +107,7 @@ REAL BoltzmannEquation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rati
     return res;
 }
 
-VD BoltzmannEquation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
+VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
     // * T^3H(beta_T dY/dx + 3(1-beta_T)Y) = CollisionRate
@@ -152,7 +152,7 @@ VD BoltzmannEquation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
     return res;
 }
 
-VD BoltzmannEquation::Yeq(REAL x) {
+VD Boltzmann_Equation::Yeq(REAL x) {
     REAL z = exp(x);
     REAL T = scale / z;
     VD res(DOF, 0);
@@ -164,7 +164,7 @@ VD BoltzmannEquation::Yeq(REAL x) {
     return res;
 }
 
-VB BoltzmannEquation::Is_Thermalized() {
+VB Boltzmann_Equation::Is_Thermalized() {
     VB res(DOF);
     for (int i = 0; i < DOF; i++) {
         res[i] = poi_ptrs[i]->Get_Init_Thermal_Status();
@@ -172,7 +172,7 @@ VB BoltzmannEquation::Is_Thermalized() {
     return res;
 }
 
-VB BoltzmannEquation::Can_be_Negative() {
+VB Boltzmann_Equation::Can_be_Negative() {
     VB res(DOF);
     for (int i = 0; i < DOF; i++) {
         // * If it is pseudo, then the number density/Yield can be negative.
@@ -181,7 +181,7 @@ VB BoltzmannEquation::Can_be_Negative() {
     return res;
 }
 
-void BoltzmannEquation::Set_X_Range(REAL X_BEGIN, REAL X_END) {
+void Boltzmann_Equation::Set_X_Range(REAL X_BEGIN, REAL X_END) {
     this->X_BEGIN = X_BEGIN;
     this->X_END = X_END;
     Y_BEGIN = Yeq(X_BEGIN);
@@ -196,19 +196,19 @@ void BoltzmannEquation::Set_X_Range(REAL X_BEGIN, REAL X_END) {
     }
 }
 
-void BoltzmannEquation::Set_T_Range(REAL T_BEGIN, REAL T_END) {
+void Boltzmann_Equation::Set_T_Range(REAL T_BEGIN, REAL T_END) {
     this->T_BEGIN = T_BEGIN;
     this->T_END = T_END;
 }
 
-void BoltzmannEquation::Set_Z_Range(REAL Z_BEGIN, REAL Z_END) {
+void Boltzmann_Equation::Set_Z_Range(REAL Z_BEGIN, REAL Z_END) {
     Setup_Scale();
     SPDLOG_INFO_FILE("Setting Z range with scale = {:+9.8e}", scale);
     T_BEGIN = scale / Z_BEGIN;
     T_END = scale / Z_END;
 }
 
-RungeKutta::STATUS BoltzmannEquation::Solve(REAL step_size, REAL eps_rel) {
+RungeKutta::STATUS Boltzmann_Equation::Solve(REAL step_size, REAL eps_rel) {
     Setup_Scale();
     REAL x_begin = log(scale / T_BEGIN);
     REAL x_end = log(scale / T_END);
@@ -218,7 +218,7 @@ RungeKutta::STATUS BoltzmannEquation::Solve(REAL step_size, REAL eps_rel) {
     return st;
 }
 
-void BoltzmannEquation::Dump_Solution(std::string filename) {
+void Boltzmann_Equation::Dump_Solution(std::string filename) {
     std::ofstream output(filename.c_str());
     VD X = rk.Get_Solution_X();
     VVD Y = rk.Get_Solution_Y();

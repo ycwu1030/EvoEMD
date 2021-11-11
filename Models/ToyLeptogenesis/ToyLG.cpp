@@ -24,7 +24,7 @@ int main(int argc, char const *argv[]) {
         cout << "PID: " << pc->Get_Process_ID() << " " << pc->Get_Process_Name() << endl;
     }
 
-    BoltzmannEquation BE(mn1);
+    Boltzmann_Equation BE(mn1);
     REAL scale = mn1->Get_Value();
     REAL T_BEGIN = 100 * scale;
     REAL T_END = scale / 1000.0;
