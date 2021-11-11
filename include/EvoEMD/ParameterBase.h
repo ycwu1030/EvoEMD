@@ -14,7 +14,7 @@ protected:
     std::string name;
     REAL value;
     bool updated;
-    std::set<Parameter_Base *> offspring_parameters;  // Parameter in this set depends on current parameter
+    std::set<Parameter_Base *> descendent_parameters;  // Parameter in this set depends on current parameter
     std::set<Parameter_Base *> parent_parameters;
 
 public:
@@ -22,11 +22,11 @@ public:
     virtual ~Parameter_Base(){};
 
     bool Is_Independent() { return (parent_parameters.size() == 0); }
-    void Register_Offspring_Parameter(Parameter_Base *par) { offspring_parameters.insert(par); }
+    void Register_Descendent_Parameter(Parameter_Base *par) { descendent_parameters.insert(par); }
     void Notify() {
         updated = false;
         // std::cout << "Parameter: " << name << " Need to be Updated" << std::endl;
-        for (auto &&bp : offspring_parameters) {
+        for (auto &&bp : descendent_parameters) {
             bp->Notify();
         }
     }
@@ -49,6 +49,16 @@ public:
         }
     }
     std::string Get_Name() const { return name; }
+
+    void Register_Dependencies(Parameter_Base *ptr) {
+        ptr->Register_Descendent_Parameter(this);
+        this->parent_parameters.insert(ptr);
+    }
+    template <typename... Ptrs>
+    void Register_Dependencies(Parameter_Base *ptr, Ptrs... params) {
+        Register_Dependencies(ptr);
+        Register_Dependencies(params...);
+    }
 };
 
 class Free_Parameter : public Parameter_Base {
@@ -95,8 +105,8 @@ public:
     };                                                             \
     const Register_Parameter g_register_parameter_##paramName(new param_##paramName)
 
-#define RETRIVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
+#define RETRIEVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
 
-#define GET_PARAMETER_VALUE(paramName) RETRIVE_PARAMETER(paramName)->Get_Value()
+#define GET_PARAMETER_VALUE(paramName) RETRIEVE_PARAMETER(paramName)->Get_Value()
 
 #endif  //_PARAMETER_BASE_H_
