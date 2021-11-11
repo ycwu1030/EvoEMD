@@ -40,12 +40,12 @@ class Pseudo_Particle : public Particle_Base {
     // *    By default: it is assumed that all particle is in thermalization.
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
-    std::string name;
+    const std::string name;
     bool massless;
     Parameter_Base *p_mass;
     Parameter_Base *p_width;
-    int PID;
-    int DOF;
+    const int PID;
+    const int DOF;
     const bool pseudo;
     bool Thermalized;
     REAL Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const;

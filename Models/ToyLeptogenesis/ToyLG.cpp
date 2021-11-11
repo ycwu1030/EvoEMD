@@ -10,9 +10,9 @@ using namespace std;
 int main(int argc, char const *argv[]) {
     // * Free Parameter can be modified accordingly
     // * Any other parameters that depend on these free parameters will update their value when their value is acquired
-    Parameter_Base *ti = RETRIVE_PARAMETER(Ti);
-    Parameter_Base *tr = RETRIVE_PARAMETER(Tr);
-    Parameter_Base *mn1 = RETRIVE_PARAMETER(MN1);
+    Parameter_Base *ti = RETRIEVE_PARAMETER(Ti);
+    Parameter_Base *tr = RETRIEVE_PARAMETER(Tr);
+    Parameter_Base *mn1 = RETRIEVE_PARAMETER(MN1);
     ti->Set_Value(15);
     tr->Set_Value(10);
 

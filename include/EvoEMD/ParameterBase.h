@@ -49,6 +49,16 @@ public:
         }
     }
     std::string Get_Name() const { return name; }
+
+    void Register_Dependencies(Parameter_Base *ptr) {
+        ptr->Register_Descendent_Parameter(this);
+        this->parent_parameters.insert(ptr);
+    }
+    template <typename... Ptrs>
+    void Register_Dependencies(Parameter_Base *ptr, Ptrs... params) {
+        Register_Dependencies(ptr);
+        Register_Dependencies(params...);
+    }
 };
 
 class Free_Parameter : public Parameter_Base {
@@ -95,8 +105,8 @@ public:
     };                                                             \
     const Register_Parameter g_register_parameter_##paramName(new param_##paramName)
 
-#define RETRIVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
+#define RETRIEVE_PARAMETER(paramName) EvoEMD::Parameter_Factory::Get_Parameter_Factory().Get_Parameter(#paramName)
 
-#define GET_PARAMETER_VALUE(paramName) RETRIVE_PARAMETER(paramName)->Get_Value()
+#define GET_PARAMETER_VALUE(paramName) RETRIEVE_PARAMETER(paramName)->Get_Value()
 
 #endif  //_PARAMETER_BASE_H_
