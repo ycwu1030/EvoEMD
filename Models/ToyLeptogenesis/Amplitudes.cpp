@@ -1,6 +1,6 @@
 #include "Amplitudes.h"
 using namespace EvoEMD;
-N_LPhi_Amp::N_LPhi_Amp() : Amplitude(1) {
+N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base(1) {
     Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
@@ -53,7 +53,7 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     }
 }
 
-delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude(1) {
+delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base(1) {
     Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     Particle_Base *p_phi = RETRIEVE_PARTICLE(25);

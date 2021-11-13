@@ -40,8 +40,8 @@ inline Process_Amp_Single_Diagram::Denominator_Type Build_Denominator(Process_Am
     return std::make_pair(p1, p2);
 }
 
-class Amplitude {
-    // * Amplitude used to calculate the collision rate;
+class Amplitude_Base {
+    // * Amplitude_Base used to calculate the collision rate;
     // * As the purpose of this class is to assist the collision rate calculation and solving Boltzmann equation
     // * The relevant dof is summed insided Get_Amp()
     // * The dof has two parts:
@@ -53,8 +53,8 @@ public:
     typedef std::vector<Particle_Base *> INITIAL_STATES;
     typedef std::vector<Particle_Base *> FINAL_STATES;
 
-    Amplitude(int N_Diagrams) : amp_res(N_Diagrams){};
-    virtual ~Amplitude(){};
+    Amplitude_Base(int N_Diagrams) : amp_res(N_Diagrams){};
+    virtual ~Amplitude_Base(){};
     virtual void Update_Amp(REAL sqrt_shat) = 0;
     virtual const Process_Amp &Get_Amp(REAL sqrt_shat) {
         Update_Amp(sqrt_shat);
@@ -85,11 +85,11 @@ protected:
     // * In this case, extra factor should be added.
     double Extra_Factor_for_Internal_Symmetry;
 
-    // * ptr to Amplitude class, but we don't own it.
-    Amplitude *amp;
+    // * ptr to Amplitude_Base class, but we don't own it.
+    Amplitude_Base *amp;
 
 public:
-    Collision_Rate(Amplitude *amp) { this->amp = amp; }
+    Collision_Rate(Amplitude_Base *amp) { this->amp = amp; }
     virtual ~Collision_Rate(){};
 
     virtual REAL Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) = 0;
@@ -99,7 +99,7 @@ public:
 class Decay12_Rate : public Collision_Rate {
     // * For two body decay
 public:
-    Decay12_Rate(Amplitude *amp) : Collision_Rate(amp){};
+    Decay12_Rate(Amplitude_Base *amp) : Collision_Rate(amp){};
     ~Decay12_Rate(){};
 
     virtual REAL Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat);
@@ -111,7 +111,7 @@ protected:
     REAL Get_Amp_Integrate_over_Phase_Space_Single_Channel(const Process_Amp_Single_Diagram &amp_single);
 
 public:
-    Scatter22_Rate(Amplitude *amp) : Collision_Rate(amp){};
+    Scatter22_Rate(Amplitude_Base *amp) : Collision_Rate(amp){};
     ~Scatter22_Rate(){};
 
     virtual REAL Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat);

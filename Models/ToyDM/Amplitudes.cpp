@@ -6,7 +6,7 @@
 
 using namespace EvoEMD;
 
-XX_SS_Amp::XX_SS_Amp() : Amplitude(1) {
+XX_SS_Amp::XX_SS_Amp() : Amplitude_Base(1) {
     Particle_Factory &pf = Particle_Factory::Get_Particle_Factory();
     Particle_Base *p_dm = pf.Get_Particle(900001);
     Particle_Base *p_l = pf.Get_Particle(900011);

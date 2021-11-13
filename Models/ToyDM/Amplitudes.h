@@ -3,7 +3,7 @@
 
 #include "EvoEMD/EvoEMD.h"
 
-class XX_SS_Amp : public EvoEMD::Amplitude {
+class XX_SS_Amp : public EvoEMD::Amplitude_Base {
 public:
     XX_SS_Amp();
     ~XX_SS_Amp(){};
