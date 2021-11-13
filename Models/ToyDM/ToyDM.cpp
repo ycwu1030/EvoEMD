@@ -20,7 +20,7 @@ int main(int argc, char const *argv[]) {
     tr->Set_Value(1);
 
     // * Any particle can also be accessed
-    Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+    Pseudo_Particle *pp = RETRIEVE_PARTICLE(900001);
 
     Boltzmann_Equation BE(mx);
     REAL scale = mx->Get_Value();

@@ -7,24 +7,31 @@
 #include "EvoEMD/RealTypes.h"
 
 namespace EvoEMD {
-struct Process_Amp {
-    // * used to store how many squared diagrams we have for corresponding amplitude calculation
-    unsigned n_diag;
-
-    typedef std::vector<REAL> CTH_RES_FULL;
-    typedef CTH_RES_FULL NUMERATOR_STRUCTURE;
+struct Process_Amp_Single_Diagram {
+    typedef VD Result_Type;
+    typedef Result_Type Numerator_Type;
     typedef int Propagator_ID;
-    typedef std::pair<Propagator_ID, CTH_RES_FULL> PROPAGATOR_STRUCTURE;
-    typedef std::pair<PROPAGATOR_STRUCTURE, PROPAGATOR_STRUCTURE> DENOMINATOR_STRUCTURE;
-
-    typedef std::vector<NUMERATOR_STRUCTURE> AMP_NUM;
-    typedef std::vector<DENOMINATOR_STRUCTURE> AMP_DEN;
-    AMP_NUM amps_numerator;
-    AMP_DEN amps_denominator;
-
-    const NUMERATOR_STRUCTURE &Get_Numerator(int diagram_id = 0) const;
-    const DENOMINATOR_STRUCTURE &Get_Denominator(int diagram_id = 0) const;
+    typedef std::pair<Propagator_ID, Result_Type> Propagator_Type;
+    typedef std::pair<Propagator_Type, Propagator_Type> Denominator_Type;
+    Numerator_Type Numerator;
+    Denominator_Type Denominator;
 };
+typedef std::vector<Process_Amp_Single_Diagram> Process_Amp;
+
+template <typename... T>
+inline VD Build_Numerator(T... args) {
+    return VD{args...};
+}
+
+template <typename... T>
+inline Process_Amp_Single_Diagram::Propagator_Type Build_Propagator(int ID, T... args) {
+    return std::make_pair(ID, VD{args...});
+}
+
+inline Process_Amp_Single_Diagram::Denominator_Type Build_Denominator(Process_Amp_Single_Diagram::Propagator_Type p1,
+                                                                      Process_Amp_Single_Diagram::Propagator_Type p2) {
+    return std::make_pair(p1, p2);
+}
 
 class Amplitude {
     // * Amplitude used to calculate the collision rate;
@@ -39,7 +46,7 @@ public:
     typedef std::vector<Pseudo_Particle *> INITIAL_STATES;
     typedef std::vector<Pseudo_Particle *> FINAL_STATES;
 
-    Amplitude(){};
+    Amplitude(int N_Diagrams) : amp_res(N_Diagrams){};
     virtual ~Amplitude(){};
     virtual void Update_Amp(REAL sqrt_shat) = 0;
     virtual const Process_Amp &Get_Amp(REAL sqrt_shat) {
@@ -94,8 +101,7 @@ public:
 
 class Scatter22_Rate : public Collision_Rate {
 protected:
-    REAL Get_Amp_Integrate_over_Phase_Space_Single_Channel(const Process_Amp::NUMERATOR_STRUCTURE &numerator,
-                                                           const Process_Amp::DENOMINATOR_STRUCTURE &denominator);
+    REAL Get_Amp_Integrate_over_Phase_Space_Single_Channel(const Process_Amp_Single_Diagram &amp_single);
 
 public:
     Scatter22_Rate(Amplitude *amp) : Collision_Rate(amp){};

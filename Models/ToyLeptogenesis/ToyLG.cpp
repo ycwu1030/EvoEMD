@@ -17,7 +17,7 @@ int main(int argc, char const *argv[]) {
     tr->Set_Value(10);
 
     // * Any particle can be accessed
-    Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+    Pseudo_Particle *pp = RETRIEVE_PARTICLE(900001);
 
     auto pl = Process_Factory::Get_Process_Factory().Get_Process_List();
     for (auto &&pc : pl) {

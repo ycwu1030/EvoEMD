@@ -10,7 +10,7 @@ DECLARE_FREE_PARAMETER(Lam, 0.4);
 DECLARE_FREE_PARAMETER(MX, 100);
 
 // * All Particles
-REGISTER_PARTICLE(Boson, X, 900001, 2, RETRIVE_PARAMETER(MX), nullptr);
+REGISTER_PARTICLE(Boson, X, 900001, 2, RETRIEVE_PARAMETER(MX), nullptr);
 REGISTER_PARTICLE(Boson, S, 900011, 1, nullptr, nullptr);
 
 // * Particles entering the Boltzmann Equation

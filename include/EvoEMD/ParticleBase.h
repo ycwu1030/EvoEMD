@@ -168,7 +168,7 @@ public:
     };                                                           \
     Register_Particle g_register_particle_##partName(new part_##partName)
 
-#define RETRIVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)
+#define RETRIEVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)
 
 class Register_POI {
 public:
