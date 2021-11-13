@@ -1,9 +1,9 @@
 #include "Amplitudes.h"
 using namespace EvoEMD;
 N_LPhi_Amp::N_LPhi_Amp() : Amplitude(1) {
-    Pseudo_Particle *p_N1 = RETRIEVE_PARTICLE(900001);
-    Pseudo_Particle *p_l = RETRIEVE_PARTICLE(900011);
-    Pseudo_Particle *p_phi = RETRIEVE_PARTICLE(25);
+    Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
+    Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
+    Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
 
     FINAL.push_back(p_l);
     FINAL.push_back(p_phi);
@@ -32,7 +32,7 @@ void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
 
 REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     if (PID == 900001) {
-        Pseudo_Particle *pp = RETRIEVE_PARTICLE(900001);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900001);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
@@ -42,7 +42,7 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
         }
         return res;
     } else if (PID == 900011) {
-        Pseudo_Particle *pp = RETRIEVE_PARTICLE(900011);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900011);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
@@ -54,9 +54,9 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
 }
 
 delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude(1) {
-    Pseudo_Particle *p_N1 = RETRIEVE_PARTICLE(900001);
-    Pseudo_Particle *p_l = RETRIEVE_PARTICLE(900011);
-    Pseudo_Particle *p_phi = RETRIEVE_PARTICLE(25);
+    Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
+    Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
+    Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
 
     FINAL.push_back(p_l);
     FINAL.push_back(p_phi);
@@ -86,13 +86,13 @@ void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
 REAL delta_N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     REAL res = 0;
     if (PID == 900001) {
-        Pseudo_Particle *pp = RETRIEVE_PARTICLE(900011);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900011);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
         res = -Y / YeqT / 2.0;
     } else if (PID == 900011) {
-        Pseudo_Particle *pp = RETRIEVE_PARTICLE(900001);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900001);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;

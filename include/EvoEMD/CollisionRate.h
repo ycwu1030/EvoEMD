@@ -43,8 +43,8 @@ class Amplitude {
     // *                     If CP violating rate is needed, (1->23) - (1bar->2bar3bar) is provided
     // *                     Flavor dof is also summed
 public:
-    typedef std::vector<Pseudo_Particle *> INITIAL_STATES;
-    typedef std::vector<Pseudo_Particle *> FINAL_STATES;
+    typedef std::vector<Particle_Base *> INITIAL_STATES;
+    typedef std::vector<Particle_Base *> FINAL_STATES;
 
     Amplitude(int N_Diagrams) : amp_res(N_Diagrams){};
     virtual ~Amplitude(){};
