@@ -18,14 +18,21 @@ struct Process_Amp_Single_Diagram {
 };
 typedef std::vector<Process_Amp_Single_Diagram> Process_Amp;
 
-template <typename... T>
-inline VD Build_Numerator(T... args) {
-    return VD{args...};
-}
+// template <typename... T>
+// inline VD Build_Numerator(T... args) {
+// return VD{args...};
+// }
+inline VD Build_Numerator(REAL n0, REAL n1, REAL n2) { return VD{n0, n1, n2}; }
 
-template <typename... T>
-inline Process_Amp_Single_Diagram::Propagator_Type Build_Propagator(int ID, T... args) {
-    return std::make_pair(ID, VD{args...});
+// template <typename... T>
+// inline Process_Amp_Single_Diagram::Propagator_Type Build_Propagator(int ID, T... args) {
+//     return std::make_pair(ID, VD{args...});
+// }
+inline Process_Amp_Single_Diagram::Propagator_Type Build_Propagator(int ID, REAL d0, REAL d1) {
+    return d1 == 0 ? std::make_pair(ID, VD{d0}) : std::make_pair(ID, VD{d0, d1});
+}
+inline Process_Amp_Single_Diagram::Propagator_Type Build_Propagator(int ID, REAL d0) {
+    return std::make_pair(ID, VD{d0});
 }
 
 inline Process_Amp_Single_Diagram::Denominator_Type Build_Denominator(Process_Amp_Single_Diagram::Propagator_Type p1,
