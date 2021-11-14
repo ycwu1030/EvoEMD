@@ -1,5 +1,5 @@
-#ifndef _TOY_DM_H_s
-#define _TOY_DM_H_s
+#ifndef _TOY_DM_H_
+#define _TOY_DM_H_
 
 #include "Amplitudes.h"
 #include "EvoEMD/EvoEMD.h"
@@ -19,4 +19,4 @@ REGISTER_POI(900001, 1);
 // * Regsiter Processes
 REGISTER_PROCESS(XX_SS_Amp);
 
-#endif  //_TOY_DM_H_s
+#endif  //_TOY_DM_H_

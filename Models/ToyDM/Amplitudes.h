@@ -1,5 +1,5 @@
-#ifndef _TOY_DM_PROCESSES_H
-#define _TOY_DM_PROCESSES_H
+#ifndef _TOY_DM_PROCESSES_H_
+#define _TOY_DM_PROCESSES_H_
 
 #include "EvoEMD/EvoEMD.h"
 
@@ -12,4 +12,4 @@ public:
     virtual REAL Get_Coeff(REAL T, int PID) override;
 };
 
-#endif  //_TOY_DM_PROCESSES_H
+#endif  //_TOY_DM_PROCESSES_H_
