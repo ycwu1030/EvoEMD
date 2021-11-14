@@ -9,11 +9,11 @@
 namespace EvoEMD {
 class Process {
 public:
-    using INITIAL_STATES = Amplitude::INITIAL_STATES;
-    using FINAL_STATES = Amplitude::FINAL_STATES;
+    using INITIAL_STATES = Amplitude_Base::INITIAL_STATES;
+    using FINAL_STATES = Amplitude_Base::FINAL_STATES;
 
     static int NProcess;
-    Process(Amplitude *amp);
+    Process(Amplitude_Base *amp);
     ~Process();
 
     std::string Get_Process_Name() const;
@@ -26,7 +26,7 @@ protected:
     INITIAL_STATES INIT;
     FINAL_STATES FINAL;
     int process_id;
-    Amplitude *amp;
+    Amplitude_Base *amp;
     Collision_Rate *CR_Calculator;
     CACHE cr_cache;
 };

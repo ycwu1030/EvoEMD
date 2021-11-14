@@ -1,9 +1,9 @@
-#ifndef _TOY_DM_PROCESSES_H
-#define _TOY_DM_PROCESSES_H
+#ifndef _TOY_DM_PROCESSES_H_
+#define _TOY_DM_PROCESSES_H_
 
 #include "EvoEMD/EvoEMD.h"
 
-class XX_SS_Amp : public EvoEMD::Amplitude {
+class XX_SS_Amp : public EvoEMD::Amplitude_Base {
 public:
     XX_SS_Amp();
     ~XX_SS_Amp(){};
@@ -12,4 +12,4 @@ public:
     virtual REAL Get_Coeff(REAL T, int PID) override;
 };
 
-#endif  //_TOY_DM_PROCESSES_H
+#endif  //_TOY_DM_PROCESSES_H_

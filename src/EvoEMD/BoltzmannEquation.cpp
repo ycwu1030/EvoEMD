@@ -19,7 +19,7 @@ Boltzmann_Equation::Boltzmann_Equation(Parameter_Base *ptr_scale_)
     std::set<int>::iterator iter = POI.begin();
     for (; iter != POI.end(); iter++) {
         poi_pids.push_back(*iter);
-        Pseudo_Particle *pp = pf.Get_Particle(*iter);
+        Particle_Base *pp = pf.Get_Particle(*iter);
         poi_ptrs.push_back(pp);
         poi_names.push_back(pp->Get_Name());
     }
@@ -38,7 +38,7 @@ VB Boltzmann_Equation::Should_be_Thermalized(REAL x, const VD &y, const VD &delt
     VB res(DOF, false);
     VD yeq = Yeq(x);
     for (int i = 0; i < DOF; i++) {
-        Pseudo_Particle *pp = poi_ptrs[i];
+        Particle_Base *pp = poi_ptrs[i];
         bool pseudo = pp->Is_Pseudo();
         if (!pseudo && fabs(delta_y_ratio[i]) < 1e-3) {
             // * If this component is a basic particle, and it is close to its equilibrium number density
@@ -90,7 +90,7 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
     bool isentropic = hs->Is_Isentropic();
     REAL res = 0;
 
-    Pseudo_Particle *pp = poi_ptrs[i];
+    Particle_Base *pp = poi_ptrs[i];
     std::set<Process *> sp = pp->Get_Process();
     for (auto &&proc_ptr : sp) {
         // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
@@ -128,7 +128,7 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
     // hs->Print();
     VD res(DOF, 0);
     for (int i = 0; i < DOF; i++) {
-        Pseudo_Particle *pp = poi_ptrs[i];
+        Particle_Base *pp = poi_ptrs[i];
         std::set<Process *> sp = pp->Get_Process();
         for (auto &&proc_ptr : sp) {
             // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
@@ -157,7 +157,7 @@ VD Boltzmann_Equation::Yeq(REAL x) {
     REAL T = scale / z;
     VD res(DOF, 0);
     for (int i = 0; i < DOF; i++) {
-        Pseudo_Particle *pp = poi_ptrs[i];
+        Particle_Base *pp = poi_ptrs[i];
         REAL yeq = pp->Get_Equilibrium_Yield_at_T(T);
         res[i] = yeq;
     }

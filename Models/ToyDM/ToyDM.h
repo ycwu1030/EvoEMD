@@ -1,5 +1,5 @@
-#ifndef _TOY_DM_H_s
-#define _TOY_DM_H_s
+#ifndef _TOY_DM_H_
+#define _TOY_DM_H_
 
 #include "Amplitudes.h"
 #include "EvoEMD/EvoEMD.h"
@@ -10,7 +10,7 @@ DECLARE_FREE_PARAMETER(Lam, 0.4);
 DECLARE_FREE_PARAMETER(MX, 100);
 
 // * All Particles
-REGISTER_PARTICLE(Boson, X, 900001, 2, RETRIVE_PARAMETER(MX), nullptr);
+REGISTER_PARTICLE(Boson, X, 900001, 2, RETRIEVE_PARAMETER(MX), nullptr);
 REGISTER_PARTICLE(Boson, S, 900011, 1, nullptr, nullptr);
 
 // * Particles entering the Boltzmann Equation
@@ -19,4 +19,4 @@ REGISTER_POI(900001, 1);
 // * Regsiter Processes
 REGISTER_PROCESS(XX_SS_Amp);
 
-#endif  //_TOY_DM_H_s
+#endif  //_TOY_DM_H_

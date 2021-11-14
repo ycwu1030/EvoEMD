@@ -7,7 +7,7 @@ namespace EvoEMD {
 
 int Process::NProcess = 0;
 
-Process::Process(Amplitude *amp) {
+Process::Process(Amplitude_Base *amp) {
     this->amp = amp;
     INIT = amp->INITIAL;
     FINAL = amp->FINAL;

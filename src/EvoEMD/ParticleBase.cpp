@@ -7,10 +7,10 @@
 #include "gsl/gsl_sf_zeta.h"
 
 namespace EvoEMD {
-void Particle_Base::Register_Process(Process *proc) { Process_Set.insert(proc); }
+void Particle_Proc::Register_Process(Process *proc) { Process_Set.insert(proc); }
 
-Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass,
-                                 Parameter_Base *width, bool pseudo_)
+Particle_Base::Particle_Base(std::string name_in, int PID_in, int DOF_in, Parameter_Base *mass, Parameter_Base *width,
+                             bool pseudo_)
     : name(name_in), DOF(DOF_in), PID(PID_in), p_mass(mass), p_width(width), pseudo(pseudo_), Thermalized(true) {
     if (!p_mass) {
         massless = true;
@@ -19,7 +19,7 @@ Pseudo_Particle::Pseudo_Particle(std::string name_in, int PID_in, int DOF_in, Pa
     }
 }
 
-REAL Pseudo_Particle::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const {
+REAL Particle_Base::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const {
     REAL mass = Get_Mass();
     REAL z = mass / T;
     REAL z2K2 = z > BESSEL_Z_MAX ? 0 : z * z * gsl_sf_bessel_Kn(2, z);
@@ -27,7 +27,7 @@ REAL Pseudo_Particle::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL 
     return neq;
 }
 
-REAL Pseudo_Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
+REAL Particle_Base::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
     REAL mass = Get_Mass();
     REAL z = mass / T;
     REAL z2K2 = z > BESSEL_Z_MAX ? 0 : z * z * gsl_sf_bessel_Kn(2, z);
@@ -35,7 +35,7 @@ REAL Pseudo_Particle::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const 
     return Yeq;
 }
 
-void Pseudo_Particle::Set_Mass(double mass) {
+void Particle_Base::Set_Mass(double mass) {
     if (massless) {
         std::cout << "Setting mass for a massless particle, the mass is ignored" << std::endl;
     } else {
@@ -44,7 +44,7 @@ void Pseudo_Particle::Set_Mass(double mass) {
 }
 
 Fermion::Fermion(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool pseudo)
-    : Pseudo_Particle(name, PID, DOF, mass, width, pseudo) {}
+    : Particle_Base(name, PID, DOF, mass, width, pseudo) {}
 
 REAL Fermion::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
@@ -65,7 +65,7 @@ REAL Fermion::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
 }
 
 Boson::Boson(std::string name, int PID, int DOF, Parameter_Base *mass, Parameter_Base *width, bool pseudo)
-    : Pseudo_Particle(name, PID, DOF, mass, width, pseudo) {}
+    : Particle_Base(name, PID, DOF, mass, width, pseudo) {}
 
 REAL Boson::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
@@ -99,7 +99,7 @@ Particle_Factory &Particle_Factory::Get_Particle_Factory() {
     return PF;
 }
 
-Pseudo_Particle *Particle_Factory::Get_Particle(int PID) {
+Particle_Base *Particle_Factory::Get_Particle(int PID) {
     Particle_List::iterator iter = PL.find(PID);
     if (iter == PL.end()) {
         std::cout << "Cannot find particle with PID = " << PID << std::endl;
@@ -109,7 +109,7 @@ Pseudo_Particle *Particle_Factory::Get_Particle(int PID) {
     }
 }
 
-bool Particle_Factory::Register_Particle(Pseudo_Particle *part) {
+bool Particle_Factory::Register_Particle(Particle_Base *part) {
     if (!part) {
         return false;
     }

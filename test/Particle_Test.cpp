@@ -5,8 +5,8 @@
 using namespace std;
 using namespace EvoEMD;
 int main(int argc, char const *argv[]) {
-    Pseudo_Particle *const ptcl = new Fermion(100.1, 900001, 2);
-    typedef set<Pseudo_Particle *const> PS;
+    Particle_Base *const ptcl = new Fermion(100.1, 900001, 2);
+    typedef set<Particle_Base *const> PS;
     PS ps;
     ps.insert(ptcl);
     cout << ptcl->Get_Mass() << endl;

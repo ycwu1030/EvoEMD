@@ -18,7 +18,7 @@ private:
     REAL scale;
     std::vector<int> poi_pids;
     std::vector<std::string> poi_names;
-    std::vector<Pseudo_Particle *> poi_ptrs;
+    std::vector<Particle_Base *> poi_ptrs;
     Particle_Factory &pf;
     Hubble_History &hh;
     RungeKutta rk;

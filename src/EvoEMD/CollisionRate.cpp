@@ -9,14 +9,6 @@
 #include "gsl/gsl_sf_bessel.h"
 
 namespace EvoEMD {
-const Process_Amp::NUMERATOR_STRUCTURE &Process_Amp::Get_Numerator(int diagram_id) const {
-    return amps_numerator.at(diagram_id);
-    // return res;
-}
-
-const Process_Amp::DENOMINATOR_STRUCTURE &Process_Amp::Get_Denominator(int diagram_id) const {
-    return amps_denominator.at(diagram_id);
-}
 
 REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
     // * For  1 -> 2 3;
@@ -33,10 +25,10 @@ REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
     // * Two body phase space volumn
     const Process_Amp &res = amp->Get_Amp(sqrt_shat);
     REAL PS2 = 1.0 / (2.0 * m1) * pf / (16.0 * M_PI * M_PI * m1);
-    REAL RES = 2.0                         // * From integral over cos(theta)
-               * 2.0 * M_PI                // * From integral over phi
-               * (res.Get_Numerator()[0])  // * The amplitude
-               * PS2;                      // * The two body phase space
+    REAL RES = 2.0                      // * From integral over cos(theta)
+               * 2.0 * M_PI             // * From integral over phi
+               * (res[0].Numerator[0])  // * The amplitude
+               * PS2;                   // * The two body phase space
     return RES;
 }
 
@@ -51,14 +43,10 @@ REAL Decay12_Rate::Get_Collision_Rate(REAL T) {
 }
 
 REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
-    using NS = Process_Amp::NUMERATOR_STRUCTURE;
-    using DS = Process_Amp::DENOMINATOR_STRUCTURE;
     const Process_Amp &amp_res = amp->Get_Amp(sqrt_shat);
     REAL amp_total = 0;
-    for (unsigned i_diag = 0; i_diag < amp_res.n_diag; i_diag++) {
-        const NS &num = amp_res.Get_Numerator(i_diag);
-        const DS &den = amp_res.Get_Denominator(i_diag);
-        amp_total += Get_Amp_Integrate_over_Phase_Space_Single_Channel(num, den);
+    for (unsigned i_diag = 0; i_diag < amp_res.size(); i_diag++) {
+        amp_total += Get_Amp_Integrate_over_Phase_Space_Single_Channel(amp_res[i_diag]);
     }
     return amp_total;  // * Extra 2pi from integrate over phi;
 }
@@ -91,23 +79,25 @@ inline REAL INT_RES_11_1(REAL a, REAL b, REAL c, REAL d, REAL e) {
     return num / den;
 }
 
-REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space_Single_Channel(
-    const Process_Amp::NUMERATOR_STRUCTURE &numerator, const Process_Amp::DENOMINATOR_STRUCTURE &denominator) {
-    REAL n0 = numerator[0];
-    REAL n1 = numerator[1];
-    REAL n2 = numerator[2];
+REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space_Single_Channel(const Process_Amp_Single_Diagram &amp_single) {
+    using NT = Process_Amp_Single_Diagram::Numerator_Type;
+    using DT = Process_Amp_Single_Diagram::Denominator_Type;
+    REAL n0 = amp_single.Numerator[0];
+    REAL n1 = amp_single.Numerator[1];
+    REAL n2 = amp_single.Numerator[2];
 
-    using PS = Process_Amp::PROPAGATOR_STRUCTURE;
-    using CRF = Process_Amp::CTH_RES_FULL;
-    const PS &p0 = denominator.first;
-    const PS &p1 = denominator.second;
+    using PT = Process_Amp_Single_Diagram::Propagator_Type;
+    using RT = Process_Amp_Single_Diagram::Result_Type;
+    const DT &denominator = amp_single.Denominator;
+    const PT &p0 = denominator.first;
+    const PT &p1 = denominator.second;
 
     int id_p0 = p0.first;
-    const CRF &crf_p0 = p0.second;
+    const RT &crf_p0 = p0.second;
     int ncth_p0 = crf_p0.size();
 
     int id_p1 = p1.first;
-    const CRF &crf_p1 = p1.second;
+    const RT &crf_p1 = p1.second;
     int ncth_p1 = crf_p1.size();
 
     // * The amplitude has following structure
