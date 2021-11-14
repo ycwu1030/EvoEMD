@@ -1,9 +1,9 @@
 #include "Amplitudes.h"
 using namespace EvoEMD;
-N_LPhi_Amp::N_LPhi_Amp() : Amplitude() {
-    Pseudo_Particle *p_N1 = RETRIVE_PARTICLE(900001);
-    Pseudo_Particle *p_l = RETRIVE_PARTICLE(900011);
-    Pseudo_Particle *p_phi = RETRIVE_PARTICLE(25);
+N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base(1) {
+    Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
+    Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
+    Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
 
     FINAL.push_back(p_l);
     FINAL.push_back(p_phi);
@@ -12,23 +12,27 @@ N_LPhi_Amp::N_LPhi_Amp() : Amplitude() {
     N_INITIAL = 1;
     N_FINAL = 2;
 
-    amp_res.n_diag = 1;
-    Process_Amp::CTH_RES_FULL den(1, 1);
-    Process_Amp::PROPAGATOR_STRUCTURE ds = std::make_pair(0, den);
-    amp_res.amps_denominator.push_back(std::make_pair(ds, ds));
-    Process_Amp::NUMERATOR_STRUCTURE num(3, 0);
-    amp_res.amps_numerator.push_back(num);
+    // Build amp for squared diagram-0
+    auto &amp_0 = amp_res[0];
+    // Numerator
+    amp_0.Numerator = Build_Numerator(1.0, 0.0, 0.0);
+
+    // Denominator
+    auto ds = Build_Propagator(0, 1.0);
+    amp_0.Denominator = Build_Denominator(ds, ds);
 }
 
 void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
     REAL lam = GET_PARAMETER_VALUE(Lam);
     REAL mn1 = GET_PARAMETER_VALUE(MN1);
-    amp_res.amps_numerator[0][0] = 4 * lam * lam * mn1 * mn1;
+
+    // Update squared-diagram-0
+    amp_res[0].Numerator = Build_Numerator(4 * lam * lam * mn1 * mn1, 0.0, 0.0);
 }
 
 REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     if (PID == 900001) {
-        Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900001);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
@@ -38,7 +42,7 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
         }
         return res;
     } else if (PID == 900011) {
-        Pseudo_Particle *pp = RETRIVE_PARTICLE(900011);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900011);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
@@ -49,10 +53,10 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     }
 }
 
-delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude() {
-    Pseudo_Particle *p_N1 = RETRIVE_PARTICLE(900001);
-    Pseudo_Particle *p_l = RETRIVE_PARTICLE(900011);
-    Pseudo_Particle *p_phi = RETRIVE_PARTICLE(25);
+delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base(1) {
+    Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
+    Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
+    Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
 
     FINAL.push_back(p_l);
     FINAL.push_back(p_phi);
@@ -61,31 +65,34 @@ delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude() {
     N_INITIAL = 1;
     N_FINAL = 2;
 
-    amp_res.n_diag = 1;
-    Process_Amp::CTH_RES_FULL den(1, 1);
-    Process_Amp::PROPAGATOR_STRUCTURE ds = std::make_pair(0, den);
-    amp_res.amps_denominator.push_back(std::make_pair(ds, ds));
-    Process_Amp::NUMERATOR_STRUCTURE num(3, 0);
-    amp_res.amps_numerator.push_back(num);
+    // Build amp for squared diagram-0
+    auto &amp_0 = amp_res[0];
+    // Numerator
+    amp_0.Numerator = Build_Numerator(1.0, 0.0, 0.0);
+
+    // Denominator
+    auto ds = Build_Propagator(0, 1.0);
+    amp_0.Denominator = Build_Denominator(ds, ds);
 }
 
 void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
     REAL lam = GET_PARAMETER_VALUE(Lam);
     REAL mn1 = GET_PARAMETER_VALUE(MN1);
     REAL eps = GET_PARAMETER_VALUE(Eps);
-    amp_res.amps_numerator[0][0] = 4 * eps * lam * lam * mn1 * mn1;
+    // Update squared-diagram-0
+    amp_res[0].Numerator = Build_Numerator(4 * eps * lam * lam * mn1 * mn1, 0.0, 0.0);
 }
 
 REAL delta_N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     REAL res = 0;
     if (PID == 900001) {
-        Pseudo_Particle *pp = RETRIVE_PARTICLE(900011);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900011);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;
         res = -Y / YeqT / 2.0;
     } else if (PID == 900011) {
-        Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+        Particle_Base *pp = RETRIEVE_PARTICLE(900001);
         REAL Y = pp->Yield;
         REAL YeqT = pp->Get_Equilibrium_Yield_at_T(T);
         if (YeqT == 0) return 0;

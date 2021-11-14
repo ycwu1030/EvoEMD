@@ -10,21 +10,21 @@ using namespace std;
 int main(int argc, char const *argv[]) {
     // * Free Parameter can be modified accordingly
     // * Any other parameters that depend on these free parameters will update their value when their value is acquired
-    Parameter_Base *ti = RETRIVE_PARAMETER(Ti);
-    Parameter_Base *tr = RETRIVE_PARAMETER(Tr);
-    Parameter_Base *mn1 = RETRIVE_PARAMETER(MN1);
+    Parameter_Base *ti = RETRIEVE_PARAMETER(Ti);
+    Parameter_Base *tr = RETRIEVE_PARAMETER(Tr);
+    Parameter_Base *mn1 = RETRIEVE_PARAMETER(MN1);
     ti->Set_Value(15);
     tr->Set_Value(10);
 
     // * Any particle can be accessed
-    Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+    Particle_Base *pp = RETRIEVE_PARTICLE(900001);
 
     auto pl = Process_Factory::Get_Process_Factory().Get_Process_List();
     for (auto &&pc : pl) {
         cout << "PID: " << pc->Get_Process_ID() << " " << pc->Get_Process_Name() << endl;
     }
 
-    BoltzmannEquation BE(mn1);
+    Boltzmann_Equation BE(mn1);
     REAL scale = mn1->Get_Value();
     REAL T_BEGIN = 100 * scale;
     REAL T_END = scale / 1000.0;

@@ -10,19 +10,19 @@ using namespace std;
 int main(int argc, char const *argv[]) {
     // * Free Parameter can be modified accordingly
     // * Any other parameters that depend on these free parameters will update their value when their value is acquired
-    Parameter_Base *ti = RETRIVE_PARAMETER(Ti);
-    Parameter_Base *tr = RETRIVE_PARAMETER(Tr);
-    Parameter_Base *mx = RETRIVE_PARAMETER(MX);
-    Parameter_Base *lam = RETRIVE_PARAMETER(Lam);
+    Parameter_Base *ti = RETRIEVE_PARAMETER(Ti);
+    Parameter_Base *tr = RETRIEVE_PARAMETER(Tr);
+    Parameter_Base *mx = RETRIEVE_PARAMETER(MX);
+    Parameter_Base *lam = RETRIEVE_PARAMETER(Lam);
 
     // * Ti and Tr can be reset to any value
     ti->Set_Value(10);
     tr->Set_Value(1);
 
     // * Any particle can also be accessed
-    Pseudo_Particle *pp = RETRIVE_PARTICLE(900001);
+    Particle_Base *pp = RETRIEVE_PARTICLE(900001);
 
-    BoltzmannEquation BE(mx);
+    Boltzmann_Equation BE(mx);
     REAL scale = mx->Get_Value();
 
     // * For Freeze-Out

@@ -11,7 +11,7 @@ namespace EvoEMD {
 
 class Process;
 
-class Particle_Base {
+class Particle_Proc {
 protected:
     // * Processes that involve current particle
     // * The process calculates its value lazily, it will acquire particle's infor when it needs
@@ -19,15 +19,15 @@ protected:
     std::set<Process *> Process_Set;
 
 public:
-    Particle_Base(){};
-    virtual ~Particle_Base(){};
+    Particle_Proc(){};
+    virtual ~Particle_Proc(){};
 
     void Register_Process(Process *);
 
     std::set<Process *> Get_Process() const { return Process_Set; }
 };
 
-class Pseudo_Particle : public Particle_Base {
+class Particle_Base : public Particle_Proc {
     // * Pseudo-Particle:
     // * Stored Pseudo-Particle information:
     // * Masses, whether Massless
@@ -40,12 +40,12 @@ class Pseudo_Particle : public Particle_Base {
     // *    By default: it is assumed that all particle is in thermalization.
     // * Calculate Number Density or Yield at Equilibrium;
 protected:
-    std::string name;
+    const std::string name;
     bool massless;
     Parameter_Base *p_mass;
     Parameter_Base *p_width;
-    int PID;
-    int DOF;
+    const int PID;
+    const int DOF;
     const bool pseudo;
     bool Thermalized;
     REAL Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T) const;
@@ -55,7 +55,7 @@ protected:
 
 public:
     /**
-     * @brief  ctor for a Pseudo_Particle
+     * @brief  ctor for a Particle_Base
      * @note
      * @param  name: The name for the particle
      * @param  PID: The PID for a particle (should be unique for each particle)
@@ -69,9 +69,9 @@ public:
      * and the density can not be negative.
      * @retval
      */
-    Pseudo_Particle(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
-                    bool pseudo = false);
-    virtual ~Pseudo_Particle(){};
+    Particle_Base(std::string name, int PID, int DOF, Parameter_Base *mass = nullptr, Parameter_Base *width = nullptr,
+                  bool pseudo = false);
+    virtual ~Particle_Base(){};
 
     int Get_PID() const { return PID; }
     int Get_DOF() const { return DOF; }
@@ -108,7 +108,7 @@ public:
     void Set_Mass(double mass);
 };
 
-class Fermion : public Pseudo_Particle {
+class Fermion : public Particle_Base {
 protected:
     virtual REAL Get_Equilibrium_Number_Density_per_DOF(const REAL T) const override;
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
@@ -119,7 +119,7 @@ public:
     ~Fermion(){};
 };
 
-class Boson : public Pseudo_Particle {
+class Boson : public Particle_Base {
 protected:
     virtual REAL Get_Equilibrium_Number_Density_per_DOF(const REAL T) const override;
     virtual REAL Get_Equilibrium_Yield_per_DOF(const REAL T) const override;
@@ -132,12 +132,12 @@ public:
 
 class Particle_Factory {
 public:
-    typedef std::map<int, Pseudo_Particle *> Particle_List;
+    typedef std::map<int, Particle_Base *> Particle_List;
 
     static Particle_Factory &Get_Particle_Factory();
 
-    Pseudo_Particle *Get_Particle(int PID);
-    bool Register_Particle(Pseudo_Particle *);
+    Particle_Base *Get_Particle(int PID);
+    bool Register_Particle(Particle_Base *);
     bool Register_POI(int PID);
     bool Set_Mass(int PID, double mass);
     std::set<int> Get_POI() const { return POI; }
@@ -154,7 +154,7 @@ private:
 
 class Register_Particle {
 public:
-    Register_Particle(EvoEMD::Pseudo_Particle *par) {
+    Register_Particle(EvoEMD::Particle_Base *par) {
         EvoEMD::Particle_Factory::Get_Particle_Factory().Register_Particle(par);
     }
 };
@@ -168,14 +168,14 @@ public:
     };                                                           \
     Register_Particle g_register_particle_##partName(new part_##partName)
 
-#define RETRIVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)
+#define RETRIEVE_PARTICLE(PID) EvoEMD::Particle_Factory::Get_Particle_Factory().Get_Particle(PID)
 
 class Register_POI {
 public:
     Register_POI(int PID, bool start_with_thermal = true) {
         EvoEMD::Particle_Factory &pf = EvoEMD::Particle_Factory::Get_Particle_Factory();
         pf.Register_POI(PID);
-        EvoEMD::Pseudo_Particle *pp = pf.Get_Particle(PID);
+        EvoEMD::Particle_Base *pp = pf.Get_Particle(PID);
         pp->Set_Init_Thermal_Status(start_with_thermal);
     }
 };

@@ -10,7 +10,7 @@
 
 namespace EvoEMD {
 
-class BoltzmannEquation : public ODE_FUNCS {
+class Boltzmann_Equation : public ODE_FUNCS {
 private:
     Parameter_Base *ptr_scale;
     REAL T_BEGIN;
@@ -18,7 +18,7 @@ private:
     REAL scale;
     std::vector<int> poi_pids;
     std::vector<std::string> poi_names;
-    std::vector<Pseudo_Particle *> poi_ptrs;
+    std::vector<Particle_Base *> poi_ptrs;
     Particle_Factory &pf;
     Hubble_History &hh;
     RungeKutta rk;
@@ -27,8 +27,8 @@ private:
     REAL dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio);
 
 public:
-    BoltzmannEquation(Parameter_Base *scale = nullptr);
-    ~BoltzmannEquation(){};
+    Boltzmann_Equation(Parameter_Base *scale = nullptr);
+    ~Boltzmann_Equation(){};
 
     // * User may not want to use following methods
     virtual VD dYdX(REAL x, const VD &y, const VD &delta_y_ratio) override;
