@@ -10,8 +10,30 @@
 
 namespace EvoEMD {
 
-REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
-    // * For  1 -> 2 3;
+// REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
+//     // * For  1 -> 2 3;
+//     REAL m1 = amp->INITIAL[0]->Get_Mass();
+//     REAL m2 = amp->FINAL[0]->Get_Mass();
+//     REAL m3 = amp->FINAL[1]->Get_Mass();
+//     REAL m12 = m1 * m1;
+//     REAL m22 = m2 * m2;
+//     REAL m32 = m3 * m3;
+
+//     // * Final state momentum when 1 is at rest;
+//     REAL pf = sqrt(Kallen_Lam(m12, m22, m32)) / 2.0 / m1;
+
+//     // * Two body phase space volumn
+//     const Process_Amp &res = amp->Get_Amp(sqrt_shat);
+//     REAL PS2 = 1.0 / (2.0 * m1) * pf / (16.0 * M_PI * M_PI * m1);
+//     REAL RES = 2.0                      // * From integral over cos(theta)
+//                * 2.0 * M_PI             // * From integral over phi
+//                * (res[0].Numerator[0])  // * The amplitude
+//                * PS2;                   // * The two body phase space
+//     return RES;
+// }
+
+REAL Decay12_Rate::Get_Collision_Rate(REAL T) {
+    REAL AMP_WITH_SOLID_ANGLE = amp->Get_Amp(0);
     REAL m1 = amp->INITIAL[0]->Get_Mass();
     REAL m2 = amp->FINAL[0]->Get_Mass();
     REAL m3 = amp->FINAL[1]->Get_Mass();
@@ -19,37 +41,23 @@ REAL Decay12_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
     REAL m22 = m2 * m2;
     REAL m32 = m3 * m3;
 
-    // * Final state momentum when 1 is at rest;
     REAL pf = sqrt(Kallen_Lam(m12, m22, m32)) / 2.0 / m1;
-
-    // * Two body phase space volumn
-    const Process_Amp &res = amp->Get_Amp(sqrt_shat);
     REAL PS2 = 1.0 / (2.0 * m1) * pf / (16.0 * M_PI * M_PI * m1);
-    REAL RES = 2.0                      // * From integral over cos(theta)
-               * 2.0 * M_PI             // * From integral over phi
-               * (res[0].Numerator[0])  // * The amplitude
-               * PS2;                   // * The two body phase space
-    return RES;
-}
 
-REAL Decay12_Rate::Get_Collision_Rate(REAL T) {
-    REAL AMP_WITH_PS = Get_Amp_Integrate_over_Phase_Space(0);
-
-    REAL m1 = amp->INITIAL[0]->Get_Mass();
     REAL z = m1 / T;
     REAL k1z = z > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(z);
-    REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z * AMP_WITH_PS;
+    REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z * PS2 * AMP_WITH_SOLID_ANGLE;
     return RES;
 }
 
-REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
-    const Process_Amp &amp_res = amp->Get_Amp(sqrt_shat);
-    REAL amp_total = 0;
-    for (unsigned i_diag = 0; i_diag < amp_res.size(); i_diag++) {
-        amp_total += Get_Amp_Integrate_over_Phase_Space_Single_Channel(amp_res[i_diag]);
-    }
-    return amp_total;  // * Extra 2pi from integrate over phi;
-}
+// REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space(REAL sqrt_shat) {
+//     const Process_Amp &amp_res = amp->Get_Amp(sqrt_shat);
+//     REAL amp_total = 0;
+//     for (unsigned i_diag = 0; i_diag < amp_res.size(); i_diag++) {
+//         amp_total += Get_Amp_Integrate_over_Phase_Space_Single_Channel(amp_res[i_diag]);
+//     }
+//     return amp_total;  // * Extra 2pi from integrate over phi;
+// }
 
 inline REAL INT_RES_00(REAL a, REAL b, REAL c, REAL d, REAL e) {
     // * Int[(a+b x+ c x^2)/d/e,{x,-1,1}]
@@ -79,85 +87,86 @@ inline REAL INT_RES_11_1(REAL a, REAL b, REAL c, REAL d, REAL e) {
     return num / den;
 }
 
-REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space_Single_Channel(const Process_Amp_Single_Diagram &amp_single) {
-    using NT = Process_Amp_Single_Diagram::Numerator_Type;
-    using DT = Process_Amp_Single_Diagram::Denominator_Type;
-    REAL n0 = amp_single.Numerator[0];
-    REAL n1 = amp_single.Numerator[1];
-    REAL n2 = amp_single.Numerator[2];
+// REAL Scatter22_Rate::Get_Amp_Integrate_over_Phase_Space_Single_Channel(const Process_Amp_Single_Diagram &amp_single)
+// {
+//     using NT = Process_Amp_Single_Diagram::Numerator_Type;
+//     using DT = Process_Amp_Single_Diagram::Denominator_Type;
+//     REAL n0 = amp_single.Numerator[0];
+//     REAL n1 = amp_single.Numerator[1];
+//     REAL n2 = amp_single.Numerator[2];
 
-    using PT = Process_Amp_Single_Diagram::Propagator_Type;
-    using RT = Process_Amp_Single_Diagram::Result_Type;
-    const DT &denominator = amp_single.Denominator;
-    const PT &p0 = denominator.first;
-    const PT &p1 = denominator.second;
+//     using PT = Process_Amp_Single_Diagram::Propagator_Type;
+//     using RT = Process_Amp_Single_Diagram::Result_Type;
+//     const DT &denominator = amp_single.Denominator;
+//     const PT &p0 = denominator.first;
+//     const PT &p1 = denominator.second;
 
-    int id_p0 = p0.first;
-    const RT &crf_p0 = p0.second;
-    int ncth_p0 = crf_p0.size();
+//     int id_p0 = p0.first;
+//     const RT &crf_p0 = p0.second;
+//     int ncth_p0 = crf_p0.size();
 
-    int id_p1 = p1.first;
-    const RT &crf_p1 = p1.second;
-    int ncth_p1 = crf_p1.size();
+//     int id_p1 = p1.first;
+//     const RT &crf_p1 = p1.second;
+//     int ncth_p1 = crf_p1.size();
 
-    // * The amplitude has following structure
-    // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10+d11*cth)
-    // * Then according to different situation for {d00,d01} and {d10,d11}, we will formally integral over cth
-    if (id_p0 == id_p1) {
-        // * In this case d00==d10, and d01 == d11
-        // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)^2
-        if (ncth_p0 == 2) {
-            // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)^2
-            // * 2pi from integral over phi, INT_RES_XXXX from integral over cth
-            REAL d00 = crf_p0[0];
-            REAL d01 = crf_p0[1];
-            return 2.0 * M_PI * INT_RES_11_1(n0, n1, n2, d00, d01);
-        }
+//     // * The amplitude has following structure
+//     // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10+d11*cth)
+//     // * Then according to different situation for {d00,d01} and {d10,d11}, we will formally integral over cth
+//     if (id_p0 == id_p1) {
+//         // * In this case d00==d10, and d01 == d11
+//         // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)^2
+//         if (ncth_p0 == 2) {
+//             // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)^2
+//             // * 2pi from integral over phi, INT_RES_XXXX from integral over cth
+//             REAL d00 = crf_p0[0];
+//             REAL d01 = crf_p0[1];
+//             return 2.0 * M_PI * INT_RES_11_1(n0, n1, n2, d00, d01);
+//         }
 
-        if (ncth_p0 == 1) {
-            // * (n0 + n1*cth + n2*cth^2)/(d00)^2
-            REAL d00 = crf_p0[0];
-            return 2.0 * M_PI * INT_RES_00(n0, n1, n2, d00, d00);
-        }
-    }
+//         if (ncth_p0 == 1) {
+//             // * (n0 + n1*cth + n2*cth^2)/(d00)^2
+//             REAL d00 = crf_p0[0];
+//             return 2.0 * M_PI * INT_RES_00(n0, n1, n2, d00, d00);
+//         }
+//     }
 
-    if (id_p0 != id_p1) {
-        // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10 + d11*cth)
-        if (ncth_p0 == 2 && ncth_p1 == 2) {
-            // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10 + d11*cth)
-            REAL d00 = crf_p0[0];
-            REAL d01 = crf_p0[1];
-            REAL d10 = crf_p1[0];
-            REAL d11 = crf_p1[1];
-            return 2.0 * M_PI * INT_RES_11_0(n0, n1, n2, d00, d01, d10, d11);
-        }
+//     if (id_p0 != id_p1) {
+//         // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10 + d11*cth)
+//         if (ncth_p0 == 2 && ncth_p1 == 2) {
+//             // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10 + d11*cth)
+//             REAL d00 = crf_p0[0];
+//             REAL d01 = crf_p0[1];
+//             REAL d10 = crf_p1[0];
+//             REAL d11 = crf_p1[1];
+//             return 2.0 * M_PI * INT_RES_11_0(n0, n1, n2, d00, d01, d10, d11);
+//         }
 
-        if (ncth_p0 == 2 && ncth_p1 == 1) {
-            // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10)
-            REAL d00 = crf_p0[0];
-            REAL d01 = crf_p0[1];
-            REAL d10 = crf_p1[0];
-            return 2.0 * M_PI * INT_RES_01(n0, n1, n2, d00, d01, d10);
-        }
+//         if (ncth_p0 == 2 && ncth_p1 == 1) {
+//             // * (n0 + n1*cth + n2*cth^2)/(d00 + d01*cth)/(d10)
+//             REAL d00 = crf_p0[0];
+//             REAL d01 = crf_p0[1];
+//             REAL d10 = crf_p1[0];
+//             return 2.0 * M_PI * INT_RES_01(n0, n1, n2, d00, d01, d10);
+//         }
 
-        if (ncth_p0 == 1 && ncth_p1 == 2) {
-            // * (n0 + n1*cth + n2*cth^2)/(d00)/(d10 + d11*cth)
-            REAL d00 = crf_p0[0];
-            REAL d10 = crf_p1[0];
-            REAL d11 = crf_p1[1];
-            return 2.0 * M_PI * INT_RES_01(n0, n1, n2, d10, d11, d00);
-        }
+//         if (ncth_p0 == 1 && ncth_p1 == 2) {
+//             // * (n0 + n1*cth + n2*cth^2)/(d00)/(d10 + d11*cth)
+//             REAL d00 = crf_p0[0];
+//             REAL d10 = crf_p1[0];
+//             REAL d11 = crf_p1[1];
+//             return 2.0 * M_PI * INT_RES_01(n0, n1, n2, d10, d11, d00);
+//         }
 
-        if (ncth_p0 == 1 && ncth_p1 == 1) {
-            // * (n0 + n1*cth + n2*cth^2)/(d00)/(d10)
-            REAL d00 = crf_p0[0];
-            REAL d10 = crf_p1[0];
-            return 2.0 * M_PI * INT_RES_00(n0, n1, n2, d00, d10);
-        }
-    }
+//         if (ncth_p0 == 1 && ncth_p1 == 1) {
+//             // * (n0 + n1*cth + n2*cth^2)/(d00)/(d10)
+//             REAL d00 = crf_p0[0];
+//             REAL d10 = crf_p1[0];
+//             return 2.0 * M_PI * INT_RES_00(n0, n1, n2, d00, d10);
+//         }
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
 struct INT_PARAM {
     Scatter22_Rate *ptr;
@@ -187,8 +196,8 @@ int Scatter22_Rate_Integrand(const int *ndim, const REAL x[], const int *ncomp, 
     REAL sqrt_Kallen_final = sqrt(Kallen_Lam(1.0, m3 * m3 / s, m4 * m4 / s));
 
     REAL k1z = sqrt_s / T > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(sqrt_s / T);
-    ff[0] = Jac_from_sqrt_s * s * k1z * sqrt_Kallen_init * sqrt_Kallen_final *
-            par->ptr->Get_Amp_Integrate_over_Phase_Space(sqrt_s);
+    ff[0] =
+        Jac_from_sqrt_s * s * k1z * sqrt_Kallen_init * sqrt_Kallen_final * par->ptr->Get_Amp_With_Solid_Angle(sqrt_s);
     return 0;
 }
 
