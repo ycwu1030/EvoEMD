@@ -1,12 +1,5 @@
 
-
-(* Load Necessary Packages *)
-Needs["FeynArts`"];
-Needs["FormCalc`"];
-Needs["Rubi`"];
-$FAVerbose=0;
-$FCVerbose=0;
-
+Begin["`EvoProcess`"]
 
 
 (* Determine the External Particle Types/Numbers *)
@@ -120,3 +113,5 @@ NSubs=Length[SubinExpr];
 NNext=Length[SubNew];
 If[NSubs==NNext,OnePassOrder[OptimizeAbbr[Subexpressions] ],GetAllSubs[Subexpressions] ]
 ]
+
+End[]

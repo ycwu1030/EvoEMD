@@ -1,6 +1,6 @@
 #include "Amplitudes.h"
 using namespace EvoEMD;
-N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base(1) {
+N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base("Decay_NLPhi") {
     Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
@@ -9,25 +9,24 @@ N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base(1) {
     FINAL.push_back(p_phi);
     INITIAL.push_back(p_N1);
 
-    N_INITIAL = 1;
-    N_FINAL = 2;
+    N_INITIAL = INITIAL.size();
+    N_FINAL = FINAL.size();
 
-    // Build amp for squared diagram-0
-    auto &amp_0 = amp_res[0];
-    // Numerator
-    amp_0.Numerator = Build_Numerator(1.0, 0.0, 0.0);
-
-    // Denominator
-    auto ds = Build_Propagator(0, 1.0);
-    amp_0.Denominator = Build_Denominator(ds, ds);
+    Parameter_Base *ptr_lam = RETRIEVE_PARAMETER(Lam);
+    Parameter_Base *ptr_mn1 = RETRIEVE_PARAMETER(MN1);
+    Register_Dependencies(ptr_lam, ptr_mn1);
 }
-
-void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+void N_LPhi_Amp::Update_Value(REAL input) {
     REAL lam = GET_PARAMETER_VALUE(Lam);
     REAL mn1 = GET_PARAMETER_VALUE(MN1);
 
-    // Update squared-diagram-0
-    amp_res[0].Numerator = Build_Numerator(4 * lam * lam * mn1 * mn1, 0.0, 0.0);
+    Sub1 = 4 * lam * lam * mn1 * mn1;
+}
+
+void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+    Get_Value();
+
+    amp_res = 4 * M_PI * Sub1;
 }
 
 REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
@@ -53,7 +52,7 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     }
 }
 
-delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base(1) {
+delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base("Decay_decay_NLPhi") {
     Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
@@ -62,25 +61,27 @@ delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base(1) {
     FINAL.push_back(p_phi);
     INITIAL.push_back(p_N1);
 
-    N_INITIAL = 1;
-    N_FINAL = 2;
+    N_INITIAL = INITIAL.size();
+    N_FINAL = FINAL.size();
 
-    // Build amp for squared diagram-0
-    auto &amp_0 = amp_res[0];
-    // Numerator
-    amp_0.Numerator = Build_Numerator(1.0, 0.0, 0.0);
-
-    // Denominator
-    auto ds = Build_Propagator(0, 1.0);
-    amp_0.Denominator = Build_Denominator(ds, ds);
+    auto *ptr_lam = RETRIEVE_PARAMETER(Lam);
+    auto *ptr_mn1 = RETRIEVE_PARAMETER(MN1);
+    auto *ptr_eps = RETRIEVE_PARAMETER(Eps);
+    Register_Dependencies(ptr_lam, ptr_mn1, ptr_eps);
 }
 
-void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+void delta_N_LPhi_Amp::Update_Value(REAL input) {
     REAL lam = GET_PARAMETER_VALUE(Lam);
     REAL mn1 = GET_PARAMETER_VALUE(MN1);
     REAL eps = GET_PARAMETER_VALUE(Eps);
-    // Update squared-diagram-0
-    amp_res[0].Numerator = Build_Numerator(4 * eps * lam * lam * mn1 * mn1, 0.0, 0.0);
+
+    Sub1 = 4 * eps * lam * lam * mn1 * mn1;
+}
+
+void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+    Get_Value();
+
+    amp_res = 4 * M_PI * Sub1;
 }
 
 REAL delta_N_LPhi_Amp::Get_Coeff(REAL T, int PID) {

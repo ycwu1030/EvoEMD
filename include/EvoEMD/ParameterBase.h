@@ -18,7 +18,7 @@ protected:
     std::set<Parameter_Base *> parent_parameters;
 
 public:
-    Parameter_Base(std::string par_name) : name(par_name), value(0), updated(true){};
+    Parameter_Base(std::string par_name) : name(par_name), value(0), updated(false){};
     virtual ~Parameter_Base(){};
 
     bool Is_Independent() { return (parent_parameters.size() == 0); }
