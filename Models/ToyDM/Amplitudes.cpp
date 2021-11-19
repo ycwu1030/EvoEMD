@@ -6,28 +6,29 @@
 
 using namespace EvoEMD;
 
-XX_SS_Amp::XX_SS_Amp() : Amplitude_Base(1) {
-    Particle_Factory &pf = Particle_Factory::Get_Particle_Factory();
-    Particle_Base *p_dm = pf.Get_Particle(900001);
-    Particle_Base *p_l = pf.Get_Particle(900011);
+XX_SS_Amp::XX_SS_Amp() : Amplitude_Base("XX_SS") {
+    Particle_Base *p_dm = RETRIEVE_PARTICLE(900001);
+    Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     FINAL.push_back(p_dm);
     FINAL.push_back(p_dm);
     INITIAL.push_back(p_l);
     INITIAL.push_back(p_l);
-    N_INITIAL = 2;
-    N_FINAL = 2;
-    // * For the diagram-0
-    auto &amp_0 = amp_res[0];
-    auto ds = Build_Propagator(0, 1.0);
-    amp_0.Denominator = Build_Denominator(ds, ds);
-    amp_0.Numerator = Build_Numerator(1.0, 0.0, 0.0);
+    N_INITIAL = INITIAL.size();
+    N_FINAL = FINAL.size();
+
+    auto *ptr_lam = RETRIEVE_PARAMETER(Lam);
+    Register_Dependencies(ptr_lam);
+}
+
+void XX_SS_Amp::Update_Value(REAL input) {
+    REAL lam = RETRIEVE_PARAMETER(Lam)->Get_Value();
+    Sub1 = pow(lam, 4);
 }
 
 void XX_SS_Amp::Update_Amp(REAL sqrt_shat) {
-    REAL lam = RETRIEVE_PARAMETER(Lam)->Get_Value();
+    Get_Value();
 
-    // * Update amp for diagram-0
-    amp_res[0].Numerator = Build_Numerator(lam * lam * lam * lam, 0.0, 0.0);
+    amp_res = 4 * M_PI * Sub1;
 }
 
 REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
