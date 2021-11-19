@@ -17,9 +17,8 @@ In preparation...
 
 ## Dependencies
 
-- GSL
-- Eigen3
-- Cuba
+- [GSL](https://www.gnu.org/software/gsl/)
+- [Cuba](http://www.feynarts.de/cuba/)
 
 ## Examples
 
