@@ -1,4 +1,4 @@
-# EvoEMD
+# EvoEMD : cosmic Evolution with an Early Matter-Dominated era
 
 A framework to evaluate the evolution w/ or w/o an early matter dominated (EMD) era.
 
@@ -30,13 +30,11 @@ cd EvoEMD
 mkdir build; cd build
 cmake -DCMAKE_INSTALL_PREFIX=INSTALL_PATH -DCUBA_ROOT=CUBA_PATH ../
 make
+make install # Optional
 ```
-where `INSTALL_PATH` should be replaced by the directory where you want to install the `EVOEMD` library, `CUBA_PATH` should be replaced by the `CUBA` directory. Then one can find the executable for the examples in the `EvoEMD/build/bin`.
+where `INSTALL_PATH` should be replaced by the directory where you want to install the `EVOEMD` library, `CUBA_PATH` should be replaced by the `CUBA` directory. Then one can find the executable for the examples in `EvoEMD/build/bin`.
 
-```bash
-make install
-```
-The whole library is installed into `INSTALL_PATH`. The headers are in `INSTALL_PATH/include`, while the shared library is in `INSTALL_PATH/lib`. If users want to integrate `EvoEMD` into their own CMake project, we also provide `FindEVOEMD.cmake` in `INSTALL_PATH/share/cmake/Modules`.
+The last command is optional, which install the whole library is into `INSTALL_PATH` (If it is a system folder, one should also use `sudo`). The headers are in `INSTALL_PATH/include`, while the shared library is in `INSTALL_PATH/lib`. If users want to integrate `EvoEMD` into their own CMake project, we also provide `FindEVOEMD.cmake` in `INSTALL_PATH/share/cmake/Modules` as well as `SOURCE_DIR/cmake/Modules`.
 
 ### Examples
 
