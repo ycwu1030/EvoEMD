@@ -12,10 +12,10 @@ Process::Process(Amplitude_Base *amp) {
     INIT = amp->INITIAL;
     FINAL = amp->FINAL;
     if (amp->N_INITIAL == 1 && amp->N_FINAL == 2) {
-        CR_Calculator = new Decay12_Rate(amp);
+        CR_Calculator = new Decay_Rate(amp);
     }
     if (amp->N_INITIAL == 2 && amp->N_FINAL == 2) {
-        CR_Calculator = new Scatter22_Rate(amp);
+        CR_Calculator = new Scatter_Rate(amp);
     }
     for (int i = 0; i < INIT.size(); i++) {
         INIT[i]->Register_Process(this);

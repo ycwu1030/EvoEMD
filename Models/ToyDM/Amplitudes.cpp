@@ -25,11 +25,7 @@ void XX_SS_Amp::Update_Value(REAL input) {
     Sub1 = pow(lam, 4);
 }
 
-void XX_SS_Amp::Update_Amp(REAL sqrt_shat) {
-    Get_Value();
-
-    amp_res = 4 * M_PI * Sub1;
-}
+void XX_SS_Amp::Update_Amp(REAL sqrt_shat) { amp_res = 4 * M_PI * Sub1; }
 
 REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
     if (PID == 900001) {

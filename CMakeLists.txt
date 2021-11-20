@@ -7,7 +7,7 @@ if (POLICY CMP0074)
 endif ()
 PROJECT(EVOEMD CXX)
 
-SET(EVOEMD_VERSION "0.9.3")
+SET(EVOEMD_VERSION "0.9.4")
 
 FIND_PACKAGE(GSL REQUIRED)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules;${CMAKE_MODULE_PATH}")
@@ -57,7 +57,5 @@ INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/EvoEMD DESTINATION include)
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/spdlog DESTINATION include)
 
 
-# add_subdirectory(src/Models/SeesawFreezeIn)
 add_subdirectory(Models/ToyDM)
 add_subdirectory(Models/ToyLeptogenesis)
-add_subdirectory(test)

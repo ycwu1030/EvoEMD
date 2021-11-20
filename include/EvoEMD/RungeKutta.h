@@ -42,6 +42,11 @@ public:
     virtual VB Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) = 0;
 };
 
+/**
+ * @brief  The struct storing information at one point
+ * @note
+ * @retval None
+ */
 struct RK_Point {
     int DOF;
     REAL X;
@@ -143,22 +148,15 @@ private:
      * @brief The Runge-Kutta method taking one step forward
      *        Based on 4th order Runge-Kutta and adding quality control (adaptive stepsize),
      *        such that we can kind of achieve 5th order accuracy
-     * @param x, input: current value of x, output: next value of x
-     * @param y, input: current value of y, output: next value of y
-     * @param yeq, input: current value of yeq, output: next value of yeq
-     * @param dydx, input: current value of dy/dx, output: next value of dy/dx
-     * @param delta_y_ratio, input: current value of 1-y/yeq, output: next value of 1-y/yeq
-     * @param thermal_status, input: current status of thermalization, output: next status of thermalization
-     * @param step_size_guess, input: initial guess of current step size
-     * @param eps, input: tolerance
-     * @param Y_Scale, input: the scale in y to set the error (it is possible in different direction of y, the scale
-     * is quite different)
-     * @param step_size_did, output: actual step size we take
-     * @param step_size_further, output: based on what we did, the prospect step size for next step
+     * @note
+     * @param  &p_cur: current point
+     * @param  step_size_guess: guess step size for current step
+     * @param  eps: tolerance for current step
+     * @param  &p_next: next point
+     * @param  &step_size_did: the step size we actually did
+     * @param  &step_size_further:  the guess next step size;
+     * @retval
      */
-    bool RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, VB &thermal_status,
-                         const REAL step_size_guess, const REAL eps, const VD &Y_Scale, REAL &step_size_did,
-                         REAL &step_size_further);
     bool RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_guess, const REAL eps, RK_Point &p_next,
                          REAL &step_size_did, REAL &step_size_further);
 };
