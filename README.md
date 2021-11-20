@@ -28,10 +28,10 @@ Make sure that `GSL` is there which can be installed through many package manage
 git clone https://github.com/ycwu1030/EvoEMD.git
 cd EvoEMD
 mkdir build; cd build
-cmake -DCMAKE_INSTALL_PREFIX=INSTALL_PATH -DCUBA_ROOT=CUDA_PATH ../
+cmake -DCMAKE_INSTALL_PREFIX=INSTALL_PATH -DCUBA_ROOT=CUBA_PATH ../
 make
 ```
-Then one can find the executable for the examples in the `EvoEMD/build/bin`.
+where `INSTALL_PATH` should be replaced by the directory where you want to install the `EVOEMD` library, `CUBA_PATH` should be replaced by the `CUBA` directory. Then one can find the executable for the examples in the `EvoEMD/build/bin`.
 
 ```bash
 make install
