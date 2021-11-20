@@ -93,9 +93,6 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
     Particle_Base *pp = poi_ptrs[i];
     std::set<Process *> sp = pp->Get_Process();
     for (auto &&proc_ptr : sp) {
-        // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
-        // std::cout << "Coefficient @ T=" << T << " is " << proc_ptr->Get_Yield_Coeff(T, pp->Get_PID()) <<
-        // std::endl;
         res += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
     }
     res *= 1.0 / pow(T, 3) / HatT;
@@ -131,9 +128,6 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
         Particle_Base *pp = poi_ptrs[i];
         std::set<Process *> sp = pp->Get_Process();
         for (auto &&proc_ptr : sp) {
-            // std::cout << "Collision Rate @ T=" << T << " is " << proc_ptr->Get_Collision_Rate(T) << std::endl;
-            // std::cout << "Coefficient @ T=" << T << " is " << proc_ptr->Get_Yield_Coeff(T, pp->Get_PID()) <<
-            // std::endl;
             REAL cr = proc_ptr->Get_Collision_Rate(T);
             REAL coef = proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
             SPDLOG_DEBUG_FILE("COMPONENT-{}, Rate: {:+9.8e}, COEF: {:+9.8e}", i, cr, coef);
@@ -148,7 +142,6 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
             res[i] /= beta_T;
         }  // else beta_T == 1, no further action needed
     }
-    // std::cout << "RES = " << res << std::endl;
     return res;
 }
 
