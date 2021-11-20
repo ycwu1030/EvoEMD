@@ -21,12 +21,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option")
 ## Collecting Source Files
 FILE(GLOB lib_SOURCES src/EvoEMD/*.cpp)
 
-# CUBA has to be recompiled with -fPIC so that it can be link into a shared library.
-ADD_CUSTOM_TARGET(CUSTOM_CUBA
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/rebuild_cuba.sh
-    WORKING_DIRECTORY ${CUBA_ROOT}
-    USES_TERMINAL)
-
 # For .so/.dylib library
 ADD_LIBRARY(EVOEMD_shared SHARED ${lib_SOURCES})
 SET_TARGET_PROPERTIES(EVOEMD_shared PROPERTIES
@@ -34,10 +28,16 @@ SET_TARGET_PROPERTIES(EVOEMD_shared PROPERTIES
     VERSION ${EVOEMD_VERSION}
     OUTPUT_NAME EVOEMD
 )
-ADD_DEPENDENCIES(EVOEMD_shared CUSTOM_CUBA)
 TARGET_LINK_LIBRARIES(EVOEMD_shared ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 SET(EVOEMD_LIBRARIES EVOEMD_shared)
 
+# CUBA has to be recompiled with -fPIC so that it can be link into a shared library.
+ADD_CUSTOM_COMMAND(
+    TARGET EVOEMD_shared
+    PRE_BUILD
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/rebuild_cuba.sh
+    WORKING_DIRECTORY ${CUBA_ROOT}
+)
 # For .a library
 # ADD_LIBRARY(EVOEMD_static STATIC ${lib_SOURCES})
 # SET_TARGET_PROPERTIES(EVOEMD_static PROPERTIES
