@@ -1,7 +1,0 @@
-
-Evo$Model=SM;
-Evo$POIs={S[1]};
-
-Evo$Processes={
-    {S[1],S[1]}->{V[2],V[2]}
-};

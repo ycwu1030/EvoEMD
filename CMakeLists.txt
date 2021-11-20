@@ -57,7 +57,5 @@ INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/EvoEMD DESTINATION include)
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/spdlog DESTINATION include)
 
 
-# add_subdirectory(src/Models/SeesawFreezeIn)
 add_subdirectory(Models/ToyDM)
 add_subdirectory(Models/ToyLeptogenesis)
-add_subdirectory(test)
