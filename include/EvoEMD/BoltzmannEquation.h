@@ -27,6 +27,12 @@ private:
     REAL dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio);
 
 public:
+    /**
+     * @brief default ctor for Boltzmann equation
+     * @note   The value of the scale is used to compute z = m/T
+     * @param  *scale: a ptr to the scale parameter
+     * @retval
+     */
     Boltzmann_Equation(Parameter_Base *scale = nullptr);
     ~Boltzmann_Equation(){};
 
@@ -38,9 +44,39 @@ public:
     virtual VB Should_be_Thermalized(REAL x, const VD &y, const VD &delta_y_ratio) override;
 
     // * User should only use following methods
+    /**
+     * @brief  Setting temperature for solving the Boltzmann equation
+     * @note
+     * @param  T_BEGIN: initial temperature
+     * @param  T_END: final temperature
+     * @retval None
+     */
     void Set_T_Range(REAL T_BEGIN, REAL T_END);
+
+    /**
+     * @brief  Setting z = scale/T range for solving the Boltzmann equation
+     * @note
+     * @param  Z_BEGIN: initial z value
+     * @param  Z_END: final z value
+     * @retval None
+     */
     void Set_Z_Range(REAL Z_BEGIN, REAL Z_END);
+
+    /**
+     * @brief  Solve the Boltzmann equation
+     * @note
+     * @param  step_size: initial step size
+     * @param  eps_rel: tolerance for max relative error
+     * @retval
+     */
     RungeKutta::STATUS Solve(REAL step_size, REAL eps_rel = 1e-4);
+
+    /**
+     * @brief  Dump current solution of the BE to file
+     * @note
+     * @param  filename: file name for output
+     * @retval None
+     */
     void Dump_Solution(std::string filename);
 };
 

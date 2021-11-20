@@ -29,7 +29,7 @@ public:
 
 class Particle_Base : public Particle_Proc {
     // * Pseudo-Particle:
-    // * Stored Pseudo-Particle information:
+    // * Stored particle information:
     // * Masses, whether Massless
     // * PID: particle id;
     // * DOF: degree of freedom, (particle and antiparticle count seperately)

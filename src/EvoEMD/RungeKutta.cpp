@@ -195,9 +195,6 @@ VB WHETHER_THERMALIZED(const RK_Point &p_cur, const RK_INTER &p_inter, const VB 
     return res;
 }
 
-// bool RungeKutta::RK4_SingleStep(const REAL x_cur, const VD &y_cur, const VD &dydx_cur, const VD &delta_y_ratio_cur,
-// const VB &thermal_status_cur, const REAL step_size, VD &y_next, VD &delta_y_ratio_next,
-// VB &thermal_status_next) {
 bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const REAL step_size,
                                 VB &should_follow_equilibrium, VB &follow_equilibrium) {
     SPDLOG_INFO_FILE("4th Order RK with stepsize = {:+9.8e}.", step_size);
@@ -306,32 +303,12 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
         }
         if (match_thermal) break;
     }
-    // bool comp = false;
-    // VB need_to_be_compensate_to_eq = WHETHER_THERMALIZED(p_cur, inter, should_follow_equilibrium);
-    // SPDLOG_DEBUG_FILE("Need to compensate to eq?");
-    // for (int i = 0; i < DOF; i++) {
-    //     SPDLOG_DEBUG_FILE("Y[{}] = {}", i, need_to_be_compensate_to_eq[i]);
-    // }
 
-    // follow_equilibrium = should_follow_equilibrium;
-    // for (int i = 0; i < DOF; i++) {
-    //     if (need_to_be_compensate_to_eq[i]) {
-    //         p_next.Y[i] = p_next.Yeq[i];
-    //         p_next.Delta_Y_Ratio[i] = 0;
-    //         comp = true;
-    //         follow_equilibrium[i] = true;
-    //     }
-    //     p_next.Thermal_Status[i] = need_to_be_compensate_to_eq[i] || should_follow_equilibrium[i];
-    // }
     p_next.dYdX = derivs->dYdX(p_next.X, p_next.Y, p_next.Delta_Y_Ratio);
-    // should_follow_equilibrium = follow_equilibrium;
     follow_equilibrium = should_be_thermalized;
     return comp;
 }
 
-// bool RungeKutta::RKQC_SingleStep(REAL &x, VD &y, VD &yeq, VD &dydx, VD &delta_y_ratio, VB &thermal_status,
-//  const REAL step_size_guess, const REAL eps, const VD &Y_Scale, REAL &step_size_did,
-//  REAL &step_size_further) {
 bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_guess, const REAL eps, RK_Point &p_next,
                                  REAL &step_size_did, REAL &step_size_further) {
     SPDLOG_INFO_FILE("RKQC: ");
@@ -372,24 +349,10 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         SPDLOG_DEBUG_FILE("{}-th Trial for RKQC with stepsize = {:+9.8e}", trials, step_size);
         // * Take two half steps
         half_step_size = step_size / 2.0;
-        // while (true) {
         new_component_thermalized = RK4_SingleStep(p_cache, p_temp, half_step_size, should_follow_equilibrium,
                                                    follow_equilibrium_two_step_first);
-        //     if (!new_component_thermalized) {
-        //         // * Once, no new component is thermalized, we finish current step
-        //         // * But we know nothing about next step, so setting should_follow_equilibrium to false
-        //         should_follow_equilibrium = VB(DOF, false);
-        //         break;
-        //     }
-        // }
-        // while (true) {
         new_component_thermalized = RK4_SingleStep(p_temp, p_end, half_step_size, should_follow_equilibrium,
                                                    follow_equilibrium_two_step_second);
-        //     if (!new_component_thermalized) {
-        //         should_follow_equilibrium = VB(DOF, false);
-        //         break;
-        //     }
-        // }
 
         SPDLOG_DEBUG_FILE("Take two half steps, reaching:");
         LOGGING_RK_POINT(p_end);
@@ -402,14 +365,8 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         }
 
         // * Take one full step
-        // while (true) {
         new_component_thermalized =
             RK4_SingleStep(p_cache, p_next, step_size, should_follow_equilibrium, follow_equilibrium_single_step);
-        //     if (!new_component_thermalized) {
-        //         should_follow_equilibrium = VB(DOF, false);
-        //         break;
-        //     }
-        // }
 
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");
         LOGGING_RK_POINT(p_next);
@@ -454,12 +411,10 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         // ** First calculate the error
         VD Y_Scale = fabs(p_cur.Y) + fabs(p_cur.dYdX * step_size);
         for (int i = 0; i < DOF; i++) {
-            // Y_Scale[i] = min(1.0, Y_Scale[i]);
             Y_Scale[i] = max(1e-50, Y_Scale[i]);
             SPDLOG_INFO_FILE("  Y[{0}] = {1:+9.8e}, dYdX[{0}] = {2:+9.8e}, YScale[{0}] = {3:+9.8e};", i, p_cur.Y[i],
                              p_cur.dYdX[i], Y_Scale[i]);
         }
-        // Delta_y = y - y_temp;
         Delta_y = p_end.Y - p_next.Y;
         error_temp = fabs(Delta_y / Y_Scale);
         error_max = *max_element(error_temp.begin(), error_temp.end());
@@ -495,9 +450,7 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         }
         step_size = step_size_temp;  // * Change the step size, do the RK4 again.
     }
-    // y = y + Delta_y / 15;
     p_next.Y = p_end.Y + Delta_y / 15.0;
-    // yeq = derivs->Yeq(x);
     for (int i = 0; i < DOF; i++) {
         if (p_next.Thermal_Status[i]) {
             p_next.Delta_Y_Ratio[i] = 0;

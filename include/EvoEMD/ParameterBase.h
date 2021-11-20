@@ -18,28 +18,67 @@ protected:
     std::set<Parameter_Base *> parent_parameters;
 
 public:
+    /**
+     * @brief  default ctor, any parameter will be built with a name
+     * @note
+     * @param  par_name: the name for the parameter
+     * @retval
+     */
     Parameter_Base(std::string par_name) : name(par_name), value(0), updated(false){};
     virtual ~Parameter_Base(){};
 
+    /**
+     * @brief  Checking if current parameter is independent or not
+     * @note
+     * @retval true for independent, false otherwise
+     */
     bool Is_Independent() { return (parent_parameters.size() == 0); }
+
+    /**
+     * @brief  Notify that par depends on current parameter
+     * @note
+     * @param  *par: ptr to the parameter that depends on current parameter
+     * @retval None
+     */
     void Register_Descendent_Parameter(Parameter_Base *par) { descendent_parameters.insert(par); }
+
+    /**
+     * @brief  To notify all parameters that depend on current parameter, that they need to update their values
+     * @note
+     * @retval None
+     */
     void Notify() {
         updated = false;
-        // std::cout << "Parameter: " << name << " Need to be Updated" << std::endl;
         for (auto &&bp : descendent_parameters) {
             bp->Notify();
         }
     }
 
-    // * Any parameter derived from this Base_Parameter should re-implement this function
-    virtual void Update_Value(REAL input) = 0;
-
+    /**
+     * @brief  User use this function to set the value of the parameters
+     * @note
+     * @param  input: the input value for free parameter, but dummy for derived parameter
+     * @retval None
+     */
     void Set_Value(REAL input = 0) {
         Notify();
         Update_Value(input);
         updated = true;
-        // std::cout << "Parameter: " << name << " has been updated" << std::endl;
     }
+
+    /**
+     * @brief  The actual function to update the value of current parameter
+     * @note   Any parameter derived from this Base_Parameter should re-implement this function
+     * @param  input: the input value for free parameter, but can be ignored for derived parameter
+     * @retval None
+     */
+    virtual void Update_Value(REAL input) = 0;
+
+    /**
+     * @brief  Get the value of current parameter
+     * @note   This function will take care of updating value if necessary
+     * @retval current updated value of the parameter
+     */
     REAL Get_Value() {
         if (updated) {
             return value;
@@ -48,8 +87,20 @@ public:
             return value;
         }
     }
+
+    /**
+     * @brief  Get the name for the parameter
+     * @note
+     * @retval
+     */
     std::string Get_Name() const { return name; }
 
+    /**
+     * @brief  register that current parameter depends on ptr
+     * @note
+     * @param  *ptr: the ptr to parameter that current parameter depends on
+     * @retval None
+     */
     void Register_Dependencies(Parameter_Base *ptr) {
         ptr->Register_Descendent_Parameter(this);
         this->parent_parameters.insert(ptr);
