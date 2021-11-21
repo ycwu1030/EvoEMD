@@ -23,7 +23,11 @@ void N_LPhi_Amp::Update_Value(REAL input) {
     Sub1 = 4 * lam * lam * mn1 * mn1;
 }
 
-void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) { amp_res = 4 * M_PI * Sub1; }
+void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+    // * Final states l and phi are massless
+    // * sqrt(lam(1,0,0)) = 1;
+    amp_res = 1.0 / 8.0 / M_PI * Sub1;
+}
 
 REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     if (PID == 900001) {
@@ -74,7 +78,11 @@ void delta_N_LPhi_Amp::Update_Value(REAL input) {
     Sub1 = 4 * eps * lam * lam * mn1 * mn1;
 }
 
-void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) { amp_res = 4 * M_PI * Sub1; }
+void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+    // * Final states l and phi are massless
+    // * sqrt(lam(1,0,0)) = 1;
+    amp_res = 1.0 / 8.0 / M_PI * Sub1;
+}
 
 REAL delta_N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     REAL res = 0;
