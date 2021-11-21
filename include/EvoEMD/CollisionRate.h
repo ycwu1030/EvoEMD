@@ -85,7 +85,7 @@ public:
     Collision_Rate(Amplitude_Base *amp) { this->amp = amp; }
     virtual ~Collision_Rate(){};
 
-    REAL Get_Amp_With_Solid_Angle(REAL sqrt_shat) { return amp->Get_Amp(sqrt_shat); }
+    REAL Get_Amp(REAL sqrt_shat) { return amp->Get_Amp(sqrt_shat); }
     virtual REAL Get_Collision_Rate(REAL T) = 0;
 };
 

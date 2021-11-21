@@ -8,11 +8,11 @@ using namespace EvoEMD;
 
 XX_SS_Amp::XX_SS_Amp() : Amplitude_Base("XX_SS") {
     Particle_Base *p_dm = RETRIEVE_PARTICLE(900001);
-    Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
-    FINAL.push_back(p_dm);
-    FINAL.push_back(p_dm);
-    INITIAL.push_back(p_l);
-    INITIAL.push_back(p_l);
+    Particle_Base *p_s = RETRIEVE_PARTICLE(900011);
+    INITIAL.push_back(p_dm);
+    INITIAL.push_back(p_dm);
+    FINAL.push_back(p_s);
+    FINAL.push_back(p_s);
     N_INITIAL = INITIAL.size();
     N_FINAL = FINAL.size();
 
@@ -25,7 +25,10 @@ void XX_SS_Amp::Update_Value(REAL input) {
     Sub1 = pow(lam, 4);
 }
 
-void XX_SS_Amp::Update_Amp(REAL sqrt_shat) { amp_res = 4 * M_PI * Sub1; }
+void XX_SS_Amp::Update_Amp(REAL sqrt_shat) {
+    // * final states s is massless, so sqrt(lam(1,0,0))=1
+    amp_res = Sub1 / 8.0 / M_PI;
+}
 
 REAL XX_SS_Amp::Get_Coeff(REAL T, int PID) {
     if (PID == 900001) {

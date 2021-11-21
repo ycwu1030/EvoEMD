@@ -7,7 +7,7 @@ if (POLICY CMP0074)
 endif ()
 PROJECT(EVOEMD CXX)
 
-SET(EVOEMD_VERSION "0.9.4")
+SET(EVOEMD_VERSION "0.9.5")
 
 FIND_PACKAGE(GSL REQUIRED)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules;${CMAKE_MODULE_PATH}")
@@ -31,7 +31,7 @@ SET_TARGET_PROPERTIES(EVOEMD_shared PROPERTIES
 TARGET_LINK_LIBRARIES(EVOEMD_shared ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 SET(EVOEMD_LIBRARIES EVOEMD_shared)
 
-# CUBA has to be recompiled with -fPIC so that it can be link into a shared library.
+# CUBA has to be recompiled with -fPIC so that it can be linked into a shared library.
 ADD_CUSTOM_COMMAND(
     TARGET EVOEMD_shared
     PRE_BUILD
