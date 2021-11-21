@@ -11,20 +11,12 @@
 namespace EvoEMD {
 
 REAL Decay_Rate::Get_Collision_Rate(REAL T) {
-    REAL AMP_WITH_SOLID_ANGLE = amp->Get_Amp(0);
     REAL m1 = amp->INITIAL[0]->Get_Mass();
-    REAL m2 = amp->FINAL[0]->Get_Mass();
-    REAL m3 = amp->FINAL[1]->Get_Mass();
-    REAL m12 = m1 * m1;
-    REAL m22 = m2 * m2;
-    REAL m32 = m3 * m3;
-
-    REAL pf = sqrt(Kallen_Lam(m12, m22, m32)) / 2.0 / m1;
-    REAL PS2 = 1.0 / (2.0 * m1) * pf / (16.0 * M_PI * M_PI * m1);
+    REAL AMP_WITH_FSPS = amp->Get_Amp(m1);
 
     REAL z = m1 / T;
     REAL k1z = z > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(z);
-    REAL RES = m1 * m1 * T / 2.0 / M_PI / M_PI * k1z * PS2 * AMP_WITH_SOLID_ANGLE;
+    REAL RES = m1 * T / 4.0 / M_PI / M_PI * k1z * AMP_WITH_FSPS;
     return RES;
 }
 
@@ -81,11 +73,9 @@ int Scatter_Rate_Integrand(const int *ndim, const REAL x[], const int *ncomp, RE
     REAL m4 = par->m4;
 
     REAL sqrt_Kallen_init = sqrt(Kallen_Lam(1.0, m1 * m1 / s, m2 * m2 / s));
-    REAL sqrt_Kallen_final = sqrt(Kallen_Lam(1.0, m3 * m3 / s, m4 * m4 / s));
 
     REAL k1z = sqrt_s / T > BESSEL_Z_MAX ? 0 : gsl_sf_bessel_K1(sqrt_s / T);
-    ff[0] =
-        Jac_from_sqrt_s * s * k1z * sqrt_Kallen_init * sqrt_Kallen_final * par->ptr->Get_Amp_With_Solid_Angle(sqrt_s);
+    ff[0] = Jac_from_sqrt_s * s * k1z * sqrt_Kallen_init * par->ptr->Get_Amp(sqrt_s);
     return 0;
 }
 
@@ -131,7 +121,7 @@ REAL Scatter_Rate::Get_Collision_Rate(REAL T) {
     Vegas(NDIM, NCOMP, Scatter_Rate_Integrand, &par, NVEC, EPSREL, EPSABS, FLAGS, SEED, MINEVAL, MAXEVAL, NSTART,
           NINCREASE, NBATCH, GRIDNO, NULL, NULL, &neval, &fail, RES, ERR, PROB);
 
-    RES[0] *= T / 16.0 / pow(2.0 * M_PI, 6);
+    RES[0] *= T / 2.0 / pow(2.0 * M_PI, 4);
     return RES[0];
 }
 
