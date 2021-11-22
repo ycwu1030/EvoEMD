@@ -6,6 +6,7 @@
 #include "EvoEMD/Hubble.h"
 #include "EvoEMD/ParameterBase.h"
 #include "EvoEMD/ParticleBase.h"
+#include "EvoEMD/PhaseSpace.h"
 #include "EvoEMD/ProcessBase.h"
 #include "EvoEMD/RealTypes.h"
 #include "EvoEMD/spdlog_wrapper.h"

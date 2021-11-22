@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iomanip>
 
+#include "EvoEMD/EffDOF.h"
 #include "EvoEMD/ProcessBase.h"
 #include "EvoEMD/spdlog_wrapper.h"
 
@@ -246,6 +247,24 @@ void Boltzmann_Equation::Dump_Solution(std::string filename) {
         output << scale << std::endl;
     }
     output.close();
+}
+
+VD Boltzmann_Equation::Get_Yield_at_T_End() { return rk.Get_Solution_Y_END(); }
+
+VD Boltzmann_Equation::Get_Omegah2_at_Today() {
+    static const REAL rhocoverh2 = 8.098e-47;  // * in GeV^-4;
+    static const REAL T0 = 2.348e-13;          // * in GeV;
+
+    // * For this extra scaling factor,
+    // * see Scott Dodelson Modern Cosmology, chap.3.4
+    // * And exercise 11 of chap.3
+    REAL extra_scaling_factor = gs(T0) / gs(T_END);
+    VD Yend = Get_Yield_at_T_End();
+    VD Omegah2(DOF);
+    for (int i = 0; i < DOF; i++) {
+        Omegah2[i] = extra_scaling_factor * Yend[i] * pow(T0, 3) * poi_ptrs[i]->Get_Mass() / rhocoverh2;
+    }
+    return Omegah2;
 }
 
 }  // namespace EvoEMD
