@@ -252,8 +252,9 @@ void Boltzmann_Equation::Dump_Solution(std::string filename) {
 VD Boltzmann_Equation::Get_Yield_at_T_End() { return rk.Get_Solution_Y_END(); }
 
 VD Boltzmann_Equation::Get_Omegah2_at_Today() {
-    static const REAL rhocoverh2 = 8.098e-47;  // * in GeV^-4;
-    static const REAL T0 = 2.348e-13;          // * in GeV;
+    static const REAL rhocoverh2 = 8.098e-47;     // * = rhoc/h^2 in GeV^4;
+    static const REAL T0 = 2.348e-13;             // * in GeV;
+    static const REAL h2T03overrhoc = 1.59851e8;  // * = T0^3/rhocoverh2 in GeV^-1;
 
     // * For this extra scaling factor,
     // * see Scott Dodelson Modern Cosmology, chap.3.4
@@ -262,7 +263,7 @@ VD Boltzmann_Equation::Get_Omegah2_at_Today() {
     VD Yend = Get_Yield_at_T_End();
     VD Omegah2(DOF);
     for (int i = 0; i < DOF; i++) {
-        Omegah2[i] = extra_scaling_factor * Yend[i] * pow(T0, 3) * poi_ptrs[i]->Get_Mass() / rhocoverh2;
+        Omegah2[i] = extra_scaling_factor * Yend[i] * poi_ptrs[i]->Get_Mass() * h2T03overrhoc;
     }
     return Omegah2;
 }
