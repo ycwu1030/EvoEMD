@@ -6,7 +6,7 @@
 
 using namespace EvoEMD;
 
-XX_HH_Amp::XX_HH_Amp() : Amplitude_Base("XX_SS") {
+XX_HH_Amp::XX_HH_Amp() : Amplitude_Base("XX_HH") {
     Particle_Base *p_dm = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_H = RETRIEVE_PARTICLE(900025);
     INITIAL.push_back(p_dm);
