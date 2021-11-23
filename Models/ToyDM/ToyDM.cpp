@@ -40,7 +40,7 @@ int main(int argc, char const *argv[]) {
     T_END = 1e-2;
     BE.Set_T_Range(T_BEGIN, T_END);
     pp->Set_Init_Thermal_Status(false);
-    BE.Solve(1e-3, 1e-3);
+    BE.Solve(1e-3, 1e-5);
     BE.Dump_Solution("ToyDM_FI_Result.txt");
     return 0;
 }
