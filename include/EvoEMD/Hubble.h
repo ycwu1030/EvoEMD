@@ -56,6 +56,7 @@ public:
 class Hubble_EMD : public Hubble_For_Single_Period {
 private:
     REAL HRD_at_T_start;
+    REAL gs_at_T_start;
 
 public:
     Hubble_EMD(const REAL T_start, const REAL T_end);
