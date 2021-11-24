@@ -78,6 +78,20 @@ public:
      * @retval None
      */
     void Dump_Solution(std::string filename);
+
+    /**
+     * @brief  Return the Yield at T_End;
+     * @note   Yield is defined as n/T^3
+     * @retval
+     */
+    VD Get_Yield_at_T_End();
+
+    /**
+     * @brief  Calculate the Omega*h^2 today
+     * @note   Today's temperature is 2.348e-13 GeV
+     * @retval
+     */
+    VD Get_Omegah2_at_Today();
 };
 
 }  // namespace EvoEMD

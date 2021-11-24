@@ -28,6 +28,7 @@ REAL Particle_Base::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T)
 }
 
 REAL Particle_Base::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
+    // * We define the Yield as Y = n/T^3
     REAL mass = Get_Mass();
     REAL z = mass / T;
     REAL z2K2 = z > BESSEL_Z_MAX ? 0 : z * z * gsl_sf_bessel_Kn(2, z);

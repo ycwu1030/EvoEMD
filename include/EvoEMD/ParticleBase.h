@@ -159,8 +159,6 @@ public:
     }
 };
 
-// #define REGISTER_PARTICLE(partName) Register_Particle g_register_particle_##partName(new partName)
-
 #define REGISTER_PARTICLE(className, partName, ...)              \
     class part_##partName : public className {                   \
     public:                                                      \

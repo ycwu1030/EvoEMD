@@ -1,6 +1,6 @@
 #include "Amplitudes.h"
 using namespace EvoEMD;
-N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base("Decay_NLPhi") {
+N_LPhi_Amp_CPC::N_LPhi_Amp_CPC() : Amplitude_Base("NLPhi_CPC") {
     Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
@@ -16,20 +16,20 @@ N_LPhi_Amp::N_LPhi_Amp() : Amplitude_Base("Decay_NLPhi") {
     Parameter_Base *ptr_mn1 = RETRIEVE_PARAMETER(MN1);
     Register_Dependencies(ptr_lam, ptr_mn1);
 }
-void N_LPhi_Amp::Update_Value(REAL input) {
+void N_LPhi_Amp_CPC::Update_Value(REAL input) {
     REAL lam = GET_PARAMETER_VALUE(Lam);
     REAL mn1 = GET_PARAMETER_VALUE(MN1);
 
     Sub1 = 4 * lam * lam * mn1 * mn1;
 }
 
-void N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+void N_LPhi_Amp_CPC::Update_Amp(REAL sqrt_shat) {
     // * Final states l and phi are massless
     // * sqrt(lam(1,0,0)) = 1;
     amp_res = 1.0 / 8.0 / M_PI * Sub1;
 }
 
-REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
+REAL N_LPhi_Amp_CPC::Get_Coeff(REAL T, int PID) {
     if (PID == 900001) {
         Particle_Base *pp = RETRIEVE_PARTICLE(900001);
         REAL Y = pp->Yield;
@@ -52,7 +52,7 @@ REAL N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
     }
 }
 
-delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base("Decay_decay_NLPhi") {
+N_LPhi_Amp_CPV::N_LPhi_Amp_CPV() : Amplitude_Base("NLPhi_CPV") {
     Particle_Base *p_N1 = RETRIEVE_PARTICLE(900001);
     Particle_Base *p_l = RETRIEVE_PARTICLE(900011);
     Particle_Base *p_phi = RETRIEVE_PARTICLE(25);
@@ -70,7 +70,7 @@ delta_N_LPhi_Amp::delta_N_LPhi_Amp() : Amplitude_Base("Decay_decay_NLPhi") {
     Register_Dependencies(ptr_lam, ptr_mn1, ptr_eps);
 }
 
-void delta_N_LPhi_Amp::Update_Value(REAL input) {
+void N_LPhi_Amp_CPV::Update_Value(REAL input) {
     REAL lam = GET_PARAMETER_VALUE(Lam);
     REAL mn1 = GET_PARAMETER_VALUE(MN1);
     REAL eps = GET_PARAMETER_VALUE(Eps);
@@ -78,13 +78,13 @@ void delta_N_LPhi_Amp::Update_Value(REAL input) {
     Sub1 = 4 * eps * lam * lam * mn1 * mn1;
 }
 
-void delta_N_LPhi_Amp::Update_Amp(REAL sqrt_shat) {
+void N_LPhi_Amp_CPV::Update_Amp(REAL sqrt_shat) {
     // * Final states l and phi are massless
     // * sqrt(lam(1,0,0)) = 1;
     amp_res = 1.0 / 8.0 / M_PI * Sub1;
 }
 
-REAL delta_N_LPhi_Amp::Get_Coeff(REAL T, int PID) {
+REAL N_LPhi_Amp_CPV::Get_Coeff(REAL T, int PID) {
     REAL res = 0;
     if (PID == 900001) {
         Particle_Base *pp = RETRIEVE_PARTICLE(900011);
