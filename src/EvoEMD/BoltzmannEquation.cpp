@@ -74,7 +74,7 @@ VB Boltzmann_Equation::Should_be_Thermalized(REAL x, const VD &y, const VD &delt
 REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
-    // * T^3H(beta_T dY/dx + 3(1-beta_T)Y) = CollisionRate
+    // * T^3H(beta_T dY/dx + 3(1-beta_R)Y) = CollisionRate
     // * beta_T indicates the dependence of T on scale factor: T~ a^{-beta_T}
 
     for (int id = 0; id < DOF; id++) {
@@ -86,7 +86,7 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
     REAL T = scale / z;
     int hubble_period_id = hh.Get_Period_ID_at_T(T);
     Hubble_For_Single_Period *hs = hh[hubble_period_id];
-    double beta_T = hs->Get_beta_T();
+    double beta_T = hs->Get_beta_R();
     REAL HatT = hs->Get_Hubble_at_T(T);
     bool isentropic = hs->Is_Isentropic();
     REAL res = 0;
@@ -108,7 +108,7 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
 VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
-    // * T^3H(beta_T dY/dx + 3(1-beta_T)Y) = CollisionRate
+    // * T^3H(beta_T dY/dx + 3(1-beta_R)Y) = CollisionRate
     // * beta_T indicates the dependence of T on scale factor: T~ a^{-beta_T}
 
     for (int i = 0; i < DOF; i++) {
@@ -120,7 +120,7 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
     REAL T = scale / z;
     int hubble_period_id = hh.Get_Period_ID_at_T(T);
     Hubble_For_Single_Period *hs = hh[hubble_period_id];
-    double beta_T = hs->Get_beta_T();
+    double beta_T = hs->Get_beta_R();
     REAL HatT = hs->Get_Hubble_at_T(T);
     bool isentropic = hs->Is_Isentropic();
     // hs->Print();
