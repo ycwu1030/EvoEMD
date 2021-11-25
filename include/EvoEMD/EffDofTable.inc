@@ -1,7 +1,8 @@
-// T  gs  ge
 // T is in increasing order !!!
+// Gondolo-Gelmini TQCD = 150 MeV
 static const int N_T_gs_ge_Points = 276;
 static const REAL T_gs_ge_Points[N_T_gs_ge_Points][3] = {
+// T  gs  ge
 {0.000000E+00, 3.913901E+00, 3.367225E+00},
 {1.995263E-05, 3.913901E+00, 3.367225E+00},
 {2.238721E-05, 3.913901E+00, 3.367225E+00},
