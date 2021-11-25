@@ -8,8 +8,8 @@
 
 namespace EvoEMD {
 Hubble_For_Single_Period::Hubble_For_Single_Period(const REAL Ti, const REAL Tf, const bool Isentropic_in,
-                                                   const double beta_T_in, const double beta_s_in)
-    : T_start(Ti), T_end(Tf), Isentropic(Isentropic_in), beta_T(beta_T_in), beta_s(beta_s_in) {}
+                                                   const double beta_R_in)
+    : T_start(Ti), T_end(Tf), Isentropic(Isentropic_in), beta_R(beta_R_in) {}
 
 REAL Hubble_For_Single_Period::Get_Hubble_For_RD(const REAL T) {
     REAL geT = ge(T);
@@ -17,7 +17,7 @@ REAL Hubble_For_Single_Period::Get_Hubble_For_RD(const REAL T) {
 }
 
 void Hubble_For_Single_Period::Print() const {
-    std::cout << "Temperature: [" << T_start << "," << T_end << "], beta_T = " << beta_T
+    std::cout << "Temperature: [" << T_start << "," << T_end << "], beta_R = " << beta_R
               << ", entropy conservation: " << Isentropic << std::endl;
 }
 
@@ -36,7 +36,7 @@ REAL Hubble_EMD::Get_Hubble_at_T(const REAL T) {
 }
 
 Hubble_EP::Hubble_EP(const REAL T_start, const REAL T_end)
-    : Hubble_For_Single_Period(T_start, T_end, false, 3.0 / 8.0, 9.0 / 8.0) {
+    : Hubble_For_Single_Period(T_start, T_end, false, 3.0 / 8.0) {
     HRD_at_T_end = Get_Hubble_For_RD(T_end);
     ge_at_T_end = ge(T_end);
 }
@@ -151,17 +151,17 @@ int Hubble_History::Get_Period_ID_at_T(const REAL T) {
 }
 
 REAL Hubble_History::Get_Hubble_at_T(const REAL T) {
-    if (updated) {
+    if (!updated) {
         Update_Value(0);
     }
     return Periods[Get_Period_ID_at_T(T)]->Get_Hubble_at_T(T);
 }
 
-double Hubble_History::Get_beta_T_at_T(const REAL T) {
-    if (updated) {
+double Hubble_History::Get_beta_R_at_T(const REAL T) {
+    if (!updated) {
         Update_Value(0);
     }
-    return Periods[Get_Period_ID_at_T(T)]->Get_beta_T();
+    return Periods[Get_Period_ID_at_T(T)]->Get_beta_R();
 }
 
 Hubble_For_Single_Period *Hubble_History::at(const int pid) {
