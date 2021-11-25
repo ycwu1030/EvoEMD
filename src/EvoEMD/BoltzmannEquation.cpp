@@ -259,7 +259,7 @@ VD Boltzmann_Equation::Get_Omegah2_at_Today() {
     // * For this extra scaling factor,
     // * see Scott Dodelson Modern Cosmology, chap.3.4
     // * And exercise 11 of chap.3
-    REAL extra_scaling_factor = gs(T0) / gs(T_END);
+    REAL extra_scaling_factor = f_gs(T0) / f_gs(T_END);
     VD Yend = Get_Yield_at_T_End();
     VD Omegah2(DOF);
     for (int i = 0; i < DOF; i++) {

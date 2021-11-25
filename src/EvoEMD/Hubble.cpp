@@ -12,7 +12,7 @@ Hubble_For_Single_Period::Hubble_For_Single_Period(const REAL Ti, const REAL Tf,
     : T_start(Ti), T_end(Tf), Isentropic(Isentropic_in), beta_R(beta_R_in) {}
 
 REAL Hubble_For_Single_Period::Get_Hubble_For_RD(const REAL T) {
-    REAL geT = ge(T);
+    REAL geT = f_ge(T);
     return M_PI / 3.0 * sqrt(geT / 10.0) * T * T / PHY_MP;
 }
 
@@ -27,22 +27,22 @@ REAL Hubble_RD::Get_Hubble_at_T(const REAL T) { return Get_Hubble_For_RD(T); }
 
 Hubble_EMD::Hubble_EMD(const REAL T_start, const REAL T_end) : Hubble_For_Single_Period(T_start, T_end) {
     HRD_at_T_start = Get_Hubble_For_RD(T_start);
-    gs_at_T_start = gs(T_start);
+    gs_at_T_start = f_gs(T_start);
 }
 
 REAL Hubble_EMD::Get_Hubble_at_T(const REAL T) {
-    REAL gs_at_T = gs(T);
+    REAL gs_at_T = f_gs(T);
     return HRD_at_T_start * sqrt(gs_at_T / gs_at_T_start) * pow(T / T_start, 1.5);
 }
 
 Hubble_EP::Hubble_EP(const REAL T_start, const REAL T_end)
     : Hubble_For_Single_Period(T_start, T_end, false, 3.0 / 8.0) {
     HRD_at_T_end = Get_Hubble_For_RD(T_end);
-    ge_at_T_end = ge(T_end);
+    ge_at_T_end = f_ge(T_end);
 }
 
 REAL Hubble_EP::Get_Hubble_at_T(const REAL T) {
-    REAL ge_at_T = ge(T);
+    REAL ge_at_T = f_ge(T);
     return HRD_at_T_end * ge_at_T / ge_at_T_end * pow(T / T_end, 4);
 }
 
@@ -116,12 +116,12 @@ void Hubble_History::Solve_Te() {
     REAL x_max = log(Ti);
     REAL x_min = log(Tr);
     REAL x_eps = 1e-5 * std::fabs(x_max - x_min);
-    REAL target_value = log(Ti) + 4 * log(Tr) + log(ge(Tr)) + log(ge(Ti)) - log(gs(Ti));
+    REAL target_value = log(Ti) + 4 * log(Tr) + log(f_ge(Tr)) + log(f_ge(Ti)) - log(f_gs(Ti));
     REAL test_value;
     REAL x_test;
     while (std::fabs(x_max - x_min) > x_eps) {
         x_test = (x_max + x_min) / 2.0;
-        test_value = 5 * x_test + 2 * log(ge(exp(x_test))) - log(gs(exp(x_test)));
+        test_value = 5 * x_test + 2 * log(f_ge(exp(x_test))) - log(f_gs(exp(x_test)));
         if (test_value > target_value) {
             x_max = x_test;
         } else {
