@@ -1,7 +1,7 @@
 #include "EvoEMD/EffDOF.h"
 
 namespace EvoEMD {
-REAL ge(REAL x) {
+REAL f_ge(REAL x) {
     REAL limit = 105.75;
     if (((0) <= x) && (x <= (1.99526e-05))) {
         limit = (3.36722) + (x - (0)) * ((3.36722) - (3.36722)) / ((1.99526e-05) - (0));
@@ -831,7 +831,7 @@ REAL ge(REAL x) {
     return limit;
 }
 
-REAL gs(REAL x) {
+REAL f_gs(REAL x) {
     REAL limit = 105.75;
     if (((0) <= x) && (x <= (1.99526e-05))) {
         limit = (3.9139) + (x - (0)) * ((3.9139) - (3.9139)) / ((1.99526e-05) - (0));
