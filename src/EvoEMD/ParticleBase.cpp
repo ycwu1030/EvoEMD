@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "EvoEMD/Constants.h"
+#include "EvoEMD/EffDOF.h"
 #include "gsl/gsl_sf_bessel.h"
 #include "gsl/gsl_sf_zeta.h"
 
@@ -28,11 +29,13 @@ REAL Particle_Base::Get_Equilibrium_Number_Density_per_DOF_Maxwell(const REAL T)
 }
 
 REAL Particle_Base::Get_Equilibrium_Yield_per_DOF_Maxwell(const REAL T) const {
-    // * We define the Yield as Y = n/T^3
+    // * We define the Yield as Y = n/s
+    // * s = 2 pi^2/45 gs(T) T^3
+    REAL entropy_pre_factor = 2 * M_PI * M_PI / 45 * f_gs(T);
     REAL mass = Get_Mass();
     REAL z = mass / T;
     REAL z2K2 = z > BESSEL_Z_MAX ? 0 : z * z * gsl_sf_bessel_Kn(2, z);
-    REAL Yeq = z2K2 / 2 / M_PI / M_PI;
+    REAL Yeq = z2K2 / 2 / M_PI / M_PI / entropy_pre_factor;
     return Yeq;
 }
 
@@ -59,7 +62,8 @@ REAL Fermion::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
 REAL Fermion::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
     if (massless) {
-        return 3.0 / 4.0 * zeta3 / M_PI / M_PI;
+        REAL entropy_pre_factor = 2 * M_PI * M_PI / 45 * f_gs(T);
+        return 3.0 / 4.0 * zeta3 / M_PI / M_PI / entropy_pre_factor;
     } else {
         return Get_Equilibrium_Yield_per_DOF_Maxwell(T);
     }
@@ -80,7 +84,8 @@ REAL Boson::Get_Equilibrium_Number_Density_per_DOF(const REAL T) const {
 REAL Boson::Get_Equilibrium_Yield_per_DOF(const REAL T) const {
     static const double zeta3 = gsl_sf_zeta_int(3);
     if (massless) {
-        return zeta3 / M_PI / M_PI;
+        REAL entropy_pre_factor = 2 * M_PI * M_PI / 45 * f_gs(T);
+        return zeta3 / M_PI / M_PI / entropy_pre_factor;
     } else {
         return Get_Equilibrium_Yield_per_DOF_Maxwell(T);
     }

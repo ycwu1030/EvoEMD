@@ -11,8 +11,7 @@ protected:
     REAL T_start;
     REAL T_end;
     bool Isentropic;
-    double beta_T;
-    double beta_s;
+    double beta_R;
 
 public:
     /**
@@ -21,12 +20,11 @@ public:
      * @param  T_start: the starting temperature of this period
      * @param  T_end: the ending temperature of this period
      * @param  Isentropic: whether this period is a isentropic period.
-     * @param  beta_T: T~a^{-beta_T}
-     * @param  beta_s: s~a^{-beta_s} S=s a^3
+     * @param  beta_R: rhoR~a^{-4*beta_R}
      * @retval
      */
     Hubble_For_Single_Period(const REAL T_start, const REAL T_end, const bool Isentropic = true,
-                             const double beta_T = 1, const double beta_s = 3);
+                             const double beta_R = 1);
     virtual ~Hubble_For_Single_Period(){};
 
     /**
@@ -39,8 +37,7 @@ public:
     static REAL Get_Hubble_For_RD(const REAL T);
     REAL Get_T_Start() const { return T_start; }
     REAL Get_T_End() const { return T_end; }
-    double Get_beta_T() const { return beta_T; }
-    double Get_beta_s() const { return beta_s; }
+    double Get_beta_R() const { return beta_R; }
     bool Is_Isentropic() const { return Isentropic; }
     void Print() const;
 };
@@ -56,6 +53,7 @@ public:
 class Hubble_EMD : public Hubble_For_Single_Period {
 private:
     REAL HRD_at_T_start;
+    REAL gs_at_T_start;
 
 public:
     Hubble_EMD(const REAL T_start, const REAL T_end);
@@ -98,7 +96,7 @@ public:
     int Get_N_Period() const { return Periods.size(); }
     int Get_Period_ID_at_T(const REAL T);
     REAL Get_Hubble_at_T(const REAL T);
-    double Get_beta_T_at_T(const REAL T);
+    double Get_beta_R_at_T(const REAL T);
     Hubble_For_Single_Period *operator[](const int pid);
     Hubble_For_Single_Period *at(const int pid);
 
