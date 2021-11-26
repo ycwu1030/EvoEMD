@@ -74,8 +74,8 @@ VB Boltzmann_Equation::Should_be_Thermalized(REAL x, const VD &y, const VD &delt
 REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_ratio) {
     // * x = log(z), z = scale/T
     // * Then the Boltzmann equation for particle Yield evolution is
-    // * T^3H(beta_T dY/dx + 3(1-beta_R)Y) = CollisionRate
-    // * beta_T indicates the dependence of T on scale factor: T~ a^{-beta_T}
+    // * sH/gestar(beta_R dY/dx + 3(gestar-beta_R gsstar)Y) = CollisionRate
+    // * beta_R indicates the dependence of rho_R on scale factor: rho_R~ a^{-beta_R}
 
     for (int id = 0; id < DOF; id++) {
         poi_ptrs[id]->Yield = y[id];
@@ -86,7 +86,11 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
     REAL T = scale / z;
     int hubble_period_id = hh.Get_Period_ID_at_T(T);
     Hubble_For_Single_Period *hs = hh[hubble_period_id];
-    double beta_T = hs->Get_beta_R();
+    double beta_R = hs->Get_beta_R();
+    REAL gestar_at_T = f_ge_star(T);
+    REAL gsstar_at_T = f_gs_star(T);
+    REAL gs_at_T = f_gs(T);
+    REAL entropy_at_T = 2 * M_PI * M_PI / 45.0 * gs_at_T * pow(T, 3);
     REAL HatT = hs->Get_Hubble_at_T(T);
     bool isentropic = hs->Is_Isentropic();
     REAL res = 0;
@@ -96,12 +100,9 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
     for (auto &&proc_ptr : sp) {
         res += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
     }
-    res *= 1.0 / pow(T, 3) / HatT;
-    if (!isentropic) {
-        // that beta_T != 1
-        res -= 3.0 * (1.0 - beta_T) * y[i];
-        res /= beta_T;
-    }  // else beta_T == 1, no further action needed
+    res *= gestar_at_T / entropy_at_T / HatT;
+    res -= 3.0 * (gestar_at_T - beta_R * gsstar_at_T) * y[i];
+    res /= beta_R;
     return res;
 }
 
@@ -120,7 +121,11 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
     REAL T = scale / z;
     int hubble_period_id = hh.Get_Period_ID_at_T(T);
     Hubble_For_Single_Period *hs = hh[hubble_period_id];
-    double beta_T = hs->Get_beta_R();
+    double beta_R = hs->Get_beta_R();
+    REAL gestar_at_T = f_ge_star(T);
+    REAL gsstar_at_T = f_gs_star(T);
+    REAL gs_at_T = f_gs(T);
+    REAL entropy_at_T = 2 * M_PI * M_PI / 45.0 * gs_at_T * pow(T, 3);
     REAL HatT = hs->Get_Hubble_at_T(T);
     bool isentropic = hs->Is_Isentropic();
     // hs->Print();
@@ -136,12 +141,9 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
         }
     }
     for (int i = 0; i < DOF; i++) {
-        res[i] *= 1.0 / pow(T, 3) / HatT;
-        if (!isentropic) {
-            // that beta_T != 1
-            res[i] -= 3.0 * (1.0 - beta_T) * y[i];
-            res[i] /= beta_T;
-        }  // else beta_T == 1, no further action needed
+        res[i] *= gestar_at_T / entropy_at_T / HatT;
+        res[i] -= 3.0 * (gestar_at_T - beta_R * gsstar_at_T) * y[i];
+        res[i] /= beta_R;
     }
     return res;
 }
@@ -252,18 +254,16 @@ void Boltzmann_Equation::Dump_Solution(std::string filename) {
 VD Boltzmann_Equation::Get_Yield_at_T_End() { return rk.Get_Solution_Y_END(); }
 
 VD Boltzmann_Equation::Get_Omegah2_at_Today() {
-    static const REAL rhocoverh2 = 8.098e-47;     // * = rhoc/h^2 in GeV^4;
-    static const REAL T0 = 2.348e-13;             // * in GeV;
-    static const REAL h2T03overrhoc = 1.59851e8;  // * = T0^3/rhocoverh2 in GeV^-1;
+    static const REAL rhocoverh2 = 8.098e-47;       // * = rhoc/h^2 in GeV^4;
+    static const REAL T0 = 2.348e-13;               // * in GeV;
+    static const REAL s_pre_factor = 1.71682909;    // *
+    static const REAL h2T03overrhoc = 1.59851e8;    // * = T0^3/rhocoverh2 in GeV^-1;
+    static const REAL h2soverrhoc = 2.744375723e8;  // * = s/rhocoverh2 in GeV^-1
 
-    // * For this extra scaling factor,
-    // * see Scott Dodelson Modern Cosmology, chap.3.4
-    // * And exercise 11 of chap.3
-    REAL extra_scaling_factor = f_gs(T0) / f_gs(T_END);
     VD Yend = Get_Yield_at_T_End();
     VD Omegah2(DOF);
     for (int i = 0; i < DOF; i++) {
-        Omegah2[i] = extra_scaling_factor * Yend[i] * poi_ptrs[i]->Get_Mass() * h2T03overrhoc;
+        Omegah2[i] = Yend[i] * poi_ptrs[i]->Get_Mass() * h2soverrhoc;
     }
     return Omegah2;
 }
