@@ -19,7 +19,7 @@ public:
     std::string Get_Process_Name() const;
     int Get_Process_ID() const { return process_id; }
     REAL Get_Collision_Rate(REAL T);
-    REAL Get_Yield_Coeff(REAL T, int PID);
+    REAL Get_Offset(REAL T, int PID);
     void Clean_Cache() { cr_cache.Clean_Cache(); }
 
 protected:

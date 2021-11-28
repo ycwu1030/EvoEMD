@@ -98,7 +98,7 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
     Particle_Base *pp = poi_ptrs[i];
     std::set<Process *> sp = pp->Get_Process();
     for (auto &&proc_ptr : sp) {
-        res += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
+        res += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Offset(T, pp->Get_PID());
     }
     res *= gestar_at_T / entropy_at_T / HatT;
     res -= 3.0 * (gestar_at_T - beta_R * gsstar_at_T) * y[i];
@@ -135,7 +135,7 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
         std::set<Process *> sp = pp->Get_Process();
         for (auto &&proc_ptr : sp) {
             REAL cr = proc_ptr->Get_Collision_Rate(T);
-            REAL coef = proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
+            REAL coef = proc_ptr->Get_Offset(T, pp->Get_PID());
             SPDLOG_DEBUG_FILE("COMPONENT-{}, Rate: {:+9.8e}, COEF: {:+9.8e}", i, cr, coef);
             res[i] += cr * coef;
         }

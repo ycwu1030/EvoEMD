@@ -56,7 +56,7 @@ REAL Process::Get_Collision_Rate(REAL T) {
     return res;
 }
 
-REAL Process::Get_Yield_Coeff(REAL T, int PID) { return amp->Get_Coeff(T, PID); }
+REAL Process::Get_Offset(REAL T, int PID) { return amp->Get_Offset(T, PID); }
 
 Process_Factory::~Process_Factory() {
     for (auto &&proc : PL) {
