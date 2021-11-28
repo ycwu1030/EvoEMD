@@ -37,6 +37,9 @@ REAL f_ge_star(REAL T);
  */
 REAL f_gs_star(REAL T);
 
+REAL rho_R_at_T(REAL T);
+
+REAL T_from_rho_R(REAL rhoR);
 }  // namespace EvoEMD
 
 #endif  // EFFDOF_H

@@ -34,6 +34,7 @@ public:
      * @retval The hubble parameter
      */
     virtual REAL Get_Hubble_at_T(const REAL T) = 0;
+    virtual REAL Get_dlna_dlnT_at_T(const REAL T) { return -1; }
     static REAL Get_Hubble_For_RD(const REAL T);
     REAL Get_T_Start() const { return T_start; }
     REAL Get_T_End() const { return T_end; }
