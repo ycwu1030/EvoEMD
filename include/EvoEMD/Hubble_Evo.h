@@ -59,6 +59,9 @@ private:
     VD List_T;
     VD List_U;  // U = k*a
     VD List_H;
+    VD List_lnT;
+    VD List_lnU;
+    VD List_lnH;
     VD List_rhoR;
     VD List_rhoM;
 
