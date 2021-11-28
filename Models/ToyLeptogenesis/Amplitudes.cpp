@@ -29,7 +29,7 @@ void N_LPhi_Amp_CPC::Update_Amp(REAL sqrt_shat) {
     amp_res = 1.0 / 8.0 / M_PI * Sub1;
 }
 
-REAL N_LPhi_Amp_CPC::Get_Coeff(REAL T, int PID) {
+REAL N_LPhi_Amp_CPC::Get_Offset(REAL T, int PID) {
     if (PID == 900001) {
         Particle_Base *pp = RETRIEVE_PARTICLE(900001);
         REAL Y = pp->Yield;
@@ -84,7 +84,7 @@ void N_LPhi_Amp_CPV::Update_Amp(REAL sqrt_shat) {
     amp_res = 1.0 / 8.0 / M_PI * Sub1;
 }
 
-REAL N_LPhi_Amp_CPV::Get_Coeff(REAL T, int PID) {
+REAL N_LPhi_Amp_CPV::Get_Offset(REAL T, int PID) {
     REAL res = 0;
     if (PID == 900001) {
         Particle_Base *pp = RETRIEVE_PARTICLE(900011);

@@ -43,7 +43,7 @@ public:
      * @param  PID: the PID for the particle we want to evaluate the coeff
      * @retval
      */
-    virtual REAL Get_Coeff(REAL T, int PID) { return 0; }
+    virtual REAL Get_Offset(REAL T, int PID) { return 0; }
 
     /**
      * @brief  Update the amplitude (integrated over final state phase space), and store the result in amp_res
