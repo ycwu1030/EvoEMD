@@ -70,25 +70,29 @@ void Hubble_BE::Update_Value(REAL input) {
     REAL kappa = pow(10, log_kappa);
     REAL Y1init = rhoRi / rhoRr * pow(U0, 3) / kappa;
     REAL Y2init = rhoRi / rhoRr * pow(U0, 4) / kappa;
-    HE.Solve(U0, Y1init, Y2init, br);
-    Us = HE.Get_Solution_U();
+    HE.Solve(U0 / 100.0, Y1init, Y2init, br);
+    List_U = HE.Get_Solution_U();
     VD Y1 = HE.Get_Solution_Y1();
     VD Y2 = HE.Get_Solution_Y2();
-    Ts.clear();
-    Hs.clear();
-    for (int i = 0; i < Us.size(); i++) {
-        double rhoM = Y1[i] * rhoRr * kappa / pow(Us[i], 3);
-        double rhoR = Y2[i] * rhoRr * kappa / pow(Us[i], 4);
-        Ts.push_back(T_from_rho_R(rhoR));
-        Hs.push_back(sqrt((rhoM + rhoR) / 3.0 / PHY_MP / PHY_MP));
+    List_T.clear();
+    List_H.clear();
+    List_rhoR.clear();
+    List_rhoM.clear();
+    for (int i = 0; i < List_U.size(); i++) {
+        double rhoM = Y1[i] * rhoRr * kappa / pow(List_U[i], 3);
+        double rhoR = Y2[i] * rhoRr * kappa / pow(List_U[i], 4);
+        List_T.push_back(T_from_rho_R(rhoR));
+        List_H.push_back(sqrt((rhoM + rhoR) / 3.0 / PHY_MP / PHY_MP));
+        List_rhoR.push_back(rhoR);
+        List_rhoM.push_back(rhoM);
     }
     Clean();
     acc_Us = gsl_interp_accel_alloc();
     acc_Hs = gsl_interp_accel_alloc();
-    spline_Us = gsl_spline_alloc(gsl_interp_steffen, Ts.size());
-    spline_Hs = gsl_spline_alloc(gsl_interp_steffen, Ts.size());
-    gsl_spline_init(spline_Us, Ts.data(), Us.data(), Ts.size());
-    gsl_spline_init(spline_Hs, Ts.data(), Hs.data(), Ts.size());
+    spline_Us = gsl_spline_alloc(gsl_interp_steffen, List_T.size());
+    spline_Hs = gsl_spline_alloc(gsl_interp_steffen, List_T.size());
+    gsl_spline_init(spline_Us, List_T.data(), List_U.data(), List_T.size());
+    gsl_spline_init(spline_Hs, List_T.data(), List_H.data(), List_T.size());
 }
 
 REAL Hubble_BE::Calc_Tr(VD U, VD Y1, VD Y2, REAL krhoRr) {
@@ -128,15 +132,15 @@ void Hubble_BE::Clean() {
 
 REAL Hubble_BE::Get_Hubble_at_T(const REAL T) {
     Get_Value();
-    if (T >= Ts.front()) return Get_Hubble_For_RD(T);
-    if (T <= Ts.back()) return Get_Hubble_For_RD(T);
+    if (T >= List_T.front()) return Get_Hubble_For_RD(T);
+    if (T <= List_T.back()) return Get_Hubble_For_RD(T);
     return gsl_spline_eval(spline_Hs, T, acc_Hs);
 }
 
 REAL Hubble_BE::Get_dlna_dlnT_at_T(const REAL T) {
     Get_Value();
-    if (T >= Ts.front()) return -1;
-    if (T <= Ts.back()) return -1;
+    if (T >= List_T.front()) return -1;
+    if (T <= List_T.back()) return -1;
     REAL dU_dT = gsl_spline_eval_deriv(spline_Us, T, acc_Us);
     REAL U = gsl_spline_eval(spline_Us, T, acc_Us);
     return dU_dT / U * T;
@@ -145,6 +149,31 @@ REAL Hubble_BE::Get_dlna_dlnT_at_T(const REAL T) {
 Hubble_BE &Hubble_BE::Get_Hubble_Calculator() {
     static Hubble_BE HBE;
     return HBE;
+}
+
+VD Hubble_BE::Get_T_List() {
+    Get_Value();
+    return List_T;
+}
+
+VD Hubble_BE::Get_U_List() {
+    Get_Value();
+    return List_U;
+}
+
+VD Hubble_BE::Get_H_List() {
+    Get_Value();
+    return List_H;
+}
+
+VD Hubble_BE::Get_rhoR_List() {
+    Get_Value();
+    return List_rhoR;
+}
+
+VD Hubble_BE::Get_rhoM_List() {
+    Get_Value();
+    return List_rhoM;
 }
 
 }  // namespace EvoEMD

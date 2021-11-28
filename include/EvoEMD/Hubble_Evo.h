@@ -56,9 +56,11 @@ private:
 
 class Hubble_BE : public Parameter_Base, public Hubble_For_Single_Period {
 private:
-    VD Ts;
-    VD Us;  // U = k*a
-    VD Hs;
+    VD List_T;
+    VD List_U;  // U = k*a
+    VD List_H;
+    VD List_rhoR;
+    VD List_rhoM;
 
     gsl_interp_accel *acc_Us;
     gsl_interp_accel *acc_Hs;
@@ -77,6 +79,11 @@ public:
     virtual REAL Get_Hubble_at_T(const REAL T) override;
     virtual REAL Get_dlna_dlnT_at_T(const REAL T) override;
     virtual void Update_Value(REAL input) override;
+    VD Get_T_List();
+    VD Get_U_List();
+    VD Get_H_List();
+    VD Get_rhoR_List();
+    VD Get_rhoM_List();
 };
 
 }  // namespace EvoEMD
