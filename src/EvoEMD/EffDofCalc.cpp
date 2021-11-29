@@ -11,6 +11,7 @@ private:
     EffDofCalc();
     ~EffDofCalc();
     REAL T_Points[N_T_gs_ge_Points];
+    REAL lnT_Points[N_T_gs_ge_Points];
     REAL gs_Points[N_T_gs_ge_Points];
     REAL ge_Points[N_T_gs_ge_Points];
     gsl_interp_accel *gs_acc;
@@ -34,6 +35,7 @@ public:
 EffDofCalc::EffDofCalc() {
     for (int i = 0; i < N_T_gs_ge_Points; i++) {
         T_Points[i] = T_gs_ge_Points[i][0];
+        lnT_Points[i] = log(T_gs_ge_Points[i][0]);
         gs_Points[i] = T_gs_ge_Points[i][1];
         ge_Points[i] = T_gs_ge_Points[i][2];
     }
@@ -44,8 +46,8 @@ EffDofCalc::EffDofCalc() {
     gs_spline = gsl_spline_alloc(gsl_interp_steffen, N_T_gs_ge_Points);
     ge_spline = gsl_spline_alloc(gsl_interp_steffen, N_T_gs_ge_Points);
 
-    gsl_spline_init(gs_spline, T_Points, gs_Points, N_T_gs_ge_Points);
-    gsl_spline_init(ge_spline, T_Points, ge_Points, N_T_gs_ge_Points);
+    gsl_spline_init(gs_spline, lnT_Points, gs_Points, N_T_gs_ge_Points);
+    gsl_spline_init(ge_spline, lnT_Points, ge_Points, N_T_gs_ge_Points);
 }
 
 EffDofCalc::~EffDofCalc() {
@@ -58,29 +60,29 @@ EffDofCalc::~EffDofCalc() {
 REAL EffDofCalc::Calc_ge(REAL T) {
     if (T <= T_MIN) return ge_Points[0];
     if (T >= T_MAX) return ge_Points[N_T_gs_ge_Points - 1];
-    return gsl_spline_eval(ge_spline, T, ge_acc);
+    return gsl_spline_eval(ge_spline, log(T), ge_acc);
 }
 
 REAL EffDofCalc::Calc_gs(REAL T) {
     if (T <= T_MIN) return gs_Points[0];
     if (T >= T_MAX) return gs_Points[N_T_gs_ge_Points - 1];
-    return gsl_spline_eval(gs_spline, T, gs_acc);
+    return gsl_spline_eval(gs_spline, log(T), gs_acc);
 }
 
 REAL EffDofCalc::Calc_dlnge_dlnT(REAL T) {
     if (T <= T_MIN) return 0;
     if (T >= T_MAX) return 0;
     REAL gge = Calc_ge(T);
-    REAL dge_dT = gsl_spline_eval_deriv(ge_spline, T, ge_acc);
-    return dge_dT * T / gge;
+    REAL dge_dlnT = gsl_spline_eval_deriv(ge_spline, log(T), ge_acc);
+    return dge_dlnT / gge;
 }
 
 REAL EffDofCalc::Calc_dlngs_dlnT(REAL T) {
     if (T <= T_MIN) return 0;
     if (T >= T_MAX) return 0;
     REAL ggs = Calc_gs(T);
-    REAL dgs_dT = gsl_spline_eval_deriv(gs_spline, T, gs_acc);
-    return dgs_dT * T / ggs;
+    REAL dgs_dlnT = gsl_spline_eval_deriv(gs_spline, log(T), gs_acc);
+    return dgs_dlnT / ggs;
 }
 
 REAL f_ge(REAL T) { return EffDofCalc::Get_Calculator().Calc_ge(T); }
