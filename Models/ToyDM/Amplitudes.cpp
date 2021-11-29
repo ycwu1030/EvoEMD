@@ -33,7 +33,7 @@ void XX_HH_Amp::Update_Amp(REAL sqrt_shat) {
     amp_res = Sub1 * kallen_sqrt / 8.0 / M_PI;
 }
 
-REAL XX_HH_Amp::Get_Coeff(REAL T, int PID) {
+REAL XX_HH_Amp::Get_Offset(REAL T, int PID) {
     if (PID == 900001) {
         Particle_Base *pp = Particle_Factory::Get_Particle_Factory().Get_Particle(900001);
         REAL Y = pp->Yield;

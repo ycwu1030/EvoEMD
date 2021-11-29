@@ -15,7 +15,7 @@ REGISTER_PARTICLE(Boson, X, 900001, 1, RETRIEVE_PARAMETER(MX), nullptr);
 REGISTER_PARTICLE(Boson, H, 900025, 2, RETRIEVE_PARAMETER(MH), nullptr);
 
 // * Particles entering the Boltzmann Equation
-REGISTER_POI(900001, 1);
+REGISTER_POI(900001, true);
 
 // * Regsiter Processes
 REGISTER_PROCESS(XX_HH_Amp);

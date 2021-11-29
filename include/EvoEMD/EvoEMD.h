@@ -3,7 +3,7 @@
 
 #include "EvoEMD/BoltzmannEquation.h"
 #include "EvoEMD/Constants.h"
-#include "EvoEMD/Hubble.h"
+#include "EvoEMD/HubbleBase.h"
 #include "EvoEMD/ParameterBase.h"
 #include "EvoEMD/ParticleBase.h"
 #include "EvoEMD/PhaseSpace.h"

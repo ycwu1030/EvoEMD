@@ -12,7 +12,7 @@ namespace EvoEMD {
 
 Boltzmann_Equation::Boltzmann_Equation(Parameter_Base *ptr_scale_)
     : pf(EvoEMD::Particle_Factory::Get_Particle_Factory()),
-      hh(EvoEMD::Hubble_History::Get_Hubble_History()),
+      hf(EvoEMD::Hubble_Factory::Get_Hubble_Factory()),
       ptr_scale(ptr_scale_),
       rk(this) {
     std::set<int> POI = pf.Get_POI();
@@ -84,25 +84,21 @@ REAL Boltzmann_Equation::dYidX(int i, REAL x, const VD &y, const VD &delta_y_rat
 
     REAL z = exp(x);
     REAL T = scale / z;
-    int hubble_period_id = hh.Get_Period_ID_at_T(T);
-    Hubble_For_Single_Period *hs = hh[hubble_period_id];
-    double beta_R = hs->Get_beta_R();
-    REAL gestar_at_T = f_ge_star(T);
+    Hubble_Base *hh = hf.Get_Hubble_Calculator();
+    double dlna_dlnT = hh->Get_dlna_dlnT_at_T(T);
     REAL gsstar_at_T = f_gs_star(T);
     REAL gs_at_T = f_gs(T);
     REAL entropy_at_T = 2 * M_PI * M_PI / 45.0 * gs_at_T * pow(T, 3);
-    REAL HatT = hs->Get_Hubble_at_T(T);
-    bool isentropic = hs->Is_Isentropic();
+    REAL HatT = hh->Get_Hubble_at_T(T);
     REAL res = 0;
 
     Particle_Base *pp = poi_ptrs[i];
     std::set<Process *> sp = pp->Get_Process();
     for (auto &&proc_ptr : sp) {
-        res += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
+        res += proc_ptr->Get_Collision_Rate(T) * proc_ptr->Get_Offset(T, pp->Get_PID());
     }
-    res *= gestar_at_T / entropy_at_T / HatT;
-    res -= 3.0 * (gestar_at_T - beta_R * gsstar_at_T) * y[i];
-    res /= beta_R;
+    res *= -dlna_dlnT / entropy_at_T / HatT;
+    res += 3.0 * (gsstar_at_T + dlna_dlnT) * y[i];
     return res;
 }
 
@@ -119,15 +115,12 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
 
     REAL z = exp(x);
     REAL T = scale / z;
-    int hubble_period_id = hh.Get_Period_ID_at_T(T);
-    Hubble_For_Single_Period *hs = hh[hubble_period_id];
-    double beta_R = hs->Get_beta_R();
-    REAL gestar_at_T = f_ge_star(T);
+    Hubble_Base *hh = hf.Get_Hubble_Calculator();
+    double dlna_dlnT = hh->Get_dlna_dlnT_at_T(T);
     REAL gsstar_at_T = f_gs_star(T);
     REAL gs_at_T = f_gs(T);
     REAL entropy_at_T = 2 * M_PI * M_PI / 45.0 * gs_at_T * pow(T, 3);
-    REAL HatT = hs->Get_Hubble_at_T(T);
-    bool isentropic = hs->Is_Isentropic();
+    REAL HatT = hh->Get_Hubble_at_T(T);
     // hs->Print();
     VD res(DOF, 0);
     for (int i = 0; i < DOF; i++) {
@@ -135,15 +128,14 @@ VD Boltzmann_Equation::dYdX(REAL x, const VD &y, const VD &delta_y_ratio) {
         std::set<Process *> sp = pp->Get_Process();
         for (auto &&proc_ptr : sp) {
             REAL cr = proc_ptr->Get_Collision_Rate(T);
-            REAL coef = proc_ptr->Get_Yield_Coeff(T, pp->Get_PID());
+            REAL coef = proc_ptr->Get_Offset(T, pp->Get_PID());
             SPDLOG_DEBUG_FILE("COMPONENT-{}, Rate: {:+9.8e}, COEF: {:+9.8e}", i, cr, coef);
             res[i] += cr * coef;
         }
     }
     for (int i = 0; i < DOF; i++) {
-        res[i] *= gestar_at_T / entropy_at_T / HatT;
-        res[i] -= 3.0 * (gestar_at_T - beta_R * gsstar_at_T) * y[i];
-        res[i] /= beta_R;
+        res[i] *= -dlna_dlnT / entropy_at_T / HatT;
+        res[i] += 3.0 * (gsstar_at_T + dlna_dlnT) * y[i];
     }
     return res;
 }

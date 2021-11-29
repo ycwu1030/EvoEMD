@@ -12,7 +12,7 @@ public:
 
     virtual void Update_Value(REAL input) override;
     virtual void Update_Amp(REAL sqrt_shat) override;
-    virtual REAL Get_Coeff(REAL T, int PID) override;
+    virtual REAL Get_Offset(REAL T, int PID) override;
 };
 
 class N_LPhi_Amp_CPV : public EvoEMD::Amplitude_Base {
@@ -24,7 +24,7 @@ public:
 
     virtual void Update_Value(REAL input) override;
     virtual void Update_Amp(REAL sqrt_shat) override;
-    virtual REAL Get_Coeff(REAL T, int PID) override;
+    virtual REAL Get_Offset(REAL T, int PID) override;
 };
 
 #endif  //_TOY_LEPTOGENESIS_AMP_H_
