@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "EvoEMD/Hubble.h"
+#include "EvoEMD/HubbleBase.h"
 #include "EvoEMD/ParticleBase.h"
 #include "EvoEMD/RungeKutta.h"
 
@@ -20,7 +20,7 @@ private:
     std::vector<std::string> poi_names;
     std::vector<Particle_Base *> poi_ptrs;
     Particle_Factory &pf;
-    Hubble_History &hh;
+    Hubble_Factory &hf;
     RungeKutta rk;
     void Setup_Scale();
     void Set_X_Range(REAL X_BEGIN, REAL X_END);

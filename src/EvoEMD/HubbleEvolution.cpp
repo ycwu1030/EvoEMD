@@ -1,10 +1,11 @@
-#include "EvoEMD/Hubble_Evo.h"
+#include "EvoEMD/HubbleEvolution.h"
 
 #include <algorithm>
 #include <cmath>
 
 #include "EvoEMD/Constants.h"
 #include "EvoEMD/EffDOF.h"
+#include "EvoEMD/HubbleBase.h"
 #include "gsl/gsl_spline.h"
 
 namespace EvoEMD {
@@ -30,7 +31,7 @@ void Hubble_Evolution::Solve(REAL Uini, REAL Y1ini, REAL Y2ini, REAL BR_in) {
     }
 }
 
-Hubble_BE::Hubble_BE() : Parameter_Base("Hubble_BE"), Hubble_For_Single_Period(-1, -1, false, 1) {
+Hubble_BE::Hubble_BE() : Parameter_Base("Hubble_BE"), Hubble_Base() {
     Parameter_Base *ptr_ti = RETRIEVE_PARAMETER(Ti);
     Parameter_Base *ptr_tr = RETRIEVE_PARAMETER(Tr);
     Parameter_Base *ptr_br = RETRIEVE_PARAMETER(BR);
@@ -154,8 +155,8 @@ void Hubble_BE::Clean() {
 
 REAL Hubble_BE::Get_Hubble_at_T(const REAL T) {
     Get_Value();
-    if (T >= List_T.back()) return Get_Hubble_For_RD(T);
-    if (T <= List_T.front()) return Get_Hubble_For_RD(T);
+    if (T >= List_T.back()) return Get_Hubble_For_RD_at_T(T);
+    if (T <= List_T.front()) return Get_Hubble_For_RD_at_T(T);
     return exp(gsl_spline_eval(spline_Hs, log(T), acc_Hs));
 }
 
@@ -167,10 +168,7 @@ REAL Hubble_BE::Get_dlna_dlnT_at_T(const REAL T) {
     return dlnU_dlnT;
 }
 
-Hubble_BE &Hubble_BE::Get_Hubble_Calculator() {
-    static Hubble_BE HBE;
-    return HBE;
-}
+void Hubble_BE::Print() { std::cout << "Dummy information for Hubble solved from BE" << std::endl; }
 
 VD Hubble_BE::Get_T_List() {
     Get_Value();
