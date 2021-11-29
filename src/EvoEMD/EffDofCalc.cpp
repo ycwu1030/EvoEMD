@@ -1,5 +1,7 @@
 #include <gsl/gsl_spline.h>
 
+#include <cmath>
+
 #include "EvoEMD/EffDOF.h"
 #include "EvoEMD/EffDofTable.inc"
 
@@ -85,5 +87,27 @@ REAL f_ge(REAL T) { return EffDofCalc::Get_Calculator().Calc_ge(T); }
 REAL f_gs(REAL T) { return EffDofCalc::Get_Calculator().Calc_gs(T); }
 REAL f_ge_star(REAL T) { return 1.0 + EffDofCalc::Get_Calculator().Calc_dlnge_dlnT(T) / 4.0; }
 REAL f_gs_star(REAL T) { return 1.0 + EffDofCalc::Get_Calculator().Calc_dlngs_dlnT(T) / 3.0; }
+
+REAL rho_R_at_T(REAL T) { return M_PI * M_PI / 30.0 * f_ge(T) * pow(T, 4); }
+
+REAL T_from_rho_R(REAL rhoR) {
+    REAL ge_max = T_gs_ge_Points[N_T_gs_ge_Points - 1][2] +
+                  10;                           // using + 10 to further increase ge_max and make sure Tmin < Ttrue
+    REAL ge_min = T_gs_ge_Points[0][2] / 10.0;  // using /10 to further decrease ge_min and make sure Tmax > Ttrue
+    REAL log_T_min = log10(rhoR * 30.0 / M_PI / M_PI / ge_max) / 4.0;
+    REAL log_T_max = log10(rhoR * 30.0 / M_PI / M_PI / ge_min) / 4.0;
+    REAL tor = 1e-3 * fabs(log_T_max - log_T_min);
+    while (fabs(log_T_max - log_T_min) > tor) {
+        REAL log_T_test = (log_T_max + log_T_min) / 2.0;
+        REAL T_test = pow(10, log_T_test);
+        REAL rhoR_test = rho_R_at_T(T_test);
+        if (rhoR_test < rhoR) {
+            log_T_min = log_T_test;
+        } else {
+            log_T_max = log_T_test;
+        }
+    }
+    return pow(10, (log_T_max + log_T_min) / 2.0);
+}
 
 }  // namespace EvoEMD
