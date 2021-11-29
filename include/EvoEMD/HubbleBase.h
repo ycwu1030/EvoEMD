@@ -17,7 +17,7 @@ public:
 
     virtual REAL Get_Hubble_at_T(const REAL T) = 0;
     virtual REAL Get_dlna_dlnT_at_T(const REAL T) = 0;
-    virtual void Print() = 0;
+    virtual void Print(){};
 };
 
 class Hubble_Splitting_Period : public Hubble_Base {
@@ -138,8 +138,11 @@ public:
     typedef std::map<unsigned int, Hubble_Base *> Hubble_Calculator_List;
 
     static Hubble_Factory &Get_Hubble_Factory();
-    Hubble_Base *Get_Hubble_Calculator(int id = -1);
-    void Register_Hubble_Calculator(int id, Hubble_Base *);
+    static Hubble_Base *Get_Hubble_Calculator(int id = -1);
+    static void Register_Hubble_Calculator(int id, Hubble_Base *);
+
+    Hubble_Base *Get_Calculator(int id = -1);
+    void Register_Calculator(int id, Hubble_Base *);
 
 private:
     Hubble_Factory();

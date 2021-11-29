@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
     Parameter_Base *tr = RETRIEVE_PARAMETER(Tr);
     Parameter_Base *mx = RETRIEVE_PARAMETER(MX);
     Parameter_Base *lam = RETRIEVE_PARAMETER(Lam);
-    Parameter_Base *HubbleID = RETRIEVE_PARAMETER(HubbleID);
+    Parameter_Base *hid = RETRIEVE_PARAMETER(HubbleMethod);
 
     // * Ti and Tr can be reset to any value
     ti->Set_Value(1e5);
@@ -25,13 +25,14 @@ int main(int argc, char const *argv[]) {
     Boltzmann_Equation BE(mx);
     REAL scale = mx->Get_Value();
 
+    // * Using default `Splitting' method for Hubble parameter
     // * For Freeze-Out
     REAL T_BEGIN = scale;
     REAL T_END = 1e-2;
     BE.Set_T_Range(T_BEGIN, T_END);
     pp->Set_Init_Thermal_Status(true);
     BE.Solve(1e-3, 1e-3);
-    BE.Dump_Solution("ToyDM_FO_Result.txt");
+    BE.Dump_Solution("ToyDM_FO_Result_SP.txt");
 
     // * For Freeze-In
     lam->Set_Value(1e-10);
@@ -41,16 +42,19 @@ int main(int argc, char const *argv[]) {
     BE.Set_T_Range(T_BEGIN, T_END);
     pp->Set_Init_Thermal_Status(false);
     BE.Solve(1e-3, 1e-5);
-    BE.Dump_Solution("ToyDM_FI_Result.txt");
+    BE.Dump_Solution("ToyDM_FI_Result_SP.txt");
 
-    HubbleID->Set_Value(1);
+    // * Using `BE' method for Hubble parameter
+    hid->Set_Value(1);
+
+    // * For Freeze-Out
     lam->Set_Value(0.4);
     T_BEGIN = scale;
     T_END = 1e-2;
     BE.Set_T_Range(T_BEGIN, T_END);
     pp->Set_Init_Thermal_Status(true);
     BE.Solve(1e-3, 1e-3);
-    BE.Dump_Solution("ToyDM_FO_Result_EVO.txt");
+    BE.Dump_Solution("ToyDM_FO_Result_BE.txt");
 
     // * For Freeze-In
     lam->Set_Value(1e-10);
@@ -60,6 +64,6 @@ int main(int argc, char const *argv[]) {
     BE.Set_T_Range(T_BEGIN, T_END);
     pp->Set_Init_Thermal_Status(false);
     BE.Solve(1e-3, 1e-5);
-    BE.Dump_Solution("ToyDM_FI_Result_EVO.txt");
+    BE.Dump_Solution("ToyDM_FI_Result_BE.txt");
     return 0;
 }
