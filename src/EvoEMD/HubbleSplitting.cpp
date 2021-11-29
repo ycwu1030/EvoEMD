@@ -197,9 +197,14 @@ Hubble_Factory &Hubble_Factory::Get_Hubble_Factory() {
 }
 
 Hubble_Base *Hubble_Factory::Get_Hubble_Calculator(int id) {
+    Hubble_Factory &hf = Get_Hubble_Factory();
+    return hf.Get_Calculator(id);
+}
+
+Hubble_Base *Hubble_Factory::Get_Calculator(int id) {
     unsigned int picked_id;
     if (id < 0) {
-        id = RETRIEVE_PARAMETER(HubbleID)->Get_Value();
+        id = RETRIEVE_PARAMETER(HubbleMethod)->Get_Value();
     }
     picked_id = id;
     auto iter = HCL.find(picked_id);
@@ -208,7 +213,7 @@ Hubble_Base *Hubble_Factory::Get_Hubble_Calculator(int id) {
     return iter->second;
 }
 
-void Hubble_Factory::Register_Hubble_Calculator(int id, Hubble_Base *ptr) {
+void Hubble_Factory::Register_Calculator(int id, Hubble_Base *ptr) {
     if (HCL.count(id) == 1) {
         std::cout << "Duplicated ID for Hubble Calculator encountered. The calculator will be replaced" << std::endl;
     }
