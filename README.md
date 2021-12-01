@@ -14,12 +14,17 @@ A framework to evaluate the evolution w/ or w/o an early matter dominated (EMD) 
 
 ## Document
 
-In preparation...
+The physics behind the `EvoEMD` and technical details can be found in:
+
+- M. Dutra, Y. Wu; EvoEMD: cosmic evolution with an early matter-dominated era; [arXiv: 2111.15665](https://arxiv.org/abs/2111.15665)
+
+If you are using `EvoEMD`, please cite above paper.
 
 ## Dependencies
 
 - [GSL](https://www.gnu.org/software/gsl/)
 - [Cuba](http://www.feynarts.de/cuba/)
+- [spdlog](https://github.com/gabime/spdlog) (Included in `EvoEMD`)
 
 ## Installation
 
@@ -39,4 +44,8 @@ The last command is optional, which install the whole library is into `INSTALL_P
 
 ### Examples
 
-Simple examples can be found in corresponding folders under `Models`.
+Simple examples can be found in corresponding folders under `Models`:
+- ToyDM
+    - A toy DM model, including freeze-in and freeze-out case.
+- ToyLeptogenesis
+    - A toy Leptogenesis model, the heavy neutrino can be initially thermalized or un-thermalized.
