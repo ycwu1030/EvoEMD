@@ -22,13 +22,13 @@ If you are using `EvoEMD`, please cite above paper.
 
 ## Dependencies
 
-- [GSL](https://www.gnu.org/software/gsl/)
+- [GSL](https://www.gnu.org/software/gsl/) (At least v2.0 is required)
 - [Cuba](http://www.feynarts.de/cuba/)
 - [spdlog](https://github.com/gabime/spdlog) (Included in `EvoEMD`)
 
 ## Installation
 
-Make sure that `GSL` is there which can be installed through many package management systems (`apt-get`, `brew`, etc.). Downloading `Cuba` from the website and compiling it such that one can find `cuba.h` and `libcuba.a` in its directory.
+Make sure that `GSL` (later than v2.0) is there which can be installed through many package management systems (`apt-get`, `brew`, etc.). Downloading `Cuba` from the website and compiling it such that one can find `cuba.h` and `libcuba.a` in its directory.
 
 ```bash
 git clone https://github.com/ycwu1030/EvoEMD.git
