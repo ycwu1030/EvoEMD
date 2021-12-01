@@ -201,7 +201,7 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     SPDLOG_INFO_FILE("Starting at: ");
     LOGGING_RK_POINT(p_cur);
     RK_INTER inter(DOF);
-    bool comp;
+    bool go_to_zero = false;  // * Checking if any `cannot be negative` component become zero
     VB should_be_thermalized = derivs->Should_be_Thermalized(p_cur.X, p_cur.Y, p_cur.Delta_Y_Ratio);
 
     // * 4th order RK proceeds as:
@@ -228,6 +228,7 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
     VB can_be_negative = derivs->Can_be_Negative();
     REAL Y_temp;
     while (true) {
+        go_to_zero = false;
         for (int i = 0; i < DOF; i++) {
             SPDLOG_DEBUG_FILE("Component-{}, should be thermalized? {}", i, should_be_thermalized[i]);
         }
@@ -286,7 +287,6 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
                 p_next.Y[i] = p_next.Yeq[i];
                 p_next.Delta_Y_Ratio[i] = 0;
                 p_next.Thermal_Status[i] = true;
-                comp = true;
             } else {
                 Y_temp = p_cur.Y[i] + inter.dY_Step1[i] / 6.0 + inter.dY_Step2[i] / 3.0 + inter.dY_Step3[i] / 3.0 +
                          inter.dY_Step4[i] / 6.0;
@@ -296,7 +296,11 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
                         should_be_thermalized[i] = true;
                     }
                 }
-                p_next.Y[i] = (Y_temp < 0 && (!can_be_negative[i])) ? 0 : Y_temp;
+                p_next.Y[i] = Y_temp;
+                if (Y_temp < 0 && (!can_be_negative[i])) {
+                    p_next.Y[i] = 0;
+                    go_to_zero = true;
+                }
                 p_next.Delta_Y_Ratio[i] = 1.0 - p_next.Y[i] / p_next.Yeq[i];
                 p_next.Thermal_Status[i] = false;
             }
@@ -306,7 +310,7 @@ bool RungeKutta::RK4_SingleStep(const RK_Point &p_cur, RK_Point &p_next, const R
 
     p_next.dYdX = derivs->dYdX(p_next.X, p_next.Y, p_next.Delta_Y_Ratio);
     follow_equilibrium = should_be_thermalized;
-    return comp;
+    return go_to_zero;
 }
 
 bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_guess, const REAL eps, RK_Point &p_next,
@@ -343,16 +347,18 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
     VB follow_equilibrium_two_step_second(DOF, false);
     VB follow_equilibrium_single_step(DOF, false);
     bool follow_equilibrium_any;
-    bool new_component_thermalized;
+    bool go_zero_half_1;
+    bool go_zero_half_2;
+    bool go_zero_full_1;
     while (true) {
         ++trials;
         SPDLOG_DEBUG_FILE("{}-th Trial for RKQC with stepsize = {:+9.8e}", trials, step_size);
         // * Take two half steps
         half_step_size = step_size / 2.0;
-        new_component_thermalized = RK4_SingleStep(p_cache, p_temp, half_step_size, should_follow_equilibrium,
-                                                   follow_equilibrium_two_step_first);
-        new_component_thermalized = RK4_SingleStep(p_temp, p_end, half_step_size, should_follow_equilibrium,
-                                                   follow_equilibrium_two_step_second);
+        go_zero_half_1 = RK4_SingleStep(p_cache, p_temp, half_step_size, should_follow_equilibrium,
+                                        follow_equilibrium_two_step_first);
+        go_zero_half_2 = RK4_SingleStep(p_temp, p_end, half_step_size, should_follow_equilibrium,
+                                        follow_equilibrium_two_step_second);
 
         SPDLOG_DEBUG_FILE("Take two half steps, reaching:");
         LOGGING_RK_POINT(p_end);
@@ -365,7 +371,7 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
         }
 
         // * Take one full step
-        new_component_thermalized =
+        go_zero_full_1 =
             RK4_SingleStep(p_cache, p_next, step_size, should_follow_equilibrium, follow_equilibrium_single_step);
 
         SPDLOG_DEBUG_FILE("Take one full step, reaching:");
@@ -376,6 +382,16 @@ bool RungeKutta::RKQC_SingleStep(const RK_Point &p_cur, const REAL step_size_gue
                                  ZERO_THRESHOLD[i]);
                 p_next.Y[i] = 0;
             }
+        }
+        // * Checking if any component that is not following equilibrium and cannot be negative, but becomes zero;
+        if (go_zero_full_1 || go_zero_half_1 || go_zero_half_2) {
+            step_size_temp = step_size;
+            step_size = step_size_temp / 2.0;
+            SPDLOG_WARN_FILE(
+                "Some component that is not thermalized and cannot be negative becomes zero, we need to shrink the "
+                "step size to be safe: {:+9.8e} -> {:+9.8e}",
+                step_size_temp, step_size);
+            continue;
         }
 
         // * Checking if there is any component is following equilibrium, and if that component drops too fast;
